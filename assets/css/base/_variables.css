@@ -1,0 +1,38 @@
+:root {
+
+    /* Colores principales */
+
+    --primary-color: #2563EB;
+    --primary-dark: #1D4ED8;
+
+    --secondary-color: #0F172A;
+
+    --background-color: #F1F5F9;
+
+    --card-color: #FFFFFF;
+
+    --text-color: #1E293B;
+
+    --text-light: #64748B;
+
+    --border-color: #CBD5E1;
+
+    --success-color: #16A34A;
+
+    --danger-color: #DC2626;
+
+    /* Tipografía */
+
+    --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+    /* Bordes */
+
+    --border-radius: 12px;
+
+    /* Sombras */
+
+    --shadow:
+
+        0px 8px 24px rgba(0,0,0,.08);
+
+}

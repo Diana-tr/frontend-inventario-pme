@@ -1,0 +1,188 @@
+.productos{
+
+    padding:40px;
+
+}
+
+.productos-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:30px;
+
+}
+
+.productos-header h1{
+
+    color:#0F172A;
+
+    font-size:38px;
+
+}
+
+.form-producto{
+
+    background:#FFFFFF;
+
+    padding:25px;
+max-width:900px;
+margin:0 auto 30px;
+    border-radius:12px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+    margin-bottom:30px;
+
+}
+
+.form-producto div{
+
+    display:flex;
+
+    flex-direction:column;
+
+    margin-bottom:18px;
+
+}
+
+.form-producto label{
+
+    font-weight:bold;
+
+    margin-bottom:8px;
+
+    color:#334155;
+
+}
+
+.form-producto input{
+
+    padding:12px;
+
+    border:1px solid #CBD5E1;
+
+    border-radius:8px;
+
+    font-size:15px;
+
+}
+
+.form-producto input:focus{
+
+    outline:none;
+
+    border:1px solid #2563EB;
+
+}
+
+.form-producto button{
+
+    width:100%;
+
+    padding:14px;
+
+    background:#2563EB;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.form-producto button:hover{
+
+    background:#1D4ED8;
+
+}
+
+.tabla-productos{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    background:white;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+}
+
+.tabla-productos th{
+
+    background:#0F172A;
+
+    color:white;
+
+    padding:15px;
+
+    text-align:center;
+
+}
+
+.tabla-productos td{
+
+    padding:15px;
+
+    text-align:center;
+
+    border-bottom:1px solid #E2E8F0;
+
+}
+
+.tabla-productos tr:hover{
+
+    background:#F8FAFC;
+
+}
+
+.btn-editar{
+
+    background:#2563EB;
+
+    color:white;
+
+    border:none;
+
+    padding:8px 14px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    margin-right:5px;
+
+}
+
+.btn-eliminar{
+
+    background:#DC2626;
+
+    color:white;
+
+    border:none;
+
+    padding:8px 14px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+}
