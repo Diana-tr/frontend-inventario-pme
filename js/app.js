@@ -19,38 +19,28 @@ const app = document.getElementById("app");
 mostrarLogin();
 
 function mostrarLogin() {
-
     app.innerHTML = renderLogin();
 
     const form = document.getElementById("loginForm");
 
     form.addEventListener("submit", function (e) {
-
         e.preventDefault();
 
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
 
         if (login(username, password)) {
-
             mostrarDashboard();
-
         }
-
     });
-
 }
 
 function mostrarDashboard() {
-
     app.innerHTML = renderDashboard();
-
     iniciarEventosDashboard();
-
 }
 
 function iniciarEventosDashboard() {
-
     document.getElementById("menuInicio")
         ?.addEventListener("click", mostrarInicio);
 
@@ -71,17 +61,13 @@ function iniciarEventosDashboard() {
 
     document.getElementById("menuConfiguracion")
         ?.addEventListener("click", mostrarConfiguracion);
-
 }
 
 function mostrarInicio() {
-
     const contenido = document.getElementById("contenidoPrincipal");
 
     contenido.innerHTML = `
-
         <section class="cards">
-
             <div class="card">
                 <h3>Total Productos</h3>
                 <span>0</span>
@@ -101,59 +87,44 @@ function mostrarInicio() {
                 <h3>Proveedores</h3>
                 <span>0</span>
             </div>
-
         </section>
-
     `;
-
 }
 
-function mostrarProductos() {
-
+async function mostrarProductos() {
     const contenido = document.getElementById("contenidoPrincipal");
 
-    contenido.innerHTML = renderProductos();
+    contenido.innerHTML = await renderProductos();
 
     iniciarModuloProductos();
-
 }
 
 function mostrarCategorias() {
-
     const contenido = document.getElementById("contenidoPrincipal");
 
     contenido.innerHTML = renderCategorias();
-
 }
 
 function mostrarProveedores() {
-
     const contenido = document.getElementById("contenidoPrincipal");
 
     contenido.innerHTML = renderProveedores();
-
 }
 
 function mostrarClientes() {
-
     const contenido = document.getElementById("contenidoPrincipal");
 
     contenido.innerHTML = renderClientes();
-
 }
 
 function mostrarReportes() {
-
     const contenido = document.getElementById("contenidoPrincipal");
 
     contenido.innerHTML = renderReportes();
-
 }
 
 function mostrarConfiguracion() {
-
     const contenido = document.getElementById("contenidoPrincipal");
 
     contenido.innerHTML = renderConfiguracion();
-
 }
