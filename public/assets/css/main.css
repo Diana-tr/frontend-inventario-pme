@@ -1,0 +1,7 @@
+@import url("./base/_variables.css");
+@import url("./base/_reset.css");
+@import url("./components/forms.css");
+@import url("./components/buttons.css");
+@import url("./components/dashboard.css");
+@import url("./components/productos.css");
+@import url("./components/login.css");
