@@ -1,10 +1,10 @@
 {
   "CC-004": {
-    "occurrences": 177,
+    "occurrences": 179,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-23T21:48:38.836Z",
-    "last_seen": "2026-08-25T14:48:58.977Z"
+    "last_seen": "2026-08-25T15:06:53.270Z"
   },
   "CSS-002": {
     "occurrences": 48,
@@ -21,11 +21,11 @@
     "last_seen": "2026-08-23T23:15:17.427Z"
   },
   "ASYNC-001": {
-    "occurrences": 261,
+    "occurrences": 264,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:42:23.631Z",
-    "last_seen": "2026-08-24T23:44:03.568Z"
+    "last_seen": "2026-08-25T15:06:53.259Z"
   },
   "CC-001": {
     "occurrences": 13,
@@ -42,10 +42,10 @@
     "last_seen": "2026-08-24T23:00:15.021Z"
   },
   "JS-001": {
-    "occurrences": 376,
+    "occurrences": 380,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:51:04.053Z",
-    "last_seen": "2026-08-25T14:48:58.978Z"
+    "last_seen": "2026-08-25T15:06:53.300Z"
   }
 }

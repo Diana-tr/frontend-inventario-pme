@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '../../../config/app.php';
+?>
+
 <footer class="main-footer">
     <strong>Copyright &copy; 2026 <a href="https://inventariopme.com">Inventario P.M.E</a>.</strong>
     Todos los derechos reservados.
@@ -22,7 +26,7 @@
 <!-- Script de Logout (Cierre de Sesión) -->
 <script type="module">
     import LogoutController from "<?php echo $URL; ?>public/assets/js/controllers7logout.js";
-    
+
     // Inicializamos el controlador de logout cuando cargue la página
     document.addEventListener("DOMContentLoaded", () => {
         LogoutController.init();
