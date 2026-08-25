@@ -17,21 +17,18 @@ require_once __DIR__ . '../../../config/app.php';
 <!-- ./wrapper -->
 
 <!-- jQuery -->
-<script src="<?php echo $URL; ?>public/assets/vendor/AdminLTE-3.2.0/plugins/jquery/jquery.min.js"></script>
+<script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
-<script src="<?php echo $URL; ?>public/assets/vendor/AdminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
-<script src="<?php echo $URL; ?>public/assets/vendor/AdminLTE-3.2.0/dist/js/adminlte.js"></script>
+<script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/dist/js/adminlte.js"></script>
 
-<!-- Script de Logout (Cierre de Sesión) -->
-<script type="module">
-    import LogoutController from "<?php echo $URL; ?>public/assets/js/controllers7logout.js";
-
-    // Inicializamos el controlador de logout cuando cargue la página
-    document.addEventListener("DOMContentLoaded", () => {
-        LogoutController.init();
-    });
+<!-- Aplicación principal -->
+<script
+    type="module"
+    src="<?php echo $URL; ?>/public/assets/js/core/app.js">
 </script>
+
 </body>
 
 </html>

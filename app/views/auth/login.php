@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../config/app.php';
+require_once __DIR__ . '../../../config/app.php';
 
 ?>
 
@@ -99,11 +99,10 @@ require_once __DIR__ . '/../../config/app.php';
         </section>
 
     </main>
-
+    <script
+        type="module"
+        src="<?php echo $URL; ?>/public/assets/js/core/app.js">
+    </script>
 </body>
-
-<script
-    type="module"
-    src="<?php echo $URL; ?>/public/assets/js/core/app.js"></script>
 
 </html>

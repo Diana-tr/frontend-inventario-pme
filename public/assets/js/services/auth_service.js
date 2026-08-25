@@ -7,15 +7,16 @@
  * Servicio responsable de las operaciones de autenticación.
  *
  * Responsabilidades:
- *  - Iniciar sesión.
- *  - Persistir tokens.
- *  - Persistir información del usuario.
+ * - Iniciar sesión.
+ * - Cerrar sesión.
+ * - Persistir tokens.
+ * - Persistir información del usuario.
  *
  * No contiene lógica de:
- *  - Manipulación del DOM.
- *  - Redirecciones.
- *  - Renderizado.
- *  - Manejo directo de fetch().
+ * - Manipulación del DOM.
+ * - Redirecciones.
+ * - Renderizado.
+ * - Manejo directo de fetch().
  * ============================================================
  */
 
@@ -24,6 +25,7 @@ import Storage from "../storage/storage.js";
 
 const AuthService = (() => {
   const LOGIN_ENDPOINT = "/api/v1/auth/login/";
+  const LOGOUT_ENDPOINT = "/api/v1/auth/logout/";
 
   /**
    * Inicia sesión contra el backend.
@@ -49,8 +51,6 @@ const AuthService = (() => {
       const data = response.data;
 
       if (!data) {
-        console.error("[AUTH] El backend no devolvió data.");
-
         return {
           ok: false,
           status: response.status,
@@ -68,8 +68,6 @@ const AuthService = (() => {
       } = data;
 
       if (!accessToken || !refreshToken) {
-        console.error("[AUTH] El backend no devolvió los tokens.");
-
         return {
           ok: false,
           status: response.status,
@@ -110,8 +108,62 @@ const AuthService = (() => {
     }
   }
 
+  /**
+   * Cierra la sesión en el backend.
+   *
+   * El ApiClient adjunta automáticamente el access token
+   * mediante el header Authorization.
+   *
+   * El refresh token se envía explícitamente en el body
+   * porque es utilizado por el backend para invalidar
+   * la sesión/token de refresco.
+   *
+   * @returns {Promise<Object>}
+   */
+  async function logout() {
+    try {
+      const refreshToken = Storage.getRefreshToken();
+
+      if (!refreshToken) {
+        return {
+          ok: false,
+          status: 400,
+          code: "REFRESH_TOKEN_MISSING",
+          message: "No existe un refresh token.",
+          data: null,
+          errors: null,
+        };
+      }
+
+      const response = await ApiClient.post(LOGOUT_ENDPOINT, {
+        refresh: refreshToken,
+      });
+
+      return {
+        ok: response.ok && response.success,
+        status: response.status,
+        code: response.code ?? "LOGOUT_ERROR",
+        message: response.message ?? "No fue posible cerrar sesión.",
+        data: response.data ?? null,
+        errors: response.errors ?? null,
+      };
+    } catch (error) {
+      console.error("[AUTH] Error durante el logout:", error);
+
+      return {
+        ok: false,
+        status: 0,
+        code: "NETWORK_ERROR",
+        message: "No se pudo conectar con el servidor.",
+        data: null,
+        errors: error,
+      };
+    }
+  }
+
   return Object.freeze({
     login,
+    logout,
   });
 })();
 

@@ -1,9 +1,14 @@
-# 📋 Pendientes del Proyecto (TODO List)
+# 📋 Pendientes del Proyecto Front-end (TODO List)
 
-## implementar el logout (Cierre de sesion) para destruir la sesion
+## ⏳ En Proceso / Pendientes
 
-- [x] Se debe realizar la conexion al backend y hacer el inicio de sesion correctamente y mostrar el Dashboard.
+- [ ] Implementar la vista del formulario para crear usuarios. *(Asignado: )*
+- [ ] Implementar la tabla para poder ver usuarios creados podemos usar DATATABLE. *(Asignado: )*
+- [ ] Arreglar el logo que esta en el siderbar para que se vea mucho mejor. *(Asignado: )*
+- [ ] .
 
-- [ ] Se debe realizar un archivo en la ubicacion public/assets/js/controllers_logout.js para poder destruir la sesion.
+## ✅ Completado
 
-- [ ] se debe trabajar en el siderbar para crear el modulo de usuarios.
+- [x] Conexión al backend e inicio de sesión con redirección al Dashboard. *(Asignado: Jhan)*
+- [x] Crear controlador `public/assets/js/controllers_logout.js` para destruir sesión. *(Asignado: Diana)*
+- [x] Maquetar el sidebar con el módulo de usuarios. *(Asignado: Diana)*
