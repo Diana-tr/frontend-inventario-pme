@@ -1,5 +1,4 @@
-/**
- * ============================================================
+/* ============================================================
  * Inventario PME
  * App
  * ============================================================
@@ -62,7 +61,7 @@ const App = (() => {
       /**
        * Página de login.
        */
-      if (currentPath === loginPath) {
+      if (currentPath === loginPath || currentPath.includes("index.php") || window.location.search.includes("route=login")) {
         LoginController.init();
 
         return;

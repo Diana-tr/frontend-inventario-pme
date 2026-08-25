@@ -18,6 +18,16 @@
 <script src="<?php echo $URL; ?>public/assets/vendor/AdminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="<?php echo $URL; ?>public/assets/vendor/AdminLTE-3.2.0/dist/js/adminlte.js"></script>
+
+<!-- Script de Logout (Cierre de Sesión) -->
+<script type="module">
+    import LogoutController from "<?php echo $URL; ?>public/assets/js/controllers7logout.js";
+    
+    // Inicializamos el controlador de logout cuando cargue la página
+    document.addEventListener("DOMContentLoaded", () => {
+        LogoutController.init();
+    });
+</script>
 </body>
 
 </html>
