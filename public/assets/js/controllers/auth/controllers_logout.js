@@ -9,7 +9,7 @@
  * - Redirigir al usuario a la vista de login.
  */
 
-import Storage from "./storage/storage.js";
+import Storage from "../../storage/storage.js";
 
 const LogoutController = (() => {
   
