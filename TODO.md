@@ -2,9 +2,9 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [ ] Implementar la vista del formulario para crear usuarios. *(Asignado: )*
-- [ ] Implementar la tabla para poder ver usuarios creados podemos usar DATATABLE. *(Asignado: )*
-- [ ] Arreglar el logo que esta en el siderbar para que se vea mucho mejor. *(Asignado: )*
+- [ x] Implementar la vista del formulario para crear usuarios. *(Asignado: )*
+- [x ] Implementar la tabla para poder ver usuarios creados podemos usar DATATABLE. *(Asignado: )*
+- [x ] Arreglar el logo que esta en el siderbar para que se vea mucho mejor. *(Asignado: )*
 - [ ] .
 
 ## ✅ Completado
