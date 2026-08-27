@@ -1,46 +1,15 @@
 /**
  * @fileoverview
  * Cliente HTTP centralizado.
- *
- * @description
- * Responsable de toda comunicación entre frontend y backend.
- *
- * El backend es la única fuente de mensajes de negocio.
- * Este cliente no crea mensajes de negocio.
- *
- * Responsabilidades:
- *
- * - Ejecutar peticiones HTTP.
- * - Adjuntar el access token.
- * - Detectar access tokens expirados.
- * - Renovar tokens utilizando el refresh token.
- * - Reintentar la petición original.
- * - Evitar múltiples refresh simultáneos.
  */
 
 import Storage from "../storage/storage.js";
 
-
-
 const ApiClient = (() => {
   const BASE_URL = "http://127.0.0.1:8000";
 
-  /**
-   * Promesa compartida para evitar múltiples refresh
-   * simultáneos cuando varias peticiones reciben 401.
-   *
-   * @type {Promise<boolean> | null}
-   */
   let refreshPromise = null;
 
-  /**
-   * Renueva los tokens utilizando el refresh token.
-   *
-   * Esta función NO utiliza request(), porque eso provocaría
-   * un ciclo de refresh potencialmente infinito.
-   *
-   * @returns {Promise<boolean>}
-   */
   const refreshAccessToken = async () => {
     const refreshToken = Storage.getRefreshToken();
 
@@ -73,19 +42,12 @@ const ApiClient = (() => {
       }
 
       const accessToken = result.data.access_token ?? result.data.access;
-
       const newRefreshToken = result.data.refresh_token ?? result.data.refresh;
 
       if (!accessToken) {
         return false;
       }
 
-      /**
-       * SIMPLE_JWT puede rotar el refresh token.
-       *
-       * Si el backend devuelve uno nuevo, guardamos ambos.
-       * Si no devuelve uno nuevo, conservamos el existente.
-       */
       Storage.saveTokens(accessToken, newRefreshToken ?? refreshToken);
 
       return true;
@@ -94,11 +56,6 @@ const ApiClient = (() => {
     }
   };
 
-  /**
-   * Garantiza que solamente exista un refresh simultáneo.
-   *
-   * @returns {Promise<boolean>}
-   */
   const ensureTokenRefresh = async () => {
     if (!refreshPromise) {
       refreshPromise = refreshAccessToken().finally(() => {
@@ -109,14 +66,6 @@ const ApiClient = (() => {
     return refreshPromise;
   };
 
-  /**
-   * Ejecuta una petición HTTP.
-   *
-   * @param {string} endpoint
-   * @param {RequestInit} options
-   * @param {boolean} retry
-   * @returns {Promise<Object>}
-   */
   const request = async (endpoint, options = {}, retry = true) => {
     const token = Storage.getAccessToken();
 
@@ -125,7 +74,13 @@ const ApiClient = (() => {
       Accept: "application/json",
     };
 
-    if (token && !endpoint.includes("/auth/login/")) {
+    // Únicamente son públicos el login y el refresh de tokens.
+    // Todo lo demás (incluyendo crear usuarios desde el panel) exige el Token del admin.
+    const isPublicEndpoint = 
+      endpoint.includes("/auth/login/") || 
+      endpoint.includes("/auth/refresh/");
+
+    if (token && !isPublicEndpoint) {
       headers.Authorization = `Bearer ${token}`;
     }
 
@@ -148,11 +103,6 @@ const ApiClient = (() => {
         result = {};
       }
 
-      /**
-       * Access token expirado.
-       *
-       * Solamente intentamos renovar una vez.
-       */
       if (
         response.status === 401 &&
         retry &&
@@ -184,53 +134,11 @@ const ApiClient = (() => {
     }
   };
 
-  /**
-   * Ejecuta una petición GET.
-   */
-  const get = (endpoint) => {
-    return request(endpoint, {
-      method: "GET",
-    });
-  };
-
-  /**
-   * Ejecuta una petición POST.
-   */
-  const post = (endpoint, body = {}) => {
-    return request(endpoint, {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
-  };
-
-  /**
-   * Ejecuta una petición PUT.
-   */
-  const put = (endpoint, body = {}) => {
-    return request(endpoint, {
-      method: "PUT",
-      body: JSON.stringify(body),
-    });
-  };
-
-  /**
-   * Ejecuta una petición PATCH.
-   */
-  const patch = (endpoint, body = {}) => {
-    return request(endpoint, {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    });
-  };
-
-  /**
-   * Ejecuta una petición DELETE.
-   */
-  const remove = (endpoint) => {
-    return request(endpoint, {
-      method: "DELETE",
-    });
-  };
+  const get = (endpoint) => request(endpoint, { method: "GET" });
+  const post = (endpoint, body = {}) => request(endpoint, { method: "POST", body: JSON.stringify(body) });
+  const put = (endpoint, body = {}) => request(endpoint, { method: "PUT", body: JSON.stringify(body) });
+  const patch = (endpoint, body = {}) => request(endpoint, { method: "PATCH", body: JSON.stringify(body) });
+  const remove = (endpoint) => request(endpoint, { method: "DELETE" });
 
   return Object.freeze({
     get,
