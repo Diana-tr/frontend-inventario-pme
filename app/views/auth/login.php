@@ -13,9 +13,7 @@ require_once __DIR__ . '../../../config/app.php';
 
     <title>Software de Inventarios P.M.E. - Login</title>
 
-    <link
-        rel="stylesheet"
-        href="<?php echo $URL; ?>/public/assets/css/main.css">
+    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/main.css">
 </head>
 
 <body>
@@ -35,9 +33,7 @@ require_once __DIR__ . '../../../config/app.php';
             <div class="login-container">
 
                 <div class="brand-logo">
-                    <img
-                        src="<?php echo $URL; ?>/public/assets/img/logo-pme.png"
-                        alt="Logo PME"
+                    <img src="<?php echo $URL; ?>/public/assets/img/logo-pme.png" alt="Logo PME"
                         class="login-logo-card">
                 </div>
 
@@ -49,21 +45,15 @@ require_once __DIR__ . '../../../config/app.php';
 
                 <br>
 
-                <form id="loginForm">
+                <form id="loginForm" class="login-form">
 
                     <div class="form-group">
                         <label for="email">
                             Correo electrónico
                         </label>
 
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="Ingrese su correo electrónico....."
-                            autocomplete="username"
-                            required
-                            aria-describedby="login-message">
+                        <input type="email" id="email" name="email" placeholder="Ingrese su correo electrónico....."
+                            autocomplete="username" required aria-describedby="login-message">
                     </div>
 
                     <div class="form-group">
@@ -71,25 +61,13 @@ require_once __DIR__ . '../../../config/app.php';
                             Contraseña
                         </label>
 
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            placeholder="Ingrese su contraseña....."
-                            autocomplete="current-password"
-                            required
-                            aria-describedby="login-message">
+                        <input type="password" id="password" name="password" placeholder="Ingrese su contraseña....."
+                            autocomplete="current-password" required aria-describedby="login-message">
                     </div>
 
-                    <div
-                        id="login-message"
-                        role="alert"
-                        aria-live="polite"
-                        hidden></div>
+                    <div id="login-message" role="alert" aria-live="polite" hidden></div>
 
-                    <button
-                        type="submit"
-                        id="login-submit">
+                    <button type="submit" id="login-submit">
                         Iniciar sesión
                     </button>
 
@@ -99,9 +77,14 @@ require_once __DIR__ . '../../../config/app.php';
         </section>
 
     </main>
-    <script
-        type="module"
-        src="<?php echo $URL; ?>/public/assets/js/core/app.js">
+    <script type="module">
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
+        import LoginController from "<?php echo $URL; ?>/public/assets/js/controllers/auth/login_controller.js";
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await App.bootstrap();
+            LoginController.init();
+        });
     </script>
 </body>
 

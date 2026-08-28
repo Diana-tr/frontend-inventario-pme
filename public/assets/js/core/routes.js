@@ -3,7 +3,7 @@
  * Servicio centralizado de rutas y navegación del frontend.
  *
  * Responsabilidades:
- * - Centralizar todas las rutas del ERP.
+ * - Centralizar todas las rutas del sistema PME.
  * - Obtener la página actual.
  * - Navegar entre páginas.
  * * Ningún otro módulo debe manipular window.location directamente.

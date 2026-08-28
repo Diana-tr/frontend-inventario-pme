@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /frontend-inventario-pme/
+
+    # Ignorar reescritura para archivos y directorios reales (assets)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Redirigir todas las demás rutas a index.php para el enrutador
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>

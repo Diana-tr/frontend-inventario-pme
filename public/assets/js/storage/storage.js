@@ -8,9 +8,9 @@
 
 const Storage = (() => {
   const KEYS = Object.freeze({
-    ACCESS_TOKEN: "veltrion_access_token",
-    REFRESH_TOKEN: "veltrion_refresh_token",
-    USER: "veltrion_user",
+    ACCESS_TOKEN: "inventariopme_access_token",
+    REFRESH_TOKEN: "inventariopme_refresh_token",
+    USER: "inventariopme_user",
   });
 
   /* ===========================

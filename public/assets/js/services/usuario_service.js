@@ -1,23 +1,32 @@
-/**
- * @fileoverview
- * Servicio para la gestión de usuarios (consumo de la API).
- */
+import ApiClient from "../core/apiClient.js";
 
-import ApiClient from "../core/apiclient.js";
+const UsuarioService = (() => {
+  const USERS_ENDPOINT = "/api/v1/users/";
 
-export const usuarioService = {
-    /**
-     * Lista todos los usuarios registrados.
-     */
-    async listarUsuarios() {
-        return await ApiClient.get("/api/v1/users/");
-    },
+  async function listarUsuarios() {
+    try {
+      return await ApiClient.get(USERS_ENDPOINT);
+    } catch (error) {
+      console.error("[USUARIO SERVICE] Error al listar usuarios:", error);
 
-    /**
-     * Crea un nuevo usuario enviando los datos al backend.
-     * @param {Object} userData 
-     */
-    async crearUsuario(userData) {
-        return await ApiClient.post("/api/v1/users/", userData);
+      throw error;
     }
-};
+  }
+
+  async function crearUsuario(userData) {
+    try {
+      return await ApiClient.post(USERS_ENDPOINT, userData);
+    } catch (error) {
+      console.error("[USUARIO SERVICE] Error al crear usuario:", error);
+
+      throw error;
+    }
+  }
+
+  return Object.freeze({
+    listarUsuarios,
+    crearUsuario,
+  });
+})();
+
+export default UsuarioService;

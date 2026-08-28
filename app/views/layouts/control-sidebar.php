@@ -6,4 +6,5 @@
         <!-- Seccion 1: Titulo -->
         <h5>Ajustes Rápidos</h5>
         <hr class="mb-3" style="border-top: 1px solid #4f5962;">
+    </div>
 </aside>

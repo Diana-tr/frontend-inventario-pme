@@ -139,22 +139,29 @@ const AuthService = (() => {
         refresh: refreshToken,
       });
 
+      // SIN IMPORTAR lo que responda el servidor (puede ser 500 o 400),
+      // nosotros DEBEMOS limpiar la sesión en el frontend.
+      Storage.clear();
+
       return {
         ok: response.ok && response.success,
         status: response.status,
         code: response.code ?? "LOGOUT_ERROR",
-        message: response.message ?? "No fue posible cerrar sesión.",
+        message: response.message ?? "No fue posible cerrar sesión en el servidor, pero se cerró localmente.",
         data: response.data ?? null,
         errors: response.errors ?? null,
       };
     } catch (error) {
       console.error("[AUTH] Error durante el logout:", error);
+      
+      // Fallo de red severo, forzamos la limpieza de todas formas
+      Storage.clear();
 
       return {
         ok: false,
         status: 0,
         code: "NETWORK_ERROR",
-        message: "No se pudo conectar con el servidor.",
+        message: "No se pudo conectar con el servidor, sesión cerrada localmente.",
         data: null,
         errors: error,
       };

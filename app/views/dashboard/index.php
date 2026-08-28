@@ -16,9 +16,9 @@ require_once __DIR__ . '/../layouts/head.php';
         </div>
 
         <!-- Modulos Layout -->
-        <?php 
-        require_once __DIR__ . '/../layouts/navbar.php'; 
-        require_once __DIR__ . '/../layouts/sidebar.php'; 
+        <?php
+        require_once __DIR__ . '/../layouts/navbar.php';
+        require_once __DIR__ . '/../layouts/sidebar.php';
         ?>
 
         <!-- Content Wrapper. Contains page content -->
@@ -31,14 +31,14 @@ require_once __DIR__ . '/../layouts/head.php';
                             <!-- small box -->
                             <div class="small-box bg-info">
                                 <div class="inner">
-                                    <h3>0</h3>
+                                    <!-- ID agregado para actualización mediante JS -->
+                                    <h3 id="total_usuarios">0</h3>
                                     <p>Usuarios</p>
                                 </div>
                                 <div class="icon">
                                     <i class="fas fa-users"></i>
                                 </div>
-                                <!-- Enlace corregido apuntando a listar.php usando la variable global $URL -->
-                                <a href="<?php echo $URL; ?>/app/views/usuarios/listar.php" class="small-box-footer">
+                                <a href="<?php echo $URL; ?>/usuarios" class="small-box-footer">
                                     Ver Usuarios <i class="fas fa-arrow-circle-right"></i>
                                 </a>
                             </div>
@@ -48,7 +48,23 @@ require_once __DIR__ . '/../layouts/head.php';
             </section>
         </div>
 
-        <?php 
-        require_once __DIR__ . '/../layouts/control-sidebar.php'; 
-        require_once __DIR__ . '/../layouts/footer.php'; 
+        <?php
+        require_once __DIR__ . '/../layouts/control-sidebar.php';
+        require_once __DIR__ . '/../layouts/footer.php';
         ?>
+
+    </div>
+
+    <!-- Script al final del archivo PHP -->
+    <script type="module">
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
+        import DashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/dashboard/dashboard.js";
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await App.bootstrap();
+            DashboardController.init();
+        });
+    </script>
+</body>
+
+</html>

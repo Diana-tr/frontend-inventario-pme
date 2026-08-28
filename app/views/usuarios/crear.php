@@ -4,63 +4,185 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../config/app.php';
-
-include_once("../layouts/head.php");
-include_once("../layouts/navbar.php");
-include_once("../layouts/sidebar.php");
+require_once __DIR__ . '/../layouts/head.php';
 ?>
 
-<main>
-    <div class="container-fluid px-4 py-4">
-        <!-- Título y migas de pan -->
-        <h1 class="mt-2 text-dark fw-bold">Registrar Nuevo Usuario</h1>
-        <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a href="../dashboard/index.php">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="listar.php">Usuarios</a></li>
-            <li class="breadcrumb-item active">Crear</li>
-        </ol>
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
 
-        <!-- Tarjeta del formulario -->
-        <div class="card shadow-sm border-0 mb-4" style="max-width: 700px;">
-            <div class="card-header bg-white py-3">
-                <h5 class="m-0 text-primary fw-semibold">
-                    <i class="fas fa-user-plus me-2"></i> Formulario de Registro de Usuario
-                </h5>
-            </div>
-            <div class="card-body p-4">
-                <div id="alertMessage" class="alert" style="display: none;"></div>
-
-                <form id="formCrearUsuario">
-                    <div class="mb-3">
-                        <label for="name" class="form-label fw-bold text-secondary">Nombre Completo:</label>
-                        <input type="text" class="form-control" id="name" name="name" required placeholder="Ej. Diana Trujillo">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="email" class="form-label fw-bold text-secondary">Correo electrónico:</label>
-                        <input type="email" class="form-control" id="email" name="email" required placeholder="ejemplo@correo.com">
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="password" class="form-label fw-bold text-secondary">Contraseña:</label>
-                        <input type="password" class="form-control" id="password" name="password" required placeholder="********">
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="<?php echo $URL; ?>/app/views/usuarios/listar.php" class="text-decoration-none text-muted">← Volver a la lista</a>
-                        <button type="submit" class="btn btn-primary px-4">
-                            <i class="fas fa-save me-1"></i> Guardar Usuario
-                        </button>
-                    </div>
-                </form>
-            </div>
+        <!-- Preloader -->
+        <div class="preloader flex-column justify-content-center align-items-center">
+            <img class="animation__shake" src="<?php echo $URL; ?>/public/assets/img/logo-pme.png" alt="Logo inventario PME" height="60" width="60">
         </div>
+
+        <!-- Módulos Layout -->
+        <?php
+        require_once __DIR__ . '/../layouts/navbar.php';
+        require_once __DIR__ . '/../layouts/sidebar.php';
+        ?>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Header de la página -->
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0"><i class="fas fa-users mr-2"></i>Gestión de Usuarios</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="<?php echo $URL; ?>/dashboard">Inicio</a></li>
+                                <li class="breadcrumb-item active">Usuarios</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido Principal -->
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card card-primary shadow-sm">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-address-card mr-1"></i> Formulario de Registro</h3>
+                                </div>
+                                <!-- /.card-header -->
+
+                                <!-- Formulario inicio -->
+                                <form id="form_crear_usuario" action="#" method="POST" autocomplete="off">
+                                    <div class="card-body">
+                                        <div class="row">
+
+                                            <!-- First Name (Nombres) -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="first_name">Nombres <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                    </div>
+                                                    <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Ej. Juan" required>
+                                                </div>
+                                            </div>
+
+                                            <!-- Last Name (Apellidos) -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="last_name">Apellidos <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                    </div>
+                                                    <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Ej. Pérez" required>
+                                                </div>
+                                            </div>
+
+                                            <!-- Username -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="username">Nombre de Usuario <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                                                    </div>
+                                                    <input type="text" name="username" id="username" class="form-control" placeholder="Ej. juanperez" required>
+                                                </div>
+                                            </div>
+
+                                            <!-- Document Number -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="document_number">Número de Documento <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                                    </div>
+                                                    <input type="text" name="document_number" id="document_number" class="form-control" placeholder="Ej. 123456789" required>
+                                                </div>
+                                            </div>
+
+                                            <!-- Email -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="email">Correo Electrónico <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                                    </div>
+                                                    <input type="email" name="email" id="email" class="form-control" placeholder="juan@gmail.com" required>
+                                                </div>
+                                            </div>
+
+                                            <!-- Phone Number -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="phone_number">Número de Teléfono <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                                    </div>
+                                                    <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Ej. 3001234567" required>
+                                                </div>
+                                            </div>
+
+                                            <!-- Password -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="password">Contraseña <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                                    </div>
+                                                    <input type="password" name="password" id="password" class="form-control" placeholder="Ingrese contraseña segura" required>
+                                                </div>
+                                            </div>
+
+                                            <!-- Confirmar Contraseña (para validación visual en cliente) -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="password_repeat">Confirmar Contraseña <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                                    </div>
+                                                    <input type="password" id="password_repeat" class="form-control" placeholder="Repita la contraseña" required>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <!-- /.card-body -->
+
+                                    <div class="card-footer d-flex justify-content-end">
+                                        <a href="index.php" class="btn btn-secondary mr-2">
+                                            <i class="fas fa-times-circle mr-1"></i> Cancelar
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save mr-1"></i> Guardar Usuario
+                                        </button>
+                                    </div>
+                                </form>
+                                <!-- Formulario fin -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <?php
+        require_once __DIR__ . '/../layouts/control-sidebar.php';
+        require_once __DIR__ . '/../layouts/footer.php';
+        ?>
+
     </div>
-</main>
 
-<!-- Llamado al controlador modular ubicado en public/assets/js/controllers/usuario/crear.js -->
-<script type="module" src="../../../public/assets/js/controllers/usuario/crear.js"></script>
+    <!-- Script de inicialización (ahora delegado al controlador JS) -->
+    <script type="module">
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
+        import CrearUsuarioController from "<?php echo $URL; ?>/public/assets/js/controllers/usuario/crear.js";
 
-<?php
-include_once("../layouts/footer.php");
-?>
+        document.addEventListener("DOMContentLoaded", async () => {
+            await App.bootstrap();
+            CrearUsuarioController.init();
+        });
+    </script>
+</body>
+
+</html>

@@ -113,6 +113,12 @@ const ApiClient = (() => {
 
         if (refreshed) {
           return request(endpoint, options, false);
+        } else {
+          // Si falló el refresh (el refresh token expiró o es inválido)
+          // debemos destruir la sesión y mandar al login de inmediato.
+          Storage.clear();
+          window.location.replace("/frontend-inventario-pme/login");
+          return { ok: false, status: 401, success: false };
         }
       }
 

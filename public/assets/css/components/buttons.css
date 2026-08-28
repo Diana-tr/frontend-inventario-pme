@@ -1,20 +1,24 @@
-button{
-
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    background:#2563EB;
-    color:white;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-    transition:.3s;
-
+/**
+ * Estilos de botón principal — limitados al contexto del login.
+ *
+ * IMPORTANTE: NO usar selectores genéricos como `button {}` porque
+ * afectan a todos los <button> del sitio (DataTables, AdminLTE, Bootstrap).
+ */
+.login-form button[type="submit"],
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #2563EB;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .3s;
 }
 
-button:hover{
-
-    background:#1D4ED8;
-
+.login-form button[type="submit"]:hover,
+.btn-login:hover {
+    background: #1D4ED8;
 }

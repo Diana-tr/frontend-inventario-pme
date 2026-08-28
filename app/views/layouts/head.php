@@ -30,4 +30,10 @@ require_once __DIR__ . '../../../config/app.php';
     <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/daterangepicker/daterangepicker.css">
     <!-- summernote -->
     <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/summernote/summernote-bs4.min.css">
+    <!-- DataTables Bootstrap 4 -->
+    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <!-- DataTables Responsive Bootstrap 4 -->
+    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <!-- DataTables Buttons Bootstrap 4 -->
+    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
 </head>
