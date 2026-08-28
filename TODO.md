@@ -2,7 +2,9 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [] Revisar el diseño del software mejoras pequeñas.
+- [] Revisar el diseño del software mejoras pequeñas. *(Asignado: )*
+- [] Falta realizar la implementacion de ver detalles, editar y desactivar(Borrado logico) del modulo usuarios. *(Asignado: )*
+- []
 
 ## ✅ Completado
 
