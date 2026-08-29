@@ -84,6 +84,9 @@ const AuthService = (() => {
         Storage.saveUser(user);
       }
 
+      // Fetch de contexto de seguridad luego de inicio de sesión exitoso
+      await fetchSecurityContext();
+
       return {
         ok: true,
         status: response.status,
@@ -105,6 +108,22 @@ const AuthService = (() => {
         data: null,
         errors: error,
       };
+    }
+  }
+
+  /**
+   * Obtiene el contexto de seguridad del servidor y lo guarda.
+   */
+  async function fetchSecurityContext() {
+    try {
+      const response = await ApiClient.get("/api/v1/security/context/");
+      if (response.ok && response.success && response.data) {
+        Storage.savePermissions(response.data.permissions);
+      } else {
+        console.warn("[AUTH] No se pudo obtener el contexto de seguridad.");
+      }
+    } catch (error) {
+      console.error("[AUTH] Error obteniendo contexto de seguridad:", error);
     }
   }
 
@@ -171,6 +190,7 @@ const AuthService = (() => {
   return Object.freeze({
     login,
     logout,
+    fetchSecurityContext,
   });
 })();
 

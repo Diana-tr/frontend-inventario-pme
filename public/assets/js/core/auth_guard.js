@@ -9,6 +9,7 @@
 
 import SessionManager from "./session_manager.js";
 import Config from "../config/config.js";
+import SecurityManager from "./security.js";
 
 const AuthGuard = (() => {
   const LOGIN_URL = Config.BASE_PATH + Config.LOGIN_PATH;
@@ -44,9 +45,28 @@ const AuthGuard = (() => {
     return true;
   }
 
+  /**
+   * Verifica que el usuario esté autenticado y posea el permiso requerido.
+   * Redirige al Dashboard si no tiene permiso (o mostrar 403).
+   * @param {string} permissionCode
+   */
+  async function requirePermission(permissionCode) {
+    const authenticated = await requireAuth();
+    if (!authenticated) return false;
+
+    if (!SecurityManager.hasPermission(permissionCode)) {
+      console.warn(`[AUTH GUARD] Acceso denegado: requiere ${permissionCode}`);
+      redirectToHome(); // Alternativa: redirigir a una página 403
+      return false;
+    }
+
+    return true;
+  }
+
   return {
     requireAuth,
     requireGuest,
+    requirePermission,
     redirectToLogin,
     redirectToHome,
   };

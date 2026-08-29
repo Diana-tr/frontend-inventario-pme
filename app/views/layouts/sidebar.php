@@ -53,7 +53,7 @@ require_once __DIR__ . '/../../config/app.php';
                 </li>
 
                 <!-- Módulo de Usuarios -->
-                <li class="nav-item" data-sidebar-module="usuarios">
+                <li class="nav-item" data-sidebar-module="usuarios" data-permission="users.view">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-address-card"></i>
                         <p>
@@ -62,16 +62,41 @@ require_once __DIR__ . '/../../config/app.php';
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item">
+                        <li class="nav-item" data-permission="users.view">
                             <a href="<?php echo $URL; ?>/usuarios" class="nav-link" data-sidebar-path="/usuarios">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>Ver Usuarios</p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" data-permission="users.create">
                             <a href="<?php echo $URL; ?>/usuarios/crear" class="nav-link" data-sidebar-path="/usuarios/crear">
                                 <i class="nav-icon fas fa-user-plus"></i>
                                 <p>Crear Usuarios</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Módulo de Roles y Permis -->
+                <li class="nav-item" data-sidebar-module="roles" data-permission="roles.view">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-user-shield"></i>
+                        <p>
+                            Roles y Permisos
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" data-permission="roles.view">
+                            <a href="<?php echo $URL; ?>/roles" class="nav-link" data-sidebar-path="/roles">
+                                <i class="nav-icon fas fa-user-cog"></i>
+                                <p>Gestión de Roles</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-permission="user_roles.view">
+                            <a href="<?php echo $URL; ?>/roles/crear" class="nav-link" data-sidebar-path="/roles/crear">
+                                <i class="nav-icon fas fa-user-tag"></i>
+                                <p>Asignar Roles</p>
                             </a>
                         </li>
                     </ul>
@@ -133,6 +158,26 @@ require_once __DIR__ . '/../../config/app.php';
                     if (parentLink) {
                         parentLink.classList.add("active");
                     }
+                }
+            })();
+
+            /**
+             * Sidebar Permissions Manager (Fase 1 — Ocultamiento preventivo)
+             * 
+             * Oculta TODOS los elementos con data-permission de forma inmediata
+             * para evitar un "flash" de contenido no autorizado.
+             * 
+             * La visibilidad real la determina SecurityManager.processDomPermissions()
+             * DESPUÉS de que App.bootstrap() descargue los permisos frescos del backend.
+             */
+            (function() {
+                try {
+                    const elements = document.querySelectorAll("[data-permission]");
+                    elements.forEach(el => {
+                        el.style.display = "none";
+                    });
+                } catch (e) {
+                    console.error("Error ocultando elementos con permisos en sidebar:", e);
                 }
             })();
         </script>

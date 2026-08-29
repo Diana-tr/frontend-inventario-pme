@@ -7,6 +7,10 @@ require_once __DIR__ . '/../../config/app.php';
 require_once __DIR__ . '/../layouts/head.php';
 ?>
 
+<!-- Select2 CSS -->
+<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
 
@@ -49,7 +53,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card-header d-flex align-items-center">
                                     <h3 class="card-title font-weight-bold">Listado de Usuarios</h3>
                                     <div class="card-tools ml-auto">
-                                        <a href="<?php echo $URL; ?>/usuarios/crear" class="btn btn-primary btn-sm">
+                                        <a href="<?php echo $URL; ?>/usuarios/crear" class="btn btn-primary btn-sm" data-permission="users.create">
                                             <i class="fas fa-user-plus mr-1"></i> Registrar Nuevo Usuario
                                         </a>
                                     </div>
@@ -223,6 +227,16 @@ require_once __DIR__ . '/../layouts/head.php';
                                     <label for="edit_phone_number" class="font-weight-bold small">Teléfono</label>
                                     <input type="text" class="form-control" id="edit_phone_number" name="phone_number" placeholder="Ej: 3001234567">
                                 </div>
+                                
+                                <!-- Roles (Select2) -->
+                                <div class="col-md-12 form-group mb-3">
+                                    <label for="edit_roles" class="font-weight-bold small">Rol(es) <span class="text-danger">*</span></label>
+                                    <div class="select2-purple">
+                                        <select class="select2" id="edit_roles" name="roles" multiple="multiple" data-placeholder="Seleccionar rol(es)" data-dropdown-css-class="select2-purple" style="width: 100%;" required>
+                                            <!-- Las opciones se cargarán por JS -->
+                                        </select>
+                                    </div>
+                                </div>
 
                                 <div class="col-md-12 form-group mb-3">
                                     <div class="custom-control custom-switch mt-2">
@@ -247,13 +261,22 @@ require_once __DIR__ . '/../layouts/head.php';
         </div>
     </div>
 
+    <!-- Select2 JS -->
+    <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/js/select2.full.min.js"></script>
+
     <!-- Script de inicialización (ahora delegado al controlador JS) -->
     <script type="module">
         import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
         import UsuarioListController from "<?php echo $URL; ?>/public/assets/js/controllers/usuario/listar.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
+            // Inicializar Select2 nativamente
+            $('.select2').select2({
+                theme: 'bootstrap4'
+            });
+
             await App.bootstrap();
             UsuarioListController.init();
         });
     </script>
+</body>

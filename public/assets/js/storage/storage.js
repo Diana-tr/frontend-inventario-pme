@@ -11,6 +11,7 @@ const Storage = (() => {
     ACCESS_TOKEN: "inventariopme_access_token",
     REFRESH_TOKEN: "inventariopme_refresh_token",
     USER: "inventariopme_user",
+    PERMISSIONS: "inventariopme_permissions",
   });
 
   /* ===========================
@@ -68,6 +69,17 @@ const Storage = (() => {
     return read(KEYS.USER);
   };
 
+  /* ===========================
+       Permisos
+    =========================== */
+
+  const savePermissions = (permissions) => {
+    save(KEYS.PERMISSIONS, permissions);
+  };
+
+  const getPermissions = () => {
+    return read(KEYS.PERMISSIONS) || {};
+  };
 
   /* ===========================
        Limpieza
@@ -85,6 +97,10 @@ const Storage = (() => {
 
     saveUser,
     getUser,
+
+    savePermissions,
+    getPermissions,
+
     clear,
   });
 })();

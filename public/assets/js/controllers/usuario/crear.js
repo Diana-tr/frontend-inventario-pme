@@ -1,4 +1,5 @@
 import usuarioService from "../../services/usuario_service.js";
+import RoleService from "../../services/role_service.js";
 
 const CrearUsuarioController = (() => {
   function init() {
@@ -12,8 +13,36 @@ const CrearUsuarioController = (() => {
       console.error("[CREAR USUARIO] No se encontró el formulario en el DOM.");
       return;
     }
+    
+    // Cargar roles en el select
+    cargarRoles();
 
     form.addEventListener("submit", handleSubmit);
+  }
+  
+  async function cargarRoles() {
+    try {
+      const response = await RoleService.listarRoles();
+      if (response && response.success) {
+        const roles = response.data?.results ?? [];
+        const select = $("#roles");
+        
+        select.empty(); // Limpiar opciones
+        
+        // Solo mostrar roles activos
+        const rolesActivos = roles.filter(r => r.is_active);
+        
+        rolesActivos.forEach(role => {
+          const option = new Option(role.role_name, role.id_role, false, false);
+          select.append(option);
+        });
+        
+        // Refrescar Select2
+        select.trigger("change");
+      }
+    } catch (error) {
+      console.error("[CREAR USUARIO] Error al cargar roles:", error);
+    }
   }
 
   async function handleSubmit(event) {
@@ -43,6 +72,10 @@ const CrearUsuarioController = (() => {
       document.getElementById("password") ||
       form.querySelector('[name="password"]');
     const passwordRepeatInput = document.getElementById("password_repeat");
+    
+    // Obtener roles seleccionados usando jQuery ya que es un Select2
+    const rolesSelect = $("#roles").val() || [];
+    const rolesIds = rolesSelect.map(val => parseInt(val, 10));
 
     // Validar coincidencia de contraseñas
     if (
@@ -71,6 +104,10 @@ const CrearUsuarioController = (() => {
       document_number: docNumberInput ? docNumberInput.value.trim() : "",
       phone_number: phoneNumberInput ? phoneNumberInput.value.trim() : "",
     };
+    
+    if (rolesIds.length > 0) {
+      userData.roles = rolesIds;
+    }
 
     console.log("[CREAR USUARIO] Enviando payload al backend:", userData);
 

@@ -7,6 +7,10 @@ require_once __DIR__ . '/../../config/app.php';
 require_once __DIR__ . '/../layouts/head.php';
 ?>
 
+<!-- Select2 CSS -->
+<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
 
@@ -144,6 +148,16 @@ require_once __DIR__ . '/../layouts/head.php';
                                                 </div>
                                             </div>
 
+                                            <!-- Roles (Select2) -->
+                                            <div class="col-md-12 form-group">
+                                                <label for="roles">Rol(es) <span class="text-danger">*</span></label>
+                                                <div class="select2-purple">
+                                                    <select class="select2" id="roles" name="roles" multiple="multiple" data-placeholder="Seleccionar rol(es)" data-dropdown-css-class="select2-purple" style="width: 100%;" required>
+                                                        <!-- Las opciones se cargarán por JS -->
+                                                    </select>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                     <!-- /.card-body -->
@@ -173,12 +187,20 @@ require_once __DIR__ . '/../layouts/head.php';
 
     </div>
 
+    <!-- Select2 JS -->
+    <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/js/select2.full.min.js"></script>
+
     <!-- Script de inicialización (ahora delegado al controlador JS) -->
     <script type="module">
         import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
         import CrearUsuarioController from "<?php echo $URL; ?>/public/assets/js/controllers/usuario/crear.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
+            // Inicializar Select2 nativamente
+            $('.select2').select2({
+                theme: 'bootstrap4'
+            });
+
             await App.bootstrap();
             CrearUsuarioController.init();
         });

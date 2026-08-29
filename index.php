@@ -40,6 +40,15 @@ switch ($path) {
         require_once __DIR__ . '/app/views/usuarios/crear.php';
         break;
 
+    case 'roles':
+    case 'roles/listar':
+        require_once __DIR__ . '/app/views/roles/listar.php';
+        break;
+
+    case 'roles/crear':
+        require_once __DIR__ . '/app/views/roles/crear.php';
+        break;
+
     default:
         // Evitar procesar archivos estáticos o directos por error
         if (file_exists(__DIR__ . '/' . $path) && is_file(__DIR__ . '/' . $path)) {

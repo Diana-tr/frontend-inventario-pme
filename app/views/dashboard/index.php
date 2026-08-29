@@ -27,7 +27,7 @@ require_once __DIR__ . '/../layouts/head.php';
                 <div class="container-fluid">
                     <!-- Contenido dinamico del dashboard -->
                     <div class="row">
-                        <div class="col-lg-3 col-6">
+                        <div class="col-lg-3 col-6" data-permission="users.view">
                             <!-- small box -->
                             <div class="small-box bg-info">
                                 <div class="inner">

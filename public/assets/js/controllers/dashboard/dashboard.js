@@ -1,9 +1,14 @@
 import UsuarioService from "../../services/usuario_service.js";
+import SecurityManager from "../../core/security.js";
 
 const DashboardController = (() => {
   async function init() {
     console.log("[DASHBOARD] Inicializando controlador...");
-    await cargarTotalUsuarios();
+
+    // Solo cargar datos de usuarios si el usuario tiene permiso
+    if (SecurityManager.hasPermission("users.view")) {
+      await cargarTotalUsuarios();
+    }
   }
 
   async function cargarTotalUsuarios() {

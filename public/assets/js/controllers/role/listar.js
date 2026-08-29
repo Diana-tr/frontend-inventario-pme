@@ -1,13 +1,15 @@
 /**
  * ============================================================
  * Inventario PME
- * Usuario List Controller
+ * Role List Controller
  * ============================================================
  *
  * Controlador responsable de:
- * - Cargar los usuarios desde la API.
- * - Renderizar la tabla de usuarios.
+ * - Cargar los roles desde la API.
+ * - Renderizar la tabla de roles.
  * - Inicializar y configurar el DataTable.
+ * - Manejar modales de Ver Detalles y Editar.
+ * - Desactivar roles (borrado lógico).
  *
  * No contiene lógica de:
  * - Manipulación de fetch().
@@ -16,15 +18,18 @@
  * ============================================================
  */
 
-import UsuarioService from "../../services/usuario_service.js";
 import RoleService from "../../services/role_service.js";
 import SecurityManager from "../../core/security.js";
+import PermissionSelector from "../../components/permission_selector.js";
 
-const UsuarioListController = (() => {
-  const TABLE_BODY_ID = "tablaUsuariosBody";
-  const TABLE_ID = "tbl_usuarios";
-  const EDIT_MODAL_ID = "modalEditarUsuario";
-  const EDIT_FORM_ID = "formEditarUsuario";
+const RoleListController = (() => {
+  const TABLE_BODY_ID = "tablaRolesBody";
+  const TABLE_ID = "tbl_roles";
+  const DETAIL_MODAL_ID = "modalDetalleRol";
+  const EDIT_MODAL_ID = "modalEditarRol";
+  const EDIT_FORM_ID = "formEditarRol";
+
+  let permissionCatalog = []; // Catálogo en memoria
 
   // ───────────────────────────────────────────
   // Helpers de creación de celdas
@@ -70,7 +75,7 @@ const UsuarioListController = (() => {
     return td;
   }
 
-  function createActionsCell(user) {
+  function createActionsCell(role) {
     const td = document.createElement("td");
     td.classList.add("text-center", "align-middle");
 
@@ -80,29 +85,29 @@ const UsuarioListController = (() => {
     // Botón Ver Detalles
     const viewButton = document.createElement("button");
     viewButton.type = "button";
-    viewButton.className = "btn btn-outline-info btn-sm btn-view-user";
+    viewButton.className = "btn btn-outline-info btn-sm btn-view-role";
     viewButton.title = "Ver detalles";
-    viewButton.dataset.userId = user.id_user ?? "";
-    viewButton.dataset.permission = "users.view";
+    viewButton.dataset.roleId = role.id_role ?? "";
+    viewButton.dataset.permission = "roles.view";
     viewButton.innerHTML = '<i class="fas fa-eye"></i>';
 
     // Botón Editar
     const editButton = document.createElement("button");
     editButton.type = "button";
-    editButton.className = "btn btn-outline-warning btn-sm btn-edit-user";
-    editButton.title = "Editar usuario";
-    editButton.dataset.userId = user.id_user ?? "";
-    editButton.dataset.permission = "users.update";
+    editButton.className = "btn btn-outline-warning btn-sm btn-edit-role";
+    editButton.title = "Editar rol";
+    editButton.dataset.roleId = role.id_role ?? "";
+    editButton.dataset.permission = "roles.update";
     editButton.innerHTML = '<i class="fas fa-edit"></i>';
 
-    // Botón Desactivar/Eliminar
+    // Botón Desactivar
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.className = "btn btn-outline-danger btn-sm";
-    deleteButton.title = "Desactivar usuario";
-    deleteButton.dataset.userId = user.id_user ?? "";
-    deleteButton.dataset.permission = "users.delete";
-    deleteButton.innerHTML = '<i class="fas fa-user-slash"></i>';
+    deleteButton.className = "btn btn-outline-danger btn-sm btn-delete-role";
+    deleteButton.title = "Desactivar rol";
+    deleteButton.dataset.roleId = role.id_role ?? "";
+    deleteButton.dataset.permission = "roles.delete";
+    deleteButton.innerHTML = '<i class="fas fa-ban"></i>';
 
     // Se agregan en orden al grupo
     container.appendChild(viewButton);
@@ -117,36 +122,23 @@ const UsuarioListController = (() => {
   // Creación de filas
   // ───────────────────────────────────────────
 
-  function createUserRow(user, index) {
+  function createRoleRow(role, index) {
     const tr = document.createElement("tr");
 
     // N°
     tr.appendChild(createCell(index + 1, ["text-center"]));
 
-    // Nombre completo
-    const fullNameParts = [user.first_name, user.last_name]
-      .filter(Boolean)
-      .join(" ");
-    const fullName = user.name || fullNameParts || "Sin nombre";
-    tr.appendChild(createCell(fullName));
+    // Nombre del Rol
+    tr.appendChild(createCell(role.role_name || "Sin nombre"));
 
-    // Username
-    tr.appendChild(createCell(user.username || "Sin usuario"));
-
-    // Email
-    tr.appendChild(createCell(user.email || "Sin correo"));
-
-    // Roles
-    const roleName = user.roles?.length
-      ? user.roles.map((role) => role.role_name).join(", ")
-      : "Sin rol";
-    tr.appendChild(createCell(roleName));
+    // Descripción
+    tr.appendChild(createCell(role.role_description || "Sin descripción"));
 
     // Estado
-    tr.appendChild(createStatusCell(user.is_active));
+    tr.appendChild(createStatusCell(role.is_active));
 
     // Acciones
-    tr.appendChild(createActionsCell(user));
+    tr.appendChild(createActionsCell(role));
 
     return tr;
   }
@@ -155,87 +147,61 @@ const UsuarioListController = (() => {
   // Manejo del Modal de Detalles
   // ───────────────────────────────────────────
 
-  function formatDate(isoStr) {
-    if (!isoStr) return "N/A";
-    const date = new Date(isoStr);
-    return date.toLocaleString("es-ES", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  }
-
   function setupViewDetailsListener() {
-    // Usamos delegación de eventos en la tabla mediante jQuery para DataTables
     $(`#${TABLE_ID}`)
-      .off("click", ".btn-view-user")
-      .on("click", ".btn-view-user", async function () {
-        const userId = $(this).data("userId");
+      .off("click", ".btn-view-role")
+      .on("click", ".btn-view-role", async function () {
+        const roleId = $(this).data("roleId");
 
-        if (!userId) return;
+        if (!roleId) return;
 
         // Estado inicial del modal (Mostrar loader y ocultar contenido)
-        $("#user_modal_loader").show();
-        $("#user_modal_content").hide();
-        $("#modalDetalleUsuario").modal("show");
+        $("#role_modal_loader").show();
+        $("#role_modal_content").hide();
+        $(`#${DETAIL_MODAL_ID}`).modal("show");
 
         try {
-          const response = await UsuarioService.obtenerUsuarioPorId(userId);
+          const response = await RoleService.obtenerRolPorId(roleId);
 
           if (response && response.success && response.data) {
-            const user = response.data;
-
-            // Nombre completo
-            const fullNameParts = [user.first_name, user.last_name]
-              .filter(Boolean)
-              .join(" ");
-            const fullName = fullNameParts || "Sin nombre";
-
-            // Roles
-            const roleName =
-              user.roles && user.roles.length > 0
-                ? user.roles.map((r) => r.role_name).join(", ")
-                : "Sin rol asignado";
+            const role = response.data;
 
             // Inyectar datos en los elementos del modal
-            $("#detail_full_name").text(fullName);
-            $("#detail_username").text(`@${user.username || "sin_usuario"}`);
-            $("#detail_email").text(user.email || "No registrado");
-            $("#detail_document").text(user.document_number || "Sin documento");
-            $("#detail_phone").text(user.phone_number || "Sin teléfono");
-            $("#detail_role").text(roleName);
-            $("#detail_created_at").text(formatDate(user.created_at));
-            $("#detail_updated_at").text(formatDate(user.updated_at));
+            $("#detail_role_name").text(role.role_name || "Sin nombre");
+            $("#detail_role_description").text(
+              role.role_description || "Sin descripción",
+            );
 
             // Badge de Estado
-            const badgeHtml = user.is_active
+            const badgeHtml = role.is_active
               ? '<span class="badge badge-success px-3 py-1 shadow-sm">Activo</span>'
               : '<span class="badge badge-danger px-3 py-1 shadow-sm">Inactivo</span>';
-            $("#detail_status_badge").html(badgeHtml);
+            $("#detail_role_status_badge").html(badgeHtml);
 
             // Ocultar spinner y mostrar contenido con efecto suave
-            $("#user_modal_loader").hide();
-            $("#user_modal_content").fadeIn();
+            $("#role_modal_loader").hide();
+            $("#role_modal_content").fadeIn();
           } else {
-            throw new Error("Respuesta inválida al consultar el usuario.");
+            throw new Error("Respuesta inválida al consultar el rol.");
           }
         } catch (error) {
-          console.error("[USUARIOS] Error al obtener detalles:", error);
-          $("#modalDetalleUsuario").modal("hide");
+          console.error("[ROLES] Error al obtener detalles:", error);
+          $(`#${DETAIL_MODAL_ID}`).modal("hide");
         }
       });
   }
 
   // ───────────────────────────────────────────
-  // Manejo del Modal de Edición (PATCH / PUT)
+  // Manejo del Modal de Edición (PATCH)
   // ───────────────────────────────────────────
 
-  function setupEditUserListener() {
+  function setupEditRoleListener() {
     // 1. Cargar datos en el modal de edición
     $(`#${TABLE_ID}`)
-      .off("click", ".btn-edit-user")
-      .on("click", ".btn-edit-user", async function () {
-        const userId = $(this).data("userId");
-        if (!userId) return;
+      .off("click", ".btn-edit-role")
+      .on("click", ".btn-edit-role", async function () {
+        const roleId = $(this).data("roleId");
+        if (!roleId) return;
 
         const form = document.getElementById(EDIT_FORM_ID);
         if (form) {
@@ -243,36 +209,37 @@ const UsuarioListController = (() => {
           form.reset();
         }
 
-        $("#edit_user_modal_loader").show();
-        $("#edit_user_modal_content").hide();
+        $("#edit_role_modal_loader").show();
+        $("#edit_role_modal_content").hide();
         $(`#${EDIT_MODAL_ID}`).modal("show");
 
         try {
-          const response = await UsuarioService.obtenerUsuarioPorId(userId);
+          const response = await RoleService.obtenerRolPorId(roleId);
 
           if (response && response.success && response.data) {
-            const user = response.data;
+            const role = response.data;
 
-            $("#edit_user_id").val(user.id_user);
-            $("#edit_first_name").val(user.first_name || "");
-            $("#edit_last_name").val(user.last_name || "");
-            $("#edit_username").val(user.username || "");
-            $("#edit_email").val(user.email || "");
-            $("#edit_document_number").val(user.document_number || "");
-            $("#edit_phone_number").val(user.phone_number || "");
-            $("#edit_is_active").prop("checked", Boolean(user.is_active));
-            
-            // Set roles in Select2
-            const userRoles = user.roles ? user.roles.map(r => r.id_role) : [];
-            $("#edit_roles").val(userRoles).trigger("change");
+            $("#edit_role_id").val(role.id_role);
+            $("#edit_role_name").val(role.role_name || "");
+            $("#edit_role_description").val(role.role_description || "");
+            $("#edit_role_is_active").prop(
+              "checked",
+              Boolean(role.is_active),
+            );
 
-            $("#edit_user_modal_loader").hide();
-            $("#edit_user_modal_content").fadeIn();
+            // Cargar selector de permisos
+            const container = document.getElementById("edit_permissions_container");
+            PermissionSelector.render(container, permissionCatalog, role.permissions || {});
+
+            $("#edit_role_modal_loader").hide();
+            $("#edit_role_modal_content").fadeIn();
           } else {
-            throw new Error("No se pudo obtener la información del usuario.");
+            throw new Error(
+              "No se pudo obtener la información del rol.",
+            );
           }
         } catch (error) {
-          console.error("[USUARIOS] Error al preparar edición:", error);
+          console.error("[ROLES] Error al preparar edición:", error);
           $(`#${EDIT_MODAL_ID}`).modal("hide");
         }
       });
@@ -290,53 +257,94 @@ const UsuarioListController = (() => {
           return;
         }
 
-        const userId = $("#edit_user_id").val();
-        const submitBtn = $("#btn_guardar_edicion");
-
-        const rolesSelect = $("#edit_roles").val() || [];
-        const rolesIds = rolesSelect.map(val => parseInt(val, 10));
+        const roleId = $("#edit_role_id").val();
+        const submitBtn = $("#btn_guardar_edicion_rol");
+        const container = document.getElementById("edit_permissions_container");
 
         // Payload con actualización parcial (PATCH)
         const payload = {
-          first_name: $("#edit_first_name").val().trim(),
-          last_name: $("#edit_last_name").val().trim(),
-          username: $("#edit_username").val().trim(),
-          email: $("#edit_email").val().trim(),
-          document_number: $("#edit_document_number").val().trim(),
-          phone_number: $("#edit_phone_number").val().trim(),
-          is_active: $("#edit_is_active").is(":checked"),
+          role_name: $("#edit_role_name").val().trim(),
+          role_description: $("#edit_role_description").val().trim(),
+          is_active: $("#edit_role_is_active").is(":checked"),
+          permissions: PermissionSelector.getSelectedPermissions(container),
         };
-        
-        if (rolesIds.length > 0) {
-            payload.roles = rolesIds;
-        }
 
         try {
           submitBtn
             .prop("disabled", true)
-            .html('<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...');
+            .html(
+              '<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...',
+            );
 
           // Ejecución del endpoint HTTP PATCH
-          const response = await UsuarioService.actualizarUsuario(
-            userId,
+          const response = await RoleService.actualizarRol(
+            roleId,
             payload,
           );
 
           if (response && response.success) {
             $(`#${EDIT_MODAL_ID}`).modal("hide");
-            await loadUsers(); // Refrescar el DataTable
+            await loadRoles(); // Refrescar el DataTable
           } else {
-            throw new Error(
-              response?.message || "No se pudo actualizar el usuario.",
-            );
+            console.error("[ROLES] Detalles de validación:", response.errors);
+            let errMsg = response?.message || "No se pudo actualizar el rol.";
+            
+            // Extraer mensajes de error detallados si existen
+            if (response.errors && typeof response.errors === 'object') {
+                const details = [];
+                for (const key in response.errors) {
+                    details.push(`${key}: ${JSON.stringify(response.errors[key])}`);
+                }
+                if (details.length > 0) {
+                    errMsg += "\nDetalles:\n" + details.join("\n");
+                }
+            }
+            throw new Error(errMsg);
           }
         } catch (error) {
-          console.error("[USUARIOS] Error al actualizar:", error);
-          alert("Ocurrió un error al intentar actualizar el usuario.");
+          console.error("[ROLES] Error al actualizar:", error);
+          alert("Ocurrió un error al intentar actualizar el rol.");
         } finally {
           submitBtn
             .prop("disabled", false)
-            .html('<i class="fas fa-save mr-1"></i>Guardar Cambios');
+            .html(
+              '<i class="fas fa-save mr-1"></i>Guardar Cambios',
+            );
+        }
+      });
+  }
+
+  // ───────────────────────────────────────────
+  // Manejo de Desactivación (DELETE lógico)
+  // ───────────────────────────────────────────
+
+  function setupDeleteRoleListener() {
+    $(`#${TABLE_ID}`)
+      .off("click", ".btn-delete-role")
+      .on("click", ".btn-delete-role", async function () {
+        const roleId = $(this).data("roleId");
+        if (!roleId) return;
+
+        const confirmed = confirm(
+          "¿Estás seguro de que deseas desactivar este rol?",
+        );
+
+        if (!confirmed) return;
+
+        try {
+          const response = await RoleService.desactivarRol(roleId);
+
+          if (response && response.success) {
+            await loadRoles(); // Refrescar el DataTable
+          } else {
+            throw new Error(
+              response?.message ||
+                "No se pudo desactivar el rol.",
+            );
+          }
+        } catch (error) {
+          console.error("[ROLES] Error al desactivar:", error);
+          alert("Ocurrió un error al intentar desactivar el rol.");
         }
       });
   }
@@ -352,16 +360,17 @@ const UsuarioListController = (() => {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
 
-    td.colSpan = 7;
+    td.colSpan = 5;
     td.classList.add("text-center", "py-4");
 
     const spinner = document.createElement("div");
-    spinner.className = "spinner-border spinner-border-sm text-primary mr-2";
+    spinner.className =
+      "spinner-border spinner-border-sm text-primary mr-2";
     spinner.setAttribute("role", "status");
 
     const text = document.createElement("span");
     text.className = "text-muted";
-    text.textContent = "Cargando usuarios...";
+    text.textContent = "Cargando roles...";
 
     td.appendChild(spinner);
     td.appendChild(text);
@@ -369,18 +378,18 @@ const UsuarioListController = (() => {
     tbody.appendChild(tr);
   }
 
-  function renderUsers(users) {
+  function renderRoles(roles) {
     const tbody = getTableBody();
 
     tbody.replaceChildren();
 
-    if (!users.length) {
+    if (!roles.length) {
       const tr = document.createElement("tr");
       const td = document.createElement("td");
 
-      td.colSpan = 7;
+      td.colSpan = 5;
       td.classList.add("text-center", "py-4", "text-muted");
-      td.textContent = "No hay usuarios registrados.";
+      td.textContent = "No hay roles registrados.";
 
       tr.appendChild(td);
       tbody.appendChild(tr);
@@ -388,13 +397,14 @@ const UsuarioListController = (() => {
       return;
     }
 
-    users.forEach((user, index) => {
-      tbody.appendChild(createUserRow(user, index));
+    roles.forEach((role, index) => {
+      tbody.appendChild(createRoleRow(role, index));
     });
 
     initDataTable();
     setupViewDetailsListener();
-    setupEditUserListener();
+    setupEditRoleListener();
+    setupDeleteRoleListener();
 
     // Procesar permisos en la tabla recién renderizada
     SecurityManager.processDomPermissions();
@@ -433,31 +443,31 @@ const UsuarioListController = (() => {
           extend: "copy",
           className: "btn btn-secondary btn-sm",
           text: '<i class="fas fa-copy mr-1"></i>Copiar',
-          exportOptions: { columns: [1, 2, 3, 4, 5] },
+          exportOptions: { columns: [1, 2, 3] },
         },
         {
           extend: "csv",
           className: "btn btn-success btn-sm",
           text: '<i class="fas fa-file-csv mr-1"></i>CSV',
-          exportOptions: { columns: [1, 2, 3, 4, 5] },
+          exportOptions: { columns: [1, 2, 3] },
         },
         {
           extend: "excel",
           className: "btn btn-success btn-sm",
           text: '<i class="fas fa-file-excel mr-1"></i>Excel',
-          exportOptions: { columns: [1, 2, 3, 4, 5] },
+          exportOptions: { columns: [1, 2, 3] },
         },
         {
           extend: "pdf",
           className: "btn btn-danger btn-sm",
           text: '<i class="fas fa-file-pdf mr-1"></i>PDF',
-          exportOptions: { columns: [1, 2, 3, 4, 5] },
+          exportOptions: { columns: [1, 2, 3] },
         },
         {
           extend: "print",
           className: "btn btn-info btn-sm",
           text: '<i class="fas fa-print mr-1"></i>Imprimir',
-          exportOptions: { columns: [1, 2, 3, 4, 5] },
+          exportOptions: { columns: [1, 2, 3] },
         },
       ],
 
@@ -467,16 +477,16 @@ const UsuarioListController = (() => {
 
       // Columna N° y Acciones no son ordenables
       columnDefs: [
-        { orderable: false, targets: [0, 6] },
-        { className: "text-center", targets: [0, 5, 6] },
+        { orderable: false, targets: [0, 4] },
+        { className: "text-center", targets: [0, 3, 4] },
       ],
 
       drawCallback: function () {
-        $(".dataTables_paginate > .pagination").addClass("pagination-sm");
+        $(".dataTables_paginate > .pagination").addClass(
+          "pagination-sm",
+        );
       },
       initComplete: function () {
-        // Agrega un margen izquierdo (ml-3 o ml-4 en Bootstrap 4) a los botones
-        // para separarlos del control de "Mostrar N registros".
         $(".dt-buttons").addClass("ml-4");
       },
     });
@@ -494,7 +504,7 @@ const UsuarioListController = (() => {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
 
-    td.colSpan = 7;
+    td.colSpan = 5;
     td.classList.add("text-center", "py-4");
 
     const icon = document.createElement("i");
@@ -503,7 +513,7 @@ const UsuarioListController = (() => {
     const text = document.createElement("span");
     text.className = "text-danger";
     text.textContent =
-      "No fue posible cargar los usuarios. Intente nuevamente.";
+      "No fue posible cargar los roles. Intente nuevamente.";
 
     td.appendChild(icon);
     td.appendChild(text);
@@ -515,23 +525,24 @@ const UsuarioListController = (() => {
   // Carga de datos
   // ───────────────────────────────────────────
 
-  async function loadUsers() {
+  async function loadRoles() {
     try {
       renderLoadingState();
 
-      const response = await UsuarioService.listarUsuarios();
+      const response = await RoleService.listarRoles();
 
       if (!response?.success) {
         throw new Error(
-          response?.message ?? "La API no pudo obtener los usuarios.",
+          response?.message ??
+            "La API no pudo obtener los roles.",
         );
       }
 
-      const users = response.data?.results ?? [];
+      const roles = response.data?.results ?? [];
 
-      renderUsers(users);
+      renderRoles(roles);
     } catch (error) {
-      console.error("[USUARIOS] Error:", error);
+      console.error("[ROLES] Error:", error);
 
       renderError();
     }
@@ -541,41 +552,27 @@ const UsuarioListController = (() => {
   // Inicialización
   // ───────────────────────────────────────────
 
-  async function cargarRoles() {
-    try {
-      const response = await RoleService.listarRoles();
-      if (response && response.success) {
-        const roles = response.data?.results ?? [];
-        const select = $("#edit_roles");
-        
-        select.empty();
-        
-        // Mostrar roles activos o los que ya tiene el usuario
-        roles.forEach(role => {
-            // Incluso si está inactivo, si un usuario lo tiene, lo dejamos en el select por compatibilidad.
-            // Para eso, agregamos todos y cuando se edite un usuario se seleccionará correctamente.
-            // Pero idealmente mostramos activos para nuevas asignaciones, pero el usuario ya lo podría tener.
-            // Para simplificar, listaremos solo activos para que al guardar solo se guarden activos.
-            if(role.is_active) {
-                const option = new Option(role.role_name, role.id_role, false, false);
-                select.append(option);
-            }
-        });
-      }
-    } catch (error) {
-      console.error("[USUARIOS] Error al cargar roles:", error);
-    }
-  }
-
-  function init() {
+  async function init() {
     const tbody = document.getElementById(TABLE_BODY_ID);
 
     if (!tbody) {
       return;
     }
-    
-    cargarRoles();
-    loadUsers();
+
+    try {
+      // 1. Cargar el catálogo de permisos globalmente para el selector
+      const catalogResponse = await RoleService.obtenerCatalogoPermisos();
+      if (catalogResponse && catalogResponse.success && catalogResponse.data) {
+        permissionCatalog = catalogResponse.data.modules || [];
+      } else {
+        console.warn("[ROLES] No se pudo cargar el catálogo de permisos.");
+      }
+    } catch (error) {
+      console.error("[ROLES] Error al cargar catálogo de permisos:", error);
+    }
+
+    // 2. Cargar los roles
+    loadRoles();
   }
 
   return Object.freeze({
@@ -583,4 +580,4 @@ const UsuarioListController = (() => {
   });
 })();
 
-export default UsuarioListController;
+export default RoleListController;
