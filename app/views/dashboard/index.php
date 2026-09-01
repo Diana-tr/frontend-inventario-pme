@@ -27,11 +27,11 @@ require_once __DIR__ . '/../layouts/head.php';
                 <div class="container-fluid">
                     <!-- Contenido dinamico del dashboard -->
                     <div class="row">
+
+                        <!-- Tarjeta 1: Usuarios -->
                         <div class="col-lg-3 col-6" data-permission="users.view">
-                            <!-- small box -->
                             <div class="small-box bg-info">
                                 <div class="inner">
-                                    <!-- ID agregado para actualización mediante JS -->
                                     <h3 id="total_usuarios">0</h3>
                                     <p>Usuarios</p>
                                 </div>
@@ -43,6 +43,55 @@ require_once __DIR__ . '/../layouts/head.php';
                                 </a>
                             </div>
                         </div>
+
+                        <!-- Tarjeta 2: Roles Creados -->
+                        <div class="col-lg-3 col-6" data-permission="roles.view">
+                            <div class="small-box bg-success">
+                                <div class="inner">
+                                    <h3 id="total_roles">0</h3>
+                                    <p>Roles Creados</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <a href="<?php echo $URL; ?>/roles" class="small-box-footer">
+                                    Ver Roles <i class="fas fa-arrow-circle-right"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta 3: Total Productos -->
+                        <div class="col-lg-3 col-6" data-permission="inventory.view">
+                            <div class="small-box bg-warning">
+                                <div class="inner">
+                                    <h3 id="total_productos">0</h3>
+                                    <p>Productos en Inventario</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-boxes"></i>
+                                </div>
+                                <a href="<?php echo $URL; ?>/inventario" class="small-box-footer">
+                                    Ver Inventario <i class="fas fa-arrow-circle-right"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta 4: Stock Crítico / Alertas -->
+                        <div class="col-lg-3 col-6" data-permission="inventory.view">
+                            <div class="small-box bg-danger">
+                                <div class="inner">
+                                    <h3 id="stock_bajo">0</h3>
+                                    <p>Stock Bajo / Crítico</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <a href="<?php echo $URL; ?>/inventario/alertas" class="small-box-footer">
+                                    Ver Alertas <i class="fas fa-arrow-circle-right"></i>
+                                </a>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </section>

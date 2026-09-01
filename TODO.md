@@ -4,6 +4,9 @@
 
 - [] Revisar el diseño del software mejoras pequeñas. *(Asignado: )*
 - [] realizar la implementacion de desactivar el usuario (Borrado logico). *(Asignado: )*
+- [] Realizar modulo de clientes. *(Asignado: )*
+- [] Realizar modulo de categorias. *(Asignado: )*
+- [] Realizar modulo de proveedores. *(Asinado: )*
 
 ## ✅ Completado
 
