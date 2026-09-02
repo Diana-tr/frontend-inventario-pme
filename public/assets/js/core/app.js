@@ -66,6 +66,27 @@ const App = (() => {
       // Procesar permisos en la vista (Ocultar botones, widgets, etc.)
       SecurityManager.processDomPermissions();
       
+      // ─── Manejo de 403 Global ───
+      window.addEventListener("security_forbidden", async () => {
+        console.warn("[APP] Evento 403 Forbidden interceptado. Refrescando contexto...");
+        
+        // 1. Refrescamos el contexto (limpia caché local y trae lo nuevo)
+        await AuthService.fetchSecurityContext(true); // asumiendo que fuerza refresh
+        
+        // 2. Volvemos a procesar permisos en la vista actual
+        SecurityManager.processDomPermissions();
+        
+        // 3. Opcional: Verificamos si seguimos teniendo permiso en la vista actual
+        const reqPerm = ROUTE_PERMISSIONS[normalizedPath];
+        if (reqPerm && !SecurityManager.hasPermission(reqPerm)) {
+          alert("Tus permisos han cambiado y ya no tienes acceso a esta vista.");
+          AuthGuard.redirectToHome();
+        } else {
+          // No lo expulsamos, pero le avisamos (o podemos omitir alert si es muy molesto)
+          console.warn("[APP] Vista actual sobrevive al 403, UI actualizada.");
+        }
+      });
+      
     } catch (error) {
       console.error("[APP] Error durante la inicialización:", error);
     }

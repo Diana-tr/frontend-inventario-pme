@@ -350,81 +350,35 @@ const RoleListController = (() => {
   }
 
   // ───────────────────────────────────────────
-  // Renderizado
+  // DataTable con paginación server-side
   // ───────────────────────────────────────────
 
-  function renderLoadingState() {
-    const tbody = getTableBody();
-    tbody.replaceChildren();
+  /**
+   * Mapa de columnas DataTables → campos de ordering del backend.
+   * Solo las columnas ordenables tienen mapping.
+   */
+  const COLUMN_ORDERING_MAP = {
+    1: "role_name",
+    2: "role_description",
+    3: "is_active",
+  };
 
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-
-    td.colSpan = 5;
-    td.classList.add("text-center", "py-4");
-
-    const spinner = document.createElement("div");
-    spinner.className =
-      "spinner-border spinner-border-sm text-primary mr-2";
-    spinner.setAttribute("role", "status");
-
-    const text = document.createElement("span");
-    text.className = "text-muted";
-    text.textContent = "Cargando roles...";
-
-    td.appendChild(spinner);
-    td.appendChild(text);
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-  }
-
-  function renderRoles(roles) {
-    const tbody = getTableBody();
-
-    tbody.replaceChildren();
-
-    if (!roles.length) {
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-
-      td.colSpan = 5;
-      td.classList.add("text-center", "py-4", "text-muted");
-      td.textContent = "No hay roles registrados.";
-
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-
-      return;
-    }
-
-    roles.forEach((role, index) => {
-      tbody.appendChild(createRoleRow(role, index));
-    });
-
-    initDataTable();
-    setupViewDetailsListener();
-    setupEditRoleListener();
-    setupDeleteRoleListener();
-
-    // Procesar permisos en la tabla recién renderizada
-    SecurityManager.processDomPermissions();
-  }
-
-  // ───────────────────────────────────────────
-  // DataTable
-  // ───────────────────────────────────────────
+  let dataTableInstance = null;
 
   function initDataTable() {
-    if ($.fn.DataTable.isDataTable(`#${TABLE_ID}`)) {
-      $(`#${TABLE_ID}`).DataTable().destroy();
+    if (dataTableInstance) {
+      dataTableInstance.destroy();
+      dataTableInstance = null;
     }
 
-    $(`#${TABLE_ID}`).DataTable({
+    dataTableInstance = $(`#${TABLE_ID}`).DataTable({
       responsive: true,
       lengthChange: true,
       autoWidth: false,
       pageLength: 10,
-      order: [[0, "asc"]],
+      processing: true,
+      serverSide: true,
+      searchDelay: 500, // Debounce de 500ms
 
       // Layout compatible con Bootstrap 4 / AdminLTE 3
       dom:
@@ -481,10 +435,68 @@ const RoleListController = (() => {
         { className: "text-center", targets: [0, 3, 4] },
       ],
 
+      ajax: async function (data, callback) {
+        try {
+          const page = Math.floor(data.start / data.length) + 1;
+          const pageSize = data.length;
+          const search = data.search?.value || "";
+
+          let ordering = "";
+          if (data.order && data.order.length > 0) {
+            const orderCol = data.order[0].column;
+            const orderDir = data.order[0].dir;
+            const field = COLUMN_ORDERING_MAP[orderCol];
+            if (field) {
+              ordering = orderDir === "desc" ? `-${field}` : field;
+            }
+          }
+
+          const response = await RoleService.listarRolesPaginados({
+            page,
+            page_size: pageSize,
+            search,
+            ordering,
+          });
+
+          if (response?.success && response.data) {
+            const roles = response.data.results || [];
+            const totalRecords = response.data.count || 0;
+
+            const rows = roles.map((role, index) => {
+              const statusBadge = role.is_active
+                ? '<span class="badge badge-success px-3 py-2" style="border-radius:20px;font-size:0.75rem">Activo</span>'
+                : '<span class="badge badge-danger px-3 py-2" style="border-radius:20px;font-size:0.75rem">Inactivo</span>';
+
+              const actions = buildActionsHtml(role);
+
+              return [
+                data.start + index + 1, // N°
+                role.role_name || "Sin nombre",
+                role.role_description || "Sin descripción",
+                statusBadge,
+                actions,
+              ];
+            });
+
+            callback({
+              draw: data.draw,
+              recordsTotal: totalRecords,
+              recordsFiltered: totalRecords,
+              data: rows,
+            });
+
+            SecurityManager.processDomPermissions();
+          } else {
+            callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+          }
+        } catch (error) {
+          console.error("[ROLES] Error server-side:", error);
+          callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+        }
+      },
+
       drawCallback: function () {
-        $(".dataTables_paginate > .pagination").addClass(
-          "pagination-sm",
-        );
+        $(".dataTables_paginate > .pagination").addClass("pagination-sm");
       },
       initComplete: function () {
         $(".dt-buttons").addClass("ml-4");
@@ -492,59 +504,32 @@ const RoleListController = (() => {
     });
   }
 
-  // ───────────────────────────────────────────
-  // Estado de error
-  // ───────────────────────────────────────────
-
-  function renderError() {
-    const tbody = getTableBody();
-
-    tbody.replaceChildren();
-
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-
-    td.colSpan = 5;
-    td.classList.add("text-center", "py-4");
-
-    const icon = document.createElement("i");
-    icon.className = "fas fa-exclamation-triangle text-danger mr-2";
-
-    const text = document.createElement("span");
-    text.className = "text-danger";
-    text.textContent =
-      "No fue posible cargar los roles. Intente nuevamente.";
-
-    td.appendChild(icon);
-    td.appendChild(text);
-    tr.appendChild(td);
-    tbody.appendChild(tr);
+  /**
+   * Construye el HTML de botones de acciones para una fila.
+   */
+  function buildActionsHtml(role) {
+    const roleId = role.id_role ?? "";
+    return `
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-info btn-sm btn-view-role"
+                title="Ver detalles" data-role-id="${roleId}" data-permission="roles.view">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button type="button" class="btn btn-outline-warning btn-sm btn-edit-role"
+                title="Editar rol" data-role-id="${roleId}" data-permission="roles.update">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" class="btn btn-outline-danger btn-sm btn-delete-role"
+                title="Desactivar rol" data-role-id="${roleId}" data-permission="roles.delete">
+          <i class="fas fa-ban"></i>
+        </button>
+      </div>
+    `;
   }
 
-  // ───────────────────────────────────────────
-  // Carga de datos
-  // ───────────────────────────────────────────
-
-  async function loadRoles() {
-    try {
-      renderLoadingState();
-
-      const response = await RoleService.listarRoles();
-
-      if (!response?.success) {
-        throw new Error(
-          response?.message ??
-            "La API no pudo obtener los roles.",
-        );
-      }
-
-      const roles = response.data?.results ?? [];
-
-      renderRoles(roles);
-    } catch (error) {
-      console.error("[ROLES] Error:", error);
-
-      renderError();
+  function loadRoles() {
+    if (dataTableInstance) {
+      dataTableInstance.ajax.reload(null, false);
     }
   }
 
@@ -571,8 +556,11 @@ const RoleListController = (() => {
       console.error("[ROLES] Error al cargar catálogo de permisos:", error);
     }
 
-    // 2. Cargar los roles
-    loadRoles();
+    // 2. Iniciar tabla
+    initDataTable();
+    setupViewDetailsListener();
+    setupEditRoleListener();
+    setupDeleteRoleListener();
   }
 
   return Object.freeze({

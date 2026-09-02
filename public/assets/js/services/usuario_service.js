@@ -14,6 +14,31 @@ const UsuarioService = (() => {
     }
   }
 
+  /**
+   * Lista usuarios con parámetros de paginación server-side.
+   * @param {Object} params - { page, page_size, search, ordering }
+   */
+  async function listarUsuariosPaginados(params = {}) {
+    try {
+      const query = new URLSearchParams();
+
+      if (params.page) query.set("page", params.page);
+      if (params.page_size) query.set("page_size", params.page_size);
+      if (params.search) query.set("search", params.search);
+      if (params.ordering) query.set("ordering", params.ordering);
+
+      const queryString = query.toString();
+      const url = queryString
+        ? `${USERS_ENDPOINT}?${queryString}`
+        : USERS_ENDPOINT;
+
+      return await ApiClient.get(url);
+    } catch (error) {
+      console.error("[USUARIO SERVICE] Error al listar usuarios paginados:", error);
+      throw error;
+    }
+  }
+
   //Obtener detalles de usuarios por ID.
   async function obtenerUsuarioPorId(id) {
     try {
@@ -63,6 +88,7 @@ const UsuarioService = (() => {
 
   return Object.freeze({
     listarUsuarios,
+    listarUsuariosPaginados,
     obtenerUsuarioPorId,
     crearUsuario,
     actualizarUsuario,

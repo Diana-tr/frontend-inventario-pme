@@ -13,6 +13,31 @@ const RoleService = (() => {
     }
   }
 
+  /**
+   * Lista roles con parámetros de paginación server-side.
+   * @param {Object} params - { page, page_size, search, ordering }
+   */
+  async function listarRolesPaginados(params = {}) {
+    try {
+      const query = new URLSearchParams();
+
+      if (params.page) query.set("page", params.page);
+      if (params.page_size) query.set("page_size", params.page_size);
+      if (params.search) query.set("search", params.search);
+      if (params.ordering) query.set("ordering", params.ordering);
+
+      const queryString = query.toString();
+      const url = queryString
+        ? `${ROLES_ENDPOINT}?${queryString}`
+        : ROLES_ENDPOINT;
+
+      return await ApiClient.get(url);
+    } catch (error) {
+      console.error("[ROLE SERVICE] Error al listar roles paginados:", error);
+      throw error;
+    }
+  }
+
   // Obtener detalles de un rol por ID.
   async function obtenerRolPorId(id) {
     try {
@@ -68,6 +93,7 @@ const RoleService = (() => {
 
   return Object.freeze({
     listarRoles,
+    listarRolesPaginados,
     obtenerRolPorId,
     crearRol,
     actualizarRol,

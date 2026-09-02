@@ -113,11 +113,26 @@ const AuthService = (() => {
 
   /**
    * Obtiene el contexto de seguridad del servidor y lo guarda.
+   * Optimización: Utiliza sessionStorage como caché de primer nivel
+   * para evitar consultar a la BD en cada recarga de página,
+   * manteniendo un nivel alto de seguridad (se borra al cerrar la pestaña).
    */
-  async function fetchSecurityContext() {
+  async function fetchSecurityContext(forceRefresh = false) {
+    const CACHE_KEY = "inventariopme_security_context";
+
     try {
+      if (!forceRefresh) {
+        const cachedContext = sessionStorage.getItem(CACHE_KEY);
+        if (cachedContext) {
+          const parsedContext = JSON.parse(cachedContext);
+          Storage.savePermissions(parsedContext.permissions);
+          return;
+        }
+      }
+
       const response = await ApiClient.get("/api/v1/security/context/");
       if (response.ok && response.success && response.data) {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
         Storage.savePermissions(response.data.permissions);
       } else {
         console.warn("[AUTH] No se pudo obtener el contexto de seguridad.");
@@ -161,6 +176,7 @@ const AuthService = (() => {
       // SIN IMPORTAR lo que responda el servidor (puede ser 500 o 400),
       // nosotros DEBEMOS limpiar la sesión en el frontend.
       Storage.clear();
+      sessionStorage.removeItem("inventariopme_security_context");
 
       return {
         ok: response.ok && response.success,
@@ -175,6 +191,7 @@ const AuthService = (() => {
       
       // Fallo de red severo, forzamos la limpieza de todas formas
       Storage.clear();
+      sessionStorage.removeItem("inventariopme_security_context");
 
       return {
         ok: false,

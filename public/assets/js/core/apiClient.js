@@ -122,6 +122,13 @@ const ApiClient = (() => {
         }
       }
 
+      // Manejo Global de 403 (Forbidden)
+      if (response.status === 403) {
+        // El usuario está autenticado pero sus roles/permisos fueron revocados o no alcanzan
+        // Despachamos un evento para que el Frontend actualice su contexto sin hacer logout
+        window.dispatchEvent(new CustomEvent("security_forbidden"));
+      }
+
       return {
         ok: response.ok,
         status: response.status,

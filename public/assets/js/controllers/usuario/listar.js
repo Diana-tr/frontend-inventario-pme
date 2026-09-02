@@ -342,79 +342,37 @@ const UsuarioListController = (() => {
   }
 
   // ───────────────────────────────────────────
-  // Renderizado
+  // DataTable con paginación server-side
   // ───────────────────────────────────────────
 
-  function renderLoadingState() {
-    const tbody = getTableBody();
-    tbody.replaceChildren();
+  /**
+   * Mapa de columnas DataTables → campos de ordering del backend.
+   * Solo las columnas ordenables tienen mapping.
+   */
+  const COLUMN_ORDERING_MAP = {
+    1: "first_name",   // Nombre completo → ordena por first_name
+    2: "username",
+    3: "email",
+    // 4: roles (no ordenable en backend)
+    5: "is_active",
+  };
 
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-
-    td.colSpan = 7;
-    td.classList.add("text-center", "py-4");
-
-    const spinner = document.createElement("div");
-    spinner.className = "spinner-border spinner-border-sm text-primary mr-2";
-    spinner.setAttribute("role", "status");
-
-    const text = document.createElement("span");
-    text.className = "text-muted";
-    text.textContent = "Cargando usuarios...";
-
-    td.appendChild(spinner);
-    td.appendChild(text);
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-  }
-
-  function renderUsers(users) {
-    const tbody = getTableBody();
-
-    tbody.replaceChildren();
-
-    if (!users.length) {
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-
-      td.colSpan = 7;
-      td.classList.add("text-center", "py-4", "text-muted");
-      td.textContent = "No hay usuarios registrados.";
-
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-
-      return;
-    }
-
-    users.forEach((user, index) => {
-      tbody.appendChild(createUserRow(user, index));
-    });
-
-    initDataTable();
-    setupViewDetailsListener();
-    setupEditUserListener();
-
-    // Procesar permisos en la tabla recién renderizada
-    SecurityManager.processDomPermissions();
-  }
-
-  // ───────────────────────────────────────────
-  // DataTable
-  // ───────────────────────────────────────────
+  let dataTableInstance = null;
 
   function initDataTable() {
-    if ($.fn.DataTable.isDataTable(`#${TABLE_ID}`)) {
-      $(`#${TABLE_ID}`).DataTable().destroy();
+    if (dataTableInstance) {
+      dataTableInstance.destroy();
+      dataTableInstance = null;
     }
 
-    $(`#${TABLE_ID}`).DataTable({
+    dataTableInstance = $(`#${TABLE_ID}`).DataTable({
       responsive: true,
       lengthChange: true,
       autoWidth: false,
       pageLength: 10,
-      order: [[0, "asc"]],
+      processing: true,
+      serverSide: true,
+      searchDelay: 500, // Debounce de 500ms para evitar ráfagas de peticiones
 
       // Layout compatible con Bootstrap 4 / AdminLTE 3
       dom:
@@ -467,73 +425,127 @@ const UsuarioListController = (() => {
 
       // Columna N° y Acciones no son ordenables
       columnDefs: [
-        { orderable: false, targets: [0, 6] },
+        { orderable: false, targets: [0, 4, 6] },
         { className: "text-center", targets: [0, 5, 6] },
       ],
+
+      /**
+       * ajax: función personalizada que conecta DataTables con
+       * nuestro UsuarioService paginado del backend.
+       */
+      ajax: async function (data, callback) {
+        try {
+          // Calcular página (DataTables envía 'start' y 'length')
+          const page = Math.floor(data.start / data.length) + 1;
+          const pageSize = data.length;
+          const search = data.search?.value || "";
+
+          // Calcular ordering
+          let ordering = "";
+          if (data.order && data.order.length > 0) {
+            const orderCol = data.order[0].column;
+            const orderDir = data.order[0].dir;
+            const field = COLUMN_ORDERING_MAP[orderCol];
+            if (field) {
+              ordering = orderDir === "desc" ? `-${field}` : field;
+            }
+          }
+
+          const response = await UsuarioService.listarUsuariosPaginados({
+            page,
+            page_size: pageSize,
+            search,
+            ordering,
+          });
+
+          if (response?.success && response.data) {
+            const users = response.data.results || [];
+            const totalRecords = response.data.count || 0;
+
+            // Transformar los datos al formato que DataTables espera
+            const rows = users.map((user, index) => {
+              const fullNameParts = [user.first_name, user.last_name]
+                .filter(Boolean)
+                .join(" ");
+              const fullName = user.name || fullNameParts || "Sin nombre";
+
+              const roleName = user.roles?.length
+                ? user.roles.map((role) => role.role_name).join(", ")
+                : "Sin rol";
+
+              const statusBadge = user.is_active
+                ? '<span class="badge badge-success px-3 py-2" style="border-radius:20px;font-size:0.75rem">Activo</span>'
+                : '<span class="badge badge-danger px-3 py-2" style="border-radius:20px;font-size:0.75rem">Inactivo</span>';
+
+              const actions = buildActionsHtml(user);
+
+              return [
+                data.start + index + 1, // N°
+                fullName,
+                user.username || "Sin usuario",
+                user.email || "Sin correo",
+                roleName,
+                statusBadge,
+                actions,
+              ];
+            });
+
+            callback({
+              draw: data.draw,
+              recordsTotal: totalRecords,
+              recordsFiltered: totalRecords,
+              data: rows,
+            });
+
+            // Procesar permisos en la tabla recién renderizada
+            SecurityManager.processDomPermissions();
+          } else {
+            callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+          }
+        } catch (error) {
+          console.error("[USUARIOS] Error server-side:", error);
+          callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+        }
+      },
 
       drawCallback: function () {
         $(".dataTables_paginate > .pagination").addClass("pagination-sm");
       },
       initComplete: function () {
-        // Agrega un margen izquierdo (ml-3 o ml-4 en Bootstrap 4) a los botones
-        // para separarlos del control de "Mostrar N registros".
         $(".dt-buttons").addClass("ml-4");
       },
     });
   }
 
-  // ───────────────────────────────────────────
-  // Estado de error
-  // ───────────────────────────────────────────
-
-  function renderError() {
-    const tbody = getTableBody();
-
-    tbody.replaceChildren();
-
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-
-    td.colSpan = 7;
-    td.classList.add("text-center", "py-4");
-
-    const icon = document.createElement("i");
-    icon.className = "fas fa-exclamation-triangle text-danger mr-2";
-
-    const text = document.createElement("span");
-    text.className = "text-danger";
-    text.textContent =
-      "No fue posible cargar los usuarios. Intente nuevamente.";
-
-    td.appendChild(icon);
-    td.appendChild(text);
-    tr.appendChild(td);
-    tbody.appendChild(tr);
+  /**
+   * Construye el HTML de botones de acciones para una fila.
+   */
+  function buildActionsHtml(user) {
+    const userId = user.id_user ?? "";
+    return `
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-info btn-sm btn-view-user"
+                title="Ver detalles" data-user-id="${userId}" data-permission="users.view">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button type="button" class="btn btn-outline-warning btn-sm btn-edit-user"
+                title="Editar usuario" data-user-id="${userId}" data-permission="users.update">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" class="btn btn-outline-danger btn-sm"
+                title="Desactivar usuario" data-user-id="${userId}" data-permission="users.delete">
+          <i class="fas fa-user-slash"></i>
+        </button>
+      </div>
+    `;
   }
 
-  // ───────────────────────────────────────────
-  // Carga de datos
-  // ───────────────────────────────────────────
-
-  async function loadUsers() {
-    try {
-      renderLoadingState();
-
-      const response = await UsuarioService.listarUsuarios();
-
-      if (!response?.success) {
-        throw new Error(
-          response?.message ?? "La API no pudo obtener los usuarios.",
-        );
-      }
-
-      const users = response.data?.results ?? [];
-
-      renderUsers(users);
-    } catch (error) {
-      console.error("[USUARIOS] Error:", error);
-
-      renderError();
+  /**
+   * Recarga los datos de la tabla del servidor.
+   */
+  function loadUsers() {
+    if (dataTableInstance) {
+      dataTableInstance.ajax.reload(null, false);
     }
   }
 
@@ -575,7 +587,9 @@ const UsuarioListController = (() => {
     }
     
     cargarRoles();
-    loadUsers();
+    initDataTable();
+    setupViewDetailsListener();
+    setupEditUserListener();
   }
 
   return Object.freeze({

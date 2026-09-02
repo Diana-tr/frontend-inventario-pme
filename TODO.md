@@ -25,3 +25,4 @@ Al hacer la prueba, la petición ya llega con éxito al backend, pero la API est
 - [x] Se realizo la creacion de la inyeccion del nombre de usuario al siderbar. *(Asignado: Jhan)*
 - [x] Se implemento la creacion y el listado de usuario. *(Asignado: Jhan)*
 - [x] Falta realizar la implementacion de ver detalles, editar del modulo usuarios. *(Asignado: Jhan)*
+- [x] se implemento mejoras en la consulta hacia la base de datos. *(Asignado: Jhan)*
