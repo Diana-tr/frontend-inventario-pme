@@ -19,6 +19,7 @@
 import UsuarioService from "../../services/usuario_service.js";
 import RoleService from "../../services/role_service.js";
 import SecurityManager from "../../core/security.js";
+import NotificationService from "../../core/notification.js";
 
 const UsuarioListController = (() => {
   const TABLE_BODY_ID = "tablaUsuariosBody";
@@ -95,19 +96,25 @@ const UsuarioListController = (() => {
     editButton.dataset.permission = "users.update";
     editButton.innerHTML = '<i class="fas fa-edit"></i>';
 
-    // Botón Desactivar/Eliminar
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "btn btn-outline-danger btn-sm";
-    deleteButton.title = "Desactivar usuario";
-    deleteButton.dataset.userId = user.id_user ?? "";
-    deleteButton.dataset.permission = "users.delete";
-    deleteButton.innerHTML = '<i class="fas fa-user-slash"></i>';
+    // Botón Desactivar / Activar
+    const isActive = Boolean(user.is_active);
+    const toggleButton = document.createElement("button");
+    toggleButton.type = "button";
+    toggleButton.className = isActive
+      ? "btn btn-outline-danger btn-sm btn-toggle-status"
+      : "btn btn-outline-success btn-sm btn-toggle-status";
+    toggleButton.title = isActive ? "Desactivar usuario" : "Activar usuario";
+    toggleButton.dataset.userId = user.id_user ?? "";
+    toggleButton.dataset.status = isActive ? "true" : "false";
+    toggleButton.dataset.permission = "users.delete";
+    toggleButton.innerHTML = isActive
+      ? '<i class="fas fa-user-slash"></i>'
+      : '<i class="fas fa-user-check"></i>';
 
     // Se agregan en orden al grupo
     container.appendChild(viewButton);
     container.appendChild(editButton);
-    container.appendChild(deleteButton);
+    container.appendChild(toggleButton);
 
     td.appendChild(container);
     return td;
@@ -261,9 +268,11 @@ const UsuarioListController = (() => {
             $("#edit_document_number").val(user.document_number || "");
             $("#edit_phone_number").val(user.phone_number || "");
             $("#edit_is_active").prop("checked", Boolean(user.is_active));
-            
-            // Set roles in Select2
-            const userRoles = user.roles ? user.roles.map(r => r.id_role) : [];
+
+            // Cargar roles en Select2
+            const userRoles = user.roles
+              ? user.roles.map((r) => r.id_role)
+              : [];
             $("#edit_roles").val(userRoles).trigger("change");
 
             $("#edit_user_modal_loader").hide();
@@ -274,6 +283,12 @@ const UsuarioListController = (() => {
         } catch (error) {
           console.error("[USUARIOS] Error al preparar edición:", error);
           $(`#${EDIT_MODAL_ID}`).modal("hide");
+          NotificationService.toastError(
+            NotificationService.getApiErrorMessage(
+              error,
+              "No se pudo cargar la información del usuario para editar.",
+            ),
+          );
         }
       });
 
@@ -282,33 +297,47 @@ const UsuarioListController = (() => {
       .off("submit")
       .on("submit", async function (e) {
         e.preventDefault();
-        const form = this;
+        const $form = $(this); // Referencia jQuery al formulario actual
 
-        if (!form.checkValidity()) {
+        if (!this.checkValidity()) {
           e.stopPropagation();
-          form.classList.add("was-validated");
+          this.classList.add("was-validated");
           return;
         }
 
-        const userId = $("#edit_user_id").val();
-        const submitBtn = $("#btn_guardar_edicion");
+        const userId = $form.find("#edit_user_id").val();
+        const submitBtn = $form.find("#btn_guardar_edicion");
 
-        const rolesSelect = $("#edit_roles").val() || [];
-        const rolesIds = rolesSelect.map(val => parseInt(val, 10));
+        // Capturar valores BUSCANDO DENTRO DEL FORMULARIO DE EDICIÓN
+        const firstName = $form.find("#edit_first_name").val()?.trim() || "";
+        const lastName = $form.find("#edit_last_name").val()?.trim() || "";
+        const username = $form.find("#edit_username").val()?.trim() || "";
+        const email = $form.find("#edit_email").val()?.trim() || "";
+        const documentNumber =
+          $form.find("#edit_document_number").val()?.trim() || "";
+        const phoneNumber =
+          $form.find("#edit_phone_number").val()?.trim() || "";
 
-        // Payload con actualización parcial (PATCH)
+        const rolesSelect = $form.find("#edit_roles").val() || [];
+        const rolesIds = rolesSelect
+          .map((val) => parseInt(val, 10))
+          .filter((id) => !isNaN(id));
+
+        // Construcción del payload
         const payload = {
-          first_name: $("#edit_first_name").val().trim(),
-          last_name: $("#edit_last_name").val().trim(),
-          username: $("#edit_username").val().trim(),
-          email: $("#edit_email").val().trim(),
-          document_number: $("#edit_document_number").val().trim(),
-          phone_number: $("#edit_phone_number").val().trim(),
-          is_active: $("#edit_is_active").is(":checked"),
+          first_name: firstName,
+          last_name: lastName,
+          username: username,
+          email: email,
+          document_number: documentNumber, // Garantiza que viaja el string no vacío
+          is_active: $form.find("#edit_is_active").is(":checked"),
+          roles: rolesIds,
         };
-        
-        if (rolesIds.length > 0) {
-            payload.roles = rolesIds;
+
+        if (phoneNumber !== "") {
+          payload.phone_number = phoneNumber;
+        } else {
+          payload.phone_number = null;
         }
 
         try {
@@ -316,7 +345,12 @@ const UsuarioListController = (() => {
             .prop("disabled", true)
             .html('<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...');
 
-          // Ejecución del endpoint HTTP PATCH
+          // IMPORTANTE: Revisa en la consola de Chrome qué imprime este log antes de salir
+          console.log(
+            "[USUARIOS] Payload final a enviar:",
+            JSON.stringify(payload, null, 2),
+          );
+
           const response = await UsuarioService.actualizarUsuario(
             userId,
             payload,
@@ -324,20 +358,79 @@ const UsuarioListController = (() => {
 
           if (response && response.success) {
             $(`#${EDIT_MODAL_ID}`).modal("hide");
-            await loadUsers(); // Refrescar el DataTable
-          } else {
-            throw new Error(
-              response?.message || "No se pudo actualizar el usuario.",
+            NotificationService.toastSuccess(
+              "Usuario actualizado correctamente.",
             );
+            await loadUsers();
+          } else {
+            throw response;
           }
         } catch (error) {
           console.error("[USUARIOS] Error al actualizar:", error);
-          alert("Ocurrió un error al intentar actualizar el usuario.");
+          if (error && error.errors) {
+            console.error("[USUARIOS] Errores DRF:", error.errors);
+          }
+          const errorMsg = NotificationService.getApiErrorMessage(
+            error,
+            "Ocurrió un error al intentar actualizar el usuario.",
+          );
+          NotificationService.toastError(errorMsg);
         } finally {
           submitBtn
             .prop("disabled", false)
             .html('<i class="fas fa-save mr-1"></i>Guardar Cambios');
         }
+      });
+  }
+
+  // ───────────────────────────────────────────
+  // Manejo de Desactivación / Activación
+  // ───────────────────────────────────────────
+
+  function setupToggleStatusListener() {
+    $(`#${TABLE_ID}`)
+      .off("click", ".btn-toggle-status")
+      .on("click", ".btn-toggle-status", async function () {
+        const button = $(this);
+        const userId = button.data("userId");
+        const username = button.data("username") || "este usuario";
+        const statusAttr = button.data("status");
+        const isCurrentActive = statusAttr === true || statusAttr === "true";
+        const newStatus = !isCurrentActive;
+        const actionWord = isCurrentActive ? "desactivar" : "activar";
+
+        if (!userId) return;
+
+        // Alerta formateada con el username
+        NotificationService.warning(
+          `¿Deseas ${actionWord} al usuario @${username}?`,
+          `Confirmación de ${actionWord}`,
+        ).then(async (result) => {
+          if (!result.isConfirmed) return;
+
+          try {
+            const response = await UsuarioService.cambiarEstadoUsuario(
+              userId,
+              newStatus,
+            );
+
+            if (response && response.success) {
+              NotificationService.toastSuccess(
+                `Usuario @${username} ${newStatus ? "activado" : "desactivado"} con éxito.`,
+              );
+              loadUsers();
+            } else {
+              throw response;
+            }
+          } catch (error) {
+            console.error("[USUARIOS] Error al cambiar estado:", error);
+            const errorMsg = NotificationService.getApiErrorMessage(
+              error,
+              "Ocurrió un problema al cambiar el estado del usuario.",
+            );
+            NotificationService.error(errorMsg);
+          }
+        });
       });
   }
 
@@ -350,7 +443,7 @@ const UsuarioListController = (() => {
    * Solo las columnas ordenables tienen mapping.
    */
   const COLUMN_ORDERING_MAP = {
-    1: "first_name",   // Nombre completo → ordena por first_name
+    1: "first_name", // Nombre completo → ordena por first_name
     2: "username",
     3: "email",
     // 4: roles (no ordenable en backend)
@@ -500,11 +593,21 @@ const UsuarioListController = (() => {
             // Procesar permisos en la tabla recién renderizada
             SecurityManager.processDomPermissions();
           } else {
-            callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+            callback({
+              draw: data.draw,
+              recordsTotal: 0,
+              recordsFiltered: 0,
+              data: [],
+            });
           }
         } catch (error) {
           console.error("[USUARIOS] Error server-side:", error);
-          callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+          callback({
+            draw: data.draw,
+            recordsTotal: 0,
+            recordsFiltered: 0,
+            data: [],
+          });
         }
       },
 
@@ -522,6 +625,12 @@ const UsuarioListController = (() => {
    */
   function buildActionsHtml(user) {
     const userId = user.id_user ?? "";
+    const username = user.username ?? "usuario";
+    const isActive = Boolean(user.is_active);
+
+    const toggleClass = isActive ? "btn-outline-danger" : "btn-outline-success";
+    const toggleIcon = isActive ? "fa-user-slash" : "fa-user-check";
+    const toggleTitle = isActive ? "Desactivar usuario" : "Activar usuario";
     return `
       <div class="btn-group">
         <button type="button" class="btn btn-outline-info btn-sm btn-view-user"
@@ -532,20 +641,21 @@ const UsuarioListController = (() => {
                 title="Editar usuario" data-user-id="${userId}" data-permission="users.update">
           <i class="fas fa-edit"></i>
         </button>
-        <button type="button" class="btn btn-outline-danger btn-sm"
-                title="Desactivar usuario" data-user-id="${userId}" data-permission="users.delete">
-          <i class="fas fa-user-slash"></i>
+        <button type="button" class="btn ${toggleClass} btn-sm btn-toggle-status"
+              title="${toggleTitle}" data-user-id="${userId}" data-username="${username}" data-status="${isActive}" data-permission="users.delete">
+          <i class="fas ${toggleIcon}"></i>
         </button>
       </div>
     `;
   }
 
   /**
-   * Recarga los datos de la tabla del servidor.
+   * Recarga los datos de la tabla del servidor obligando la actualización completa.
    */
   function loadUsers() {
     if (dataTableInstance) {
-      dataTableInstance.ajax.reload(null, false);
+      // El 'true' borra el caché interno de DataTables y vuelve a consultar a la API
+      dataTableInstance.ajax.reload(null, true);
     }
   }
 
@@ -559,19 +669,24 @@ const UsuarioListController = (() => {
       if (response && response.success) {
         const roles = response.data?.results ?? [];
         const select = $("#edit_roles");
-        
+
         select.empty();
-        
+
         // Mostrar roles activos o los que ya tiene el usuario
-        roles.forEach(role => {
-            // Incluso si está inactivo, si un usuario lo tiene, lo dejamos en el select por compatibilidad.
-            // Para eso, agregamos todos y cuando se edite un usuario se seleccionará correctamente.
-            // Pero idealmente mostramos activos para nuevas asignaciones, pero el usuario ya lo podría tener.
-            // Para simplificar, listaremos solo activos para que al guardar solo se guarden activos.
-            if(role.is_active) {
-                const option = new Option(role.role_name, role.id_role, false, false);
-                select.append(option);
-            }
+        roles.forEach((role) => {
+          // Incluso si está inactivo, si un usuario lo tiene, lo dejamos en el select por compatibilidad.
+          // Para eso, agregamos todos y cuando se edite un usuario se seleccionará correctamente.
+          // Pero idealmente mostramos activos para nuevas asignaciones, pero el usuario ya lo podría tener.
+          // Para simplificar, listaremos solo activos para que al guardar solo se guarden activos.
+          if (role.is_active) {
+            const option = new Option(
+              role.role_name,
+              role.id_role,
+              false,
+              false,
+            );
+            select.append(option);
+          }
         });
       }
     } catch (error) {
@@ -585,11 +700,12 @@ const UsuarioListController = (() => {
     if (!tbody) {
       return;
     }
-    
+
     cargarRoles();
     initDataTable();
     setupViewDetailsListener();
     setupEditUserListener();
+    setupToggleStatusListener();
   }
 
   return Object.freeze({

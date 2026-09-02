@@ -34,7 +34,10 @@ const UsuarioService = (() => {
 
       return await ApiClient.get(url);
     } catch (error) {
-      console.error("[USUARIO SERVICE] Error al listar usuarios paginados:", error);
+      console.error(
+        "[USUARIO SERVICE] Error al listar usuarios paginados:",
+        error,
+      );
       throw error;
     }
   }
@@ -86,12 +89,29 @@ const UsuarioService = (() => {
     }
   }
 
+  // Alternar estado activo/inactivo (DELETE lógico)
+  async function cambiarEstadoUsuario(id, is_active) {
+    try {
+      return await ApiClient.patch(`/api/v1/users/${id}/`, {
+        is_active: is_active,
+      });
+    } catch (error) {
+      console.error(
+        `[USUARIO SERVICE] Error al cambiar estado del usuario ${id}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
   return Object.freeze({
     listarUsuarios,
     listarUsuariosPaginados,
     obtenerUsuarioPorId,
     crearUsuario,
     actualizarUsuario,
+    reemplazarUsuario,
+    cambiarEstadoUsuario,
   });
 })();
 

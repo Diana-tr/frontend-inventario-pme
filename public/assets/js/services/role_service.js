@@ -71,12 +71,17 @@ const RoleService = (() => {
     }
   }
 
-  // Desactivar un rol (DELETE lógico).
-  async function desactivarRol(id) {
+  // Alternar estado activo/inactivo (DELETE lógico)
+  async function cambiarEstadoRol(id, is_active) {
     try {
-      return await ApiClient.delete(`${ROLES_ENDPOINT}${id}/`);
+      return await ApiClient.patch(`${ROLES_ENDPOINT}${id}/`, {
+        is_active: is_active,
+      });
     } catch (error) {
-      console.error(`[ROLE SERVICE] Error al desactivar rol ${id}:`, error);
+      console.error(
+        `[ROLE SERVICE] Error al cambiar estado del rol ${id}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -86,7 +91,10 @@ const RoleService = (() => {
     try {
       return await ApiClient.get("/api/v1/security/permissions/");
     } catch (error) {
-      console.error("[ROLE SERVICE] Error al obtener catálogo de permisos:", error);
+      console.error(
+        "[ROLE SERVICE] Error al obtener catálogo de permisos:",
+        error,
+      );
       throw error;
     }
   }
@@ -97,7 +105,7 @@ const RoleService = (() => {
     obtenerRolPorId,
     crearRol,
     actualizarRol,
-    desactivarRol,
+    cambiarEstadoRol,
     obtenerCatalogoPermisos,
   });
 })();

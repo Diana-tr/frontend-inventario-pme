@@ -21,6 +21,7 @@
 import RoleService from "../../services/role_service.js";
 import SecurityManager from "../../core/security.js";
 import PermissionSelector from "../../components/permission_selector.js";
+import NotificationService from "../../core/notification.js";
 
 const RoleListController = (() => {
   const TABLE_BODY_ID = "tablaRolesBody";
@@ -100,19 +101,25 @@ const RoleListController = (() => {
     editButton.dataset.permission = "roles.update";
     editButton.innerHTML = '<i class="fas fa-edit"></i>';
 
-    // Botón Desactivar
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "btn btn-outline-danger btn-sm btn-delete-role";
-    deleteButton.title = "Desactivar rol";
-    deleteButton.dataset.roleId = role.id_role ?? "";
-    deleteButton.dataset.permission = "roles.delete";
-    deleteButton.innerHTML = '<i class="fas fa-ban"></i>';
+    // Botón Desactivar / Activar
+    const isActive = Boolean(role.is_active);
+    const toggleButton = document.createElement("button");
+    toggleButton.type = "button";
+    toggleButton.className = isActive
+      ? "btn btn-outline-danger btn-sm btn-toggle-status"
+      : "btn btn-outline-success btn-sm btn-toggle-status";
+    toggleButton.title = isActive ? "Desactivar rol" : "Activar rol";
+    toggleButton.dataset.roleId = role.id_role ?? "";
+    toggleButton.dataset.status = isActive ? "true" : "false";
+    toggleButton.dataset.permission = "roles.update";
+    toggleButton.innerHTML = isActive
+      ? '<i class="fas fa-user-slash"></i>'
+      : '<i class="fas fa-user-check"></i>';
 
     // Se agregan en orden al grupo
     container.appendChild(viewButton);
     container.appendChild(editButton);
-    container.appendChild(deleteButton);
+    container.appendChild(toggleButton);
 
     td.appendChild(container);
     return td;
@@ -222,21 +229,22 @@ const RoleListController = (() => {
             $("#edit_role_id").val(role.id_role);
             $("#edit_role_name").val(role.role_name || "");
             $("#edit_role_description").val(role.role_description || "");
-            $("#edit_role_is_active").prop(
-              "checked",
-              Boolean(role.is_active),
-            );
+            $("#edit_role_is_active").prop("checked", Boolean(role.is_active));
 
             // Cargar selector de permisos
-            const container = document.getElementById("edit_permissions_container");
-            PermissionSelector.render(container, permissionCatalog, role.permissions || {});
+            const container = document.getElementById(
+              "edit_permissions_container",
+            );
+            PermissionSelector.render(
+              container,
+              permissionCatalog,
+              role.permissions || {},
+            );
 
             $("#edit_role_modal_loader").hide();
             $("#edit_role_modal_content").fadeIn();
           } else {
-            throw new Error(
-              "No se pudo obtener la información del rol.",
-            );
+            throw new Error("No se pudo obtener la información del rol.");
           }
         } catch (error) {
           console.error("[ROLES] Error al preparar edición:", error);
@@ -272,15 +280,10 @@ const RoleListController = (() => {
         try {
           submitBtn
             .prop("disabled", true)
-            .html(
-              '<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...',
-            );
+            .html('<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...');
 
           // Ejecución del endpoint HTTP PATCH
-          const response = await RoleService.actualizarRol(
-            roleId,
-            payload,
-          );
+          const response = await RoleService.actualizarRol(roleId, payload);
 
           if (response && response.success) {
             $(`#${EDIT_MODAL_ID}`).modal("hide");
@@ -288,16 +291,16 @@ const RoleListController = (() => {
           } else {
             console.error("[ROLES] Detalles de validación:", response.errors);
             let errMsg = response?.message || "No se pudo actualizar el rol.";
-            
+
             // Extraer mensajes de error detallados si existen
-            if (response.errors && typeof response.errors === 'object') {
-                const details = [];
-                for (const key in response.errors) {
-                    details.push(`${key}: ${JSON.stringify(response.errors[key])}`);
-                }
-                if (details.length > 0) {
-                    errMsg += "\nDetalles:\n" + details.join("\n");
-                }
+            if (response.errors && typeof response.errors === "object") {
+              const details = [];
+              for (const key in response.errors) {
+                details.push(`${key}: ${JSON.stringify(response.errors[key])}`);
+              }
+              if (details.length > 0) {
+                errMsg += "\nDetalles:\n" + details.join("\n");
+              }
             }
             throw new Error(errMsg);
           }
@@ -307,45 +310,59 @@ const RoleListController = (() => {
         } finally {
           submitBtn
             .prop("disabled", false)
-            .html(
-              '<i class="fas fa-save mr-1"></i>Guardar Cambios',
-            );
+            .html('<i class="fas fa-save mr-1"></i>Guardar Cambios');
         }
       });
   }
 
-  // ───────────────────────────────────────────
-  // Manejo de Desactivación (DELETE lógico)
-  // ───────────────────────────────────────────
-
-  function setupDeleteRoleListener() {
+  /**
+   * Manejo de Desactivación / Activación de Roles
+   */
+  function setupToggleStatusListener() {
     $(`#${TABLE_ID}`)
-      .off("click", ".btn-delete-role")
-      .on("click", ".btn-delete-role", async function () {
-        const roleId = $(this).data("roleId");
+      .off("click", ".btn-toggle-status")
+      .on("click", ".btn-toggle-status", async function () {
+        const button = $(this);
+        const roleId = button.data("roleId");
+        const roleName = button.data("roleName") || "este rol";
+        const statusAttr = button.data("status");
+        const isCurrentActive = statusAttr === true || statusAttr === "true";
+        const newStatus = !isCurrentActive;
+        const actionWord = isCurrentActive ? "desactivar" : "activar";
+
         if (!roleId) return;
 
-        const confirmed = confirm(
-          "¿Estás seguro de que deseas desactivar este rol?",
-        );
+        // Alerta con el nombre del rol
+        NotificationService.warning(
+          `¿Deseas ${actionWord} el rol "${roleName}"?`,
+          `Confirmación de ${actionWord}`,
+        ).then(async (result) => {
+          if (!result.isConfirmed) return;
 
-        if (!confirmed) return;
-
-        try {
-          const response = await RoleService.desactivarRol(roleId);
-
-          if (response && response.success) {
-            await loadRoles(); // Refrescar el DataTable
-          } else {
-            throw new Error(
-              response?.message ||
-                "No se pudo desactivar el rol.",
+          try {
+            // Uso correcto de RoleService
+            const response = await RoleService.cambiarEstadoRol(
+              roleId,
+              newStatus,
             );
+
+            if (response && response.success) {
+              NotificationService.toastSuccess(
+                `Rol "${roleName}" ${newStatus ? "activado" : "desactivado"} con éxito.`,
+              );
+              loadRoles(); // Recargar la tabla de roles
+            } else {
+              throw response;
+            }
+          } catch (error) {
+            console.error("[ROLES] Error al cambiar estado:", error);
+            const errorMsg = NotificationService.getApiErrorMessage(
+              error,
+              "Ocurrió un problema al cambiar el estado del rol.",
+            );
+            NotificationService.error(errorMsg);
           }
-        } catch (error) {
-          console.error("[ROLES] Error al desactivar:", error);
-          alert("Ocurrió un error al intentar desactivar el rol.");
-        }
+        });
       });
   }
 
@@ -487,11 +504,21 @@ const RoleListController = (() => {
 
             SecurityManager.processDomPermissions();
           } else {
-            callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+            callback({
+              draw: data.draw,
+              recordsTotal: 0,
+              recordsFiltered: 0,
+              data: [],
+            });
           }
         } catch (error) {
           console.error("[ROLES] Error server-side:", error);
-          callback({ draw: data.draw, recordsTotal: 0, recordsFiltered: 0, data: [] });
+          callback({
+            draw: data.draw,
+            recordsTotal: 0,
+            recordsFiltered: 0,
+            data: [],
+          });
         }
       },
 
@@ -509,6 +536,12 @@ const RoleListController = (() => {
    */
   function buildActionsHtml(role) {
     const roleId = role.id_role ?? "";
+    const roleName = role.role_name ?? "rol";
+    const isActive = Boolean(role.is_active);
+    // Definición de variables dinámicas según el estado
+    const toggleClass = isActive ? "btn-outline-danger" : "btn-outline-success";
+    const toggleIcon = isActive ? "fa-user-slash" : "fa-user-check";
+    const toggleTitle = isActive ? "Desactivar rol" : "Activar rol";
     return `
       <div class="btn-group">
         <button type="button" class="btn btn-outline-info btn-sm btn-view-role"
@@ -519,9 +552,9 @@ const RoleListController = (() => {
                 title="Editar rol" data-role-id="${roleId}" data-permission="roles.update">
           <i class="fas fa-edit"></i>
         </button>
-        <button type="button" class="btn btn-outline-danger btn-sm btn-delete-role"
-                title="Desactivar rol" data-role-id="${roleId}" data-permission="roles.delete">
-          <i class="fas fa-ban"></i>
+        <button type="button" class="btn ${toggleClass} btn-sm btn-toggle-status"
+              title="${toggleTitle}" data-role-id="${roleId}" data-role-name="${roleName}" data-status="${isActive}" data-permission="roles.delete">
+          <i class="fas ${toggleIcon}"></i>
         </button>
       </div>
     `;
@@ -560,7 +593,7 @@ const RoleListController = (() => {
     initDataTable();
     setupViewDetailsListener();
     setupEditRoleListener();
-    setupDeleteRoleListener();
+    setupToggleStatusListener();
   }
 
   return Object.freeze({

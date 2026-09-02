@@ -219,15 +219,16 @@ require_once __DIR__ . '/../layouts/head.php';
                                 </div>
 
                                 <div class="col-md-6 form-group mb-3">
-                                    <label for="edit_document_number" class="font-weight-bold small">Número de documento</label>
-                                    <input type="text" class="form-control" id="edit_document_number" name="document_number" placeholder="Ej: 123456789">
+                                    <label for="edit_document_number" class="font-weight-bold small">Número de documento <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="edit_document_number" name="document_number" placeholder="Ej: 123456789" required>
+                                    <div class="invalid-feedback">El número de documento es obligatorio.</div>
                                 </div>
 
                                 <div class="col-md-6 form-group mb-3">
                                     <label for="edit_phone_number" class="font-weight-bold small">Teléfono</label>
                                     <input type="text" class="form-control" id="edit_phone_number" name="phone_number" placeholder="Ej: 3001234567">
                                 </div>
-                                
+
                                 <!-- Roles (Select2) -->
                                 <div class="col-md-12 form-group mb-3">
                                     <label for="edit_roles" class="font-weight-bold small">Rol(es) <span class="text-danger">*</span></label>
