@@ -2,10 +2,10 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [] Revisar el diseño del software mejoras pequeñas. *(Asignado: )*
-- [] realizar la implementacion de desactivar el usuario (Borrado logico). *(Asignado: )*
+- [x] Revisar el diseño del software mejoras pequeñas. *(Asignado: )*
+- [x] realizar la implementacion de desactivar el usuario (Borrado logico). *(Asignado: )*
 - [] Realizar modulo de clientes. *(Asignado: )*
-- [] Realizar modulo de categorias. *(Asignado: )*
+- [x] Realizar modulo de categorias. *(Asignado: )*
 - [] Realizar modulo de proveedores. *(Asinado: )*
 
 ## ✅ Completado

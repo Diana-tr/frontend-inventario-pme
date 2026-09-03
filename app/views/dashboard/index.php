@@ -93,6 +93,26 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
 
                     </div>
+
+                    <!-- Segunda Fila: Módulos adicionales (Categorías) -->
+                    <div class="row">
+                        <!-- Tarjeta 5: Categorías -->
+                        <div class="col-lg-3 col-6" data-permission="categories.view">
+                            <div class="small-box bg-primary">
+                                <div class="inner">
+                                    <h3 id="total_categorias">0</h3>
+                                    <p>Categorías</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <a href="<?php echo $URL; ?>/categorias" class="small-box-footer">
+                                    Ver Categorías <i class="fas fa-arrow-circle-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </section>
         </div>

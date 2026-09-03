@@ -77,7 +77,7 @@ require_once __DIR__ . '/../../config/app.php';
                     </ul>
                 </li>
 
-                <!-- Módulo de Roles y Permis -->
+                <!-- Módulo de Roles y Permisos -->
                 <li class="nav-item" data-sidebar-module="roles" data-permission="roles.view">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-user-shield"></i>
@@ -100,6 +100,14 @@ require_once __DIR__ . '/../../config/app.php';
                             </a>
                         </li>
                     </ul>
+                </li>
+
+                <!-- Módulo de Categorías (NUEVO) -->
+                <li class="nav-item" data-sidebar-module="categorias">
+                    <a href="<?php echo $URL; ?>/categorias" class="nav-link" data-sidebar-path="/categorias">
+                        <i class="nav-icon fas fa-tags"></i>
+                        <p>Categorías</p>
+                    </a>
                 </li>
 
                 <!-- Separador visual -->
@@ -135,7 +143,7 @@ require_once __DIR__ . '/../../config/app.php';
                     }
                 });
 
-                // Si no encontramos coincidencia exacta, buscar por prefijo (ej: /usuarios/editar → /usuarios)
+                // Si no encontramos coincidencia exacta, buscar por prefijo
                 if (!matchedLink) {
                     allLinks.forEach(link => {
                         const linkPath = link.getAttribute("data-sidebar-path").replace(/\/+$/, "");
@@ -163,12 +171,6 @@ require_once __DIR__ . '/../../config/app.php';
 
             /**
              * Sidebar Permissions Manager (Fase 1 — Ocultamiento preventivo)
-             * 
-             * Oculta TODOS los elementos con data-permission de forma inmediata
-             * para evitar un "flash" de contenido no autorizado.
-             * 
-             * La visibilidad real la determina SecurityManager.processDomPermissions()
-             * DESPUÉS de que App.bootstrap() descargue los permisos frescos del backend.
              */
             (function() {
                 try {
