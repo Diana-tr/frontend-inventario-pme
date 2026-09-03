@@ -102,7 +102,7 @@ require_once __DIR__ . '/../../config/app.php';
                     </ul>
                 </li>
 
-                <!-- Módulo de Categorías (NUEVO) -->
+                <!-- Módulo de Categorías -->
                 <li class="nav-item" data-sidebar-module="categorias">
                     <a href="<?php echo $URL; ?>/categorias" class="nav-link" data-sidebar-path="/categorias">
                         <i class="nav-icon fas fa-tags"></i>
@@ -113,9 +113,9 @@ require_once __DIR__ . '/../../config/app.php';
                 <!-- Separador visual -->
                 <li class="nav-header border-top border-secondary my-2"></li>
 
-                <!-- Módulo de Cerrar Sesión -->
+                <!-- Módulo de Cerrar Sesión (Corregido y Blindado) -->
                 <li class="nav-item px-2">
-                    <a href="#" id="logout-btn" class="nav-link btn btn-danger text-white text-left shadow-sm">
+                    <a href="#" id="logout-btn" class="nav-link btn btn-danger text-white text-left shadow-sm" onclick="event.preventDefault(); localStorage.removeItem('inventariopme_user'); window.location.href = '<?php echo $URL; ?>/';">
                         <i class="nav-icon fas fa-sign-out-alt mr-2"></i>
                         <p class="d-inline">Cerrar Sesión</p>
                     </a>
