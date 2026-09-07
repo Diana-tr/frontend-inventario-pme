@@ -102,12 +102,29 @@ require_once __DIR__ . '/../../config/app.php';
                     </ul>
                 </li>
 
-                <!-- Módulo de Categorías -->
-                <li class="nav-item" data-sidebar-module="categorias">
-                    <a href="<?php echo $URL; ?>/categorias" class="nav-link" data-sidebar-path="/categorias">
-                        <i class="nav-icon fas fa-tags"></i>
-                        <p>Categorías</p>
+                <!-- Módulo de Categorias -->
+                <li class="nav-item" data-sidebar-module="categorias" data-permission="categories.view">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-layer-group"></i>
+                        <p>
+                            Categorias
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" data-permission="categories.view">
+                            <a href="<?php echo $URL; ?>/categorias" class="nav-link" data-sidebar-path="/categorias">
+                                <i class="nav-icon fas fa-list"></i>
+                                <p>Gestión de Categorias</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-permission="categories.view">
+                            <a href="<?php echo $URL; ?>/categorias/crear" class="nav-link" data-sidebar-path="/categorias/crear">
+                                <i class="nav-icon fas fa-folder-plus"></i>
+                                <p>Crear Categoria</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
                 <!-- Separador visual -->

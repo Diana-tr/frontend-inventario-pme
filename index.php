@@ -51,9 +51,14 @@ switch ($path) {
 
     // NUEVA RUTA PARA CATEGORÍAS
     case 'categorias':
-        require_once __DIR__ . '/app/views/categorias/index.php';
+    case 'categorias/listar':
+        require_once __DIR__ . '/app/views/categorias/listar.php';
         break;
 
+    case 'categorias/crear':
+        require_once __DIR__ . '/app/views/categorias/crear.php';
+        break;
+        
     default:
         // Evitar procesar archivos estáticos o directos por error
         if (file_exists(__DIR__ . '/' . $path) && is_file(__DIR__ . '/' . $path)) {
