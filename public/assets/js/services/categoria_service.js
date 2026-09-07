@@ -48,7 +48,7 @@ const CategoriaService = (() => {
     }
   }
 
-  // Crear un rol.
+  // Crear una categoria.
   async function crearCategoria(categoriaData) {
     try {
       return await ApiClient.post(CATEGORIES_ENDPOINT, categoriaData);
@@ -86,19 +86,6 @@ const CategoriaService = (() => {
     }
   }
 
-  // Obtener catálogo de permisos dinámicos desde backend
-  async function obtenerCatalogoPermisos() {
-    try {
-      return await ApiClient.get("/api/v1/security/permissions/");
-    } catch (error) {
-      console.error(
-        "[CATEGORIE SERVICE] Error al obtener catálogo de permisos:",
-        error,
-      );
-      throw error;
-    }
-  }
-
   return Object.freeze({
     listarCategorias,
     listarCategoriasPaginadas,
@@ -106,7 +93,6 @@ const CategoriaService = (() => {
     crearCategoria,
     actualizarCategoria,
     cambiarEstadoCategoria,
-    obtenerCatalogoPermisos,
   });
 })();
 

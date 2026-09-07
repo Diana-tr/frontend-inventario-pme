@@ -3,19 +3,6 @@
  * Inventario PME
  * Category List Controller
  * ============================================================
- *
- * Controlador responsable de:
- * - Cargar las categorías desde la API.
- * - Renderizar la tabla de categorías.
- * - Inicializar y configurar el DataTable.
- * - Manejar modales de Ver Detalles y Editar.
- * - Desactivar / Activar o Eliminar categorías.
- *
- * No contiene lógica de:
- * - Manipulación de fetch().
- * - Autenticación.
- * - Redirecciones.
- * ============================================================
  */
 
 import CategoryService from "../../services/categoria_service.js";
@@ -29,128 +16,21 @@ const CategoryListController = (() => {
   const EDIT_MODAL_ID = "modalEditarCategoria";
   const EDIT_FORM_ID = "formEditarCategoria";
 
-  // ───────────────────────────────────────────
-  // Helpers de creación de celdas
-  // ───────────────────────────────────────────
-
   function getTableBody() {
     const tbody = document.getElementById(TABLE_BODY_ID);
-
     if (!tbody) {
       throw new Error(`No se encontró #${TABLE_BODY_ID}.`);
     }
-
     return tbody;
   }
 
-  function createCell(text, extraClasses = []) {
-    const td = document.createElement("td");
-    td.classList.add("align-middle");
-
-    if (extraClasses.length) {
-      td.classList.add(...extraClasses);
-    }
-
-    td.textContent = text ?? "";
-
-    return td;
-  }
-
-  function createStatusCell(isActive) {
-    const td = document.createElement("td");
-    td.classList.add("text-center", "align-middle");
-
-    const badge = document.createElement("span");
-    badge.className = isActive
-      ? "badge badge-success px-3 py-2"
-      : "badge badge-danger px-3 py-2";
-    badge.style.borderRadius = "20px";
-    badge.style.fontSize = "0.75rem";
-    badge.style.letterSpacing = "0.5px";
-    badge.textContent = isActive ? "Activo" : "Inactivo";
-
-    td.appendChild(badge);
-    return td;
-  }
-
-  function createActionsCell(category) {
-    const td = document.createElement("td");
-    td.classList.add("text-center", "align-middle");
-
-    const container = document.createElement("div");
-    container.classList.add("btn-group");
-
-    // Botón Ver Detalles
-    const viewButton = document.createElement("button");
-    viewButton.type = "button";
-    viewButton.className = "btn btn-outline-info btn-sm btn-view-category";
-    viewButton.title = "Ver detalles";
-    viewButton.dataset.categoryId = category.id_category ?? category.id ?? "";
-    viewButton.dataset.permission = "categories.view";
-    viewButton.innerHTML = '<i class="fas fa-eye"></i>';
-
-    // Botón Editar
-    const editButton = document.createElement("button");
-    editButton.type = "button";
-    editButton.className = "btn btn-outline-warning btn-sm btn-edit-category";
-    editButton.title = "Editar categoría";
-    editButton.dataset.categoryId = category.id_category ?? category.id ?? "";
-    editButton.dataset.permission = "categories.update";
-    editButton.innerHTML = '<i class="fas fa-edit"></i>';
-
-    // Botón Desactivar / Activar
-    const isActive = Boolean(category.is_active);
-    const toggleButton = document.createElement("button");
-    toggleButton.type = "button";
-    toggleButton.className = isActive
-      ? "btn btn-outline-danger btn-sm btn-toggle-status"
-      : "btn btn-outline-success btn-sm btn-toggle-status";
-    toggleButton.title = isActive ? "Desactivar categoría" : "Activar categoría";
-    toggleButton.dataset.categoryId = category.id_category ?? category.id ?? "";
-    toggleButton.dataset.categoryName = category.category_name ?? category.name ?? "";
-    toggleButton.dataset.status = isActive ? "true" : "false";
-    toggleButton.dataset.permission = "categories.update";
-    toggleButton.innerHTML = isActive
-      ? '<i class="fas fa-toggle-off"></i>'
-      : '<i class="fas fa-toggle-on"></i>';
-
-    container.appendChild(viewButton);
-    container.appendChild(editButton);
-    container.appendChild(toggleButton);
-
-    td.appendChild(container);
-    return td;
-  }
-
-  // ───────────────────────────────────────────
-  // Creación de filas
-  // ───────────────────────────────────────────
-
-  function createCategoryRow(category, index) {
-    const tr = document.createElement("tr");
-
-    // N°
-    tr.appendChild(createCell(index + 1, ["text-center"]));
-
-    // Nombre de Categoría
-    tr.appendChild(
-      createCell(category.category_name || category.name || "Sin nombre")
-    );
-
-    // Descripción
-    tr.appendChild(
-      createCell(
-        category.category_description || category.description || "Sin descripción"
-      )
-    );
-
-    // Estado
-    tr.appendChild(createStatusCell(category.is_active));
-
-    // Acciones
-    tr.appendChild(createActionsCell(category));
-
-    return tr;
+  function formatDate(isoStr) {
+    if (!isoStr) return "N/A";
+    const date = new Date(isoStr);
+    return date.toLocaleString("es-ES", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   }
 
   // ───────────────────────────────────────────
@@ -165,49 +45,50 @@ const CategoryListController = (() => {
 
         if (!categoryId) return;
 
-        // Estado inicial del modal (Mostrar loader y ocultar contenido)
         $("#category_modal_loader").show();
         $("#category_modal_content").hide();
         $(`#${DETAIL_MODAL_ID}`).modal("show");
 
         try {
-          const response = await CategoryService.obtenerCategoriaPorId(
-            categoryId
-          );
+          const response = await CategoryService.obtenerCategoriaPorId(categoryId);
 
           if (response && response.success && response.data) {
             const category = response.data;
 
-            // Inyectar datos en los elementos del modal
-            $("#detail_category_name").text(
-              category.category_name || category.name || "Sin nombre"
-            );
-            $("#detail_category_description").text(
-              category.category_description ||
-                category.description ||
-                "Sin descripción"
-            );
+            $("#detail_name").text(category.name || "Sin nombre");
+            $("#detail_description").text(category.description || "Sin descripción");
+            
+            // Obtener nombre del padre si existe
+            let parentDisplay = "Ninguna";
+            if (category.parent) {
+                try {
+                    const parentResponse = await CategoryService.obtenerCategoriaPorId(category.parent);
+                    if (parentResponse && parentResponse.success && parentResponse.data) {
+                        parentDisplay = parentResponse.data.name;
+                    }
+                } catch (e) {
+                    parentDisplay = `ID: ${category.parent}`;
+                }
+            }
+            $("#detail_parent_name").text(parentDisplay);
 
-            // Badge de Estado
+            $("#detail_created_at").text(formatDate(category.created_at));
+            $("#detail_updated_at").text(formatDate(category.updated_at));
+
             const badgeHtml = category.is_active
               ? '<span class="badge badge-success px-3 py-1 shadow-sm">Activo</span>'
               : '<span class="badge badge-danger px-3 py-1 shadow-sm">Inactivo</span>';
-            $("#detail_category_status_badge").html(badgeHtml);
+            $("#detail_status_badge").html(badgeHtml);
 
-            // Ocultar spinner y mostrar contenido con efecto suave
             $("#category_modal_loader").hide();
             $("#category_modal_content").fadeIn();
           } else {
-            throw new Error(
-              "Respuesta inválida al consultar la categoría."
-            );
+            throw new Error("Respuesta inválida al consultar la categoría.");
           }
         } catch (error) {
-          console.error(
-            "[CATEGORIES] Error al obtener detalles:",
-            error
-          );
+          console.error("[CATEGORÍAS] Error al obtener detalles:", error);
           $(`#${DETAIL_MODAL_ID}`).modal("hide");
+          NotificationService.toastError("No se pudo cargar la información de la categoría.");
         }
       });
   }
@@ -216,8 +97,34 @@ const CategoryListController = (() => {
   // Manejo del Modal de Edición (PATCH)
   // ───────────────────────────────────────────
 
+  async function cargarCategoriasPadre(selectedId = null, currentCategoryId = null) {
+    const select = $('#edit_parent_id');
+    select.empty();
+    select.append(new Option('Seleccionar categoría padre (opcional)', '', true, true));
+
+    try {
+        const response = await CategoryService.listarCategorias();
+        if (response && response.success) {
+            const categorias = Array.isArray(response.data) ? response.data : (response.data.results || []);
+            
+            categorias.forEach(cat => {
+                // No permitir seleccionarse a sí misma como padre
+                if (cat.id_category != currentCategoryId) {
+                    const option = new Option(cat.name, cat.id_category, false, false);
+                    select.append(option);
+                }
+            });
+
+            if (selectedId) {
+                select.val(selectedId).trigger('change');
+            }
+        }
+    } catch (error) {
+        console.error("Error al cargar categorías padre:", error);
+    }
+  }
+
   function setupEditCategoryListener() {
-    // 1. Cargar datos en el modal de edición
     $(`#${TABLE_ID}`)
       .off("click", ".btn-edit-category")
       .on("click", ".btn-edit-category", async function () {
@@ -235,44 +142,30 @@ const CategoryListController = (() => {
         $(`#${EDIT_MODAL_ID}`).modal("show");
 
         try {
-          const response = await CategoryService.obtenerCategoriaPorId(
-            categoryId
-          );
+          const response = await CategoryService.obtenerCategoriaPorId(categoryId);
 
           if (response && response.success && response.data) {
             const category = response.data;
 
-            $("#edit_category_id").val(
-              category.id_category || category.id
-            );
-            $("#edit_category_name").val(
-              category.category_name || category.name || ""
-            );
-            $("#edit_category_description").val(
-              category.category_description || category.description || ""
-            );
-            $("#edit_category_is_active").prop(
-              "checked",
-              Boolean(category.is_active)
-            );
+            $("#edit_category_id").val(category.id_category);
+            $("#edit_name").val(category.name || "");
+            $("#edit_description").val(category.description || "");
+            $("#edit_is_active").prop("checked", Boolean(category.is_active));
+
+            // Cargar select2 de padres
+            await cargarCategoriasPadre(category.parent, category.id_category);
 
             $("#edit_category_modal_loader").hide();
             $("#edit_category_modal_content").fadeIn();
           } else {
-            throw new Error(
-              "No se pudo obtener la información de la categoría."
-            );
+            throw new Error("No se pudo obtener la información de la categoría.");
           }
         } catch (error) {
-          console.error(
-            "[CATEGORIES] Error al preparar edición:",
-            error
-          );
+          console.error("[CATEGORÍAS] Error al preparar edición:", error);
           $(`#${EDIT_MODAL_ID}`).modal("hide");
         }
       });
 
-    // 2. Procesar la actualización enviando PATCH
     $(`#${EDIT_FORM_ID}`)
       .off("submit")
       .on("submit", async function (e) {
@@ -286,63 +179,31 @@ const CategoryListController = (() => {
         }
 
         const categoryId = $("#edit_category_id").val();
-        const submitBtn = $("#btn_guardar_edicion_categoria");
+        const submitBtn = $("#btn_guardar_edicion");
 
-        // Payload con actualización parcial (PATCH)
         const payload = {
-          category_name: $("#edit_category_name").val().trim(),
-          category_description: $("#edit_category_description")
-            .val()
-            .trim(),
-          is_active: $("#edit_category_is_active").is(":checked"),
+          name: $("#edit_name").val().trim(),
+          description: $("#edit_description").val().trim(),
+          parent: $("#edit_parent_id").val() || null,
+          is_active: $("#edit_is_active").is(":checked"),
         };
 
         try {
           submitBtn
             .prop("disabled", true)
-            .html(
-              '<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...'
-            );
+            .html('<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...');
 
-          // Ejecución del endpoint HTTP PATCH
-          const response = await CategoryService.actualizarCategoria(
-            categoryId,
-            payload
-          );
+          const response = await CategoryService.actualizarCategoria(categoryId, payload);
 
           if (response && response.success) {
             $(`#${EDIT_MODAL_ID}`).modal("hide");
-            await loadCategories(); // Refrescar el DataTable
-            NotificationService.toastSuccess(
-              "Categoría actualizada correctamente."
-            );
+            loadCategories(); 
+            NotificationService.toastSuccess("Categoría actualizada correctamente.");
           } else {
-            console.error(
-              "[CATEGORIES] Detalles de validación:",
-              response.errors
-            );
-            let errMsg =
-              response?.message ||
-              "No se pudo actualizar la categoría.";
-
-            if (
-              response.errors &&
-              typeof response.errors === "object"
-            ) {
-              const details = [];
-              for (const key in response.errors) {
-                details.push(
-                  `${key}: ${JSON.stringify(response.errors[key])}`
-                );
-              }
-              if (details.length > 0) {
-                errMsg += "\nDetalles:\n" + details.join("\n");
-              }
-            }
-            throw new Error(errMsg);
+            throw response;
           }
         } catch (error) {
-          console.error("[CATEGORIES] Error al actualizar:", error);
+          console.error("[CATEGORÍAS] Error al actualizar:", error);
           const errorMsg = NotificationService.getApiErrorMessage(
             error,
             "Ocurrió un error al actualizar la categoría."
@@ -367,8 +228,7 @@ const CategoryListController = (() => {
         const categoryId = button.data("categoryId");
         const categoryName = button.data("categoryName") || "esta categoría";
         const statusAttr = button.data("status");
-        const isCurrentActive =
-          statusAttr === true || statusAttr === "true";
+        const isCurrentActive = statusAttr === true || statusAttr === "true";
         const newStatus = !isCurrentActive;
         const actionWord = isCurrentActive ? "desactivar" : "activar";
 
@@ -381,27 +241,18 @@ const CategoryListController = (() => {
           if (!result.isConfirmed) return;
 
           try {
-            const response =
-              await CategoryService.cambiarEstadoCategoria(
-                categoryId,
-                newStatus
-              );
+            const response = await CategoryService.cambiarEstadoCategoria(categoryId, newStatus);
 
             if (response && response.success) {
               NotificationService.toastSuccess(
-                `Categoría "${categoryName}" ${
-                  newStatus ? "activada" : "desactivada"
-                } con éxito.`
+                `Categoría "${categoryName}" ${newStatus ? "activada" : "desactivada"} con éxito.`
               );
-              loadCategories(); // Recargar la tabla
+              loadCategories();
             } else {
               throw response;
             }
           } catch (error) {
-            console.error(
-              "[CATEGORIES] Error al cambiar estado:",
-              error
-            );
+            console.error("[CATEGORÍAS] Error al cambiar estado:", error);
             const errorMsg = NotificationService.getApiErrorMessage(
               error,
               "Ocurrió un problema al cambiar el estado de la categoría."
@@ -416,12 +267,9 @@ const CategoryListController = (() => {
   // DataTable con paginación server-side
   // ───────────────────────────────────────────
 
-  /**
-   * Mapa de columnas DataTables → campos de ordering del backend.
-   */
   const COLUMN_ORDERING_MAP = {
-    1: "category_name",
-    2: "category_description",
+    1: "name",
+    2: "description",
     3: "is_active",
   };
 
@@ -440,9 +288,7 @@ const CategoryListController = (() => {
       pageLength: 10,
       processing: true,
       serverSide: true,
-      searchDelay: 500, // Debounce de 500ms
-
-      // Layout compatible con Bootstrap 4 / AdminLTE 3
+      searchDelay: 500,
       dom:
         "<'row mb-2'" +
         "<'col-sm-12 col-md-6 d-flex align-items-center'lB>" +
@@ -453,7 +299,6 @@ const CategoryListController = (() => {
         "<'col-sm-12 col-md-5'i>" +
         "<'col-sm-12 col-md-7 d-flex justify-content-end'p>" +
         ">",
-
       buttons: [
         {
           extend: "copy",
@@ -486,17 +331,13 @@ const CategoryListController = (() => {
           exportOptions: { columns: [1, 2, 3] },
         },
       ],
-
       language: {
         url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
       },
-
-      // Columna N° y Acciones no son ordenables
       columnDefs: [
         { orderable: false, targets: [0, 4] },
         { className: "text-center", targets: [0, 3, 4] },
       ],
-
       ajax: async function (data, callback) {
         try {
           const page = Math.floor(data.start / data.length) + 1;
@@ -513,13 +354,12 @@ const CategoryListController = (() => {
             }
           }
 
-          const response =
-            await CategoryService.listarCategoriasPaginadas({
-              page,
-              page_size: pageSize,
-              search,
-              ordering,
-            });
+          const response = await CategoryService.listarCategoriasPaginadas({
+            page,
+            page_size: pageSize,
+            search,
+            ordering,
+          });
 
           if (response?.success && response.data) {
             const categories = response.data.results || [];
@@ -533,11 +373,9 @@ const CategoryListController = (() => {
               const actions = buildActionsHtml(category);
 
               return [
-                data.start + index + 1, // N°
-                category.category_name || category.name || "Sin nombre",
-                category.category_description ||
-                  category.description ||
-                  "Sin descripción",
+                data.start + index + 1,
+                category.name || "Sin nombre",
+                category.description || "Sin descripción",
                 statusBadge,
                 actions,
               ];
@@ -560,7 +398,7 @@ const CategoryListController = (() => {
             });
           }
         } catch (error) {
-          console.error("[CATEGORIES] Error server-side:", error);
+          console.error("[CATEGORÍAS] Error server-side:", error);
           callback({
             draw: data.draw,
             recordsTotal: 0,
@@ -569,7 +407,6 @@ const CategoryListController = (() => {
           });
         }
       },
-
       drawCallback: function () {
         $(".dataTables_paginate > .pagination").addClass("pagination-sm");
       },
@@ -579,22 +416,14 @@ const CategoryListController = (() => {
     });
   }
 
-  /**
-   * Construye el HTML de botones de acciones para una fila.
-   */
   function buildActionsHtml(category) {
-    const categoryId = category.id_category ?? category.id ?? "";
-    const categoryName =
-      category.category_name ?? category.name ?? "categoría";
+    const categoryId = category.id_category ?? "";
+    const categoryName = category.name ?? "categoría";
     const isActive = Boolean(category.is_active);
 
-    const toggleClass = isActive
-      ? "btn-outline-danger"
-      : "btn-outline-success";
+    const toggleClass = isActive ? "btn-outline-danger" : "btn-outline-success";
     const toggleIcon = isActive ? "fa-toggle-off" : "fa-toggle-on";
-    const toggleTitle = isActive
-      ? "Desactivar categoría"
-      : "Activar categoría";
+    const toggleTitle = isActive ? "Desactivar categoría" : "Activar categoría";
 
     return `
       <div class="btn-group">
@@ -620,18 +449,10 @@ const CategoryListController = (() => {
     }
   }
 
-  // ───────────────────────────────────────────
-  // Inicialización
-  // ───────────────────────────────────────────
-
   async function init() {
     const tbody = document.getElementById(TABLE_BODY_ID);
+    if (!tbody) return;
 
-    if (!tbody) {
-      return;
-    }
-
-    // Inicializar tabla y eventos
     initDataTable();
     setupViewDetailsListener();
     setupEditCategoryListener();

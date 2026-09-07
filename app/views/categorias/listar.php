@@ -32,7 +32,7 @@ require_once __DIR__ . '/../layouts/head.php';
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0"><i class="fas fa-users mr-2"></i>Gestión de Categorias</h1>
+                            <h1 class="m-0"><i class="fas fa-tags mr-2"></i>Gestión de Categorías</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -54,7 +54,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                     <h3 class="card-title font-weight-bold">Listado de Categorias</h3>
                                     <div class="card-tools ml-auto">
                                         <a href="<?php echo $URL; ?>/categorias/crear" class="btn btn-primary btn-sm" data-permission="categories.create">
-                                            <i class="fas fa-user-plus mr-1"></i> Registrar Nueva Categoria
+                                            <i class="fas fa-plus mr-1"></i> Registrar Nueva Categoría
                                         </a>
                                     </div>
                                 </div>
@@ -90,13 +90,13 @@ require_once __DIR__ . '/../layouts/head.php';
 
     </div>
 
-    <!-- Modal Ver Detalles de Usuario -->
-    <div class="modal fade" id="modalDetalleUsuario" tabindex="-1" role="dialog" aria-labelledby="modalDetalleUsuarioLabel" aria-hidden="true">
+    <!-- Modal Ver Detalles de Categoría -->
+    <div class="modal fade" id="modalDetalleCategoria" tabindex="-1" role="dialog" aria-labelledby="modalDetalleCategoriaLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title" id="modalDetalleUsuarioLabel">
-                        <i class="fas fa-id-card mr-2"></i>Información Detallada del Usuario
+                    <h5 class="modal-title" id="modalDetalleCategoriaLabel">
+                        <i class="fas fa-tag mr-2"></i>Información Detallada de la Categoría
                     </h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -105,7 +105,7 @@ require_once __DIR__ . '/../layouts/head.php';
 
                 <div class="modal-body">
                     <!-- Loader / Spinner -->
-                    <div id="user_modal_loader" class="text-center py-5">
+                    <div id="category_modal_loader" class="text-center py-5">
                         <div class="spinner-border text-info" role="status" style="width: 3rem; height: 3rem;">
                             <span class="sr-only">Cargando...</span>
                         </div>
@@ -113,32 +113,23 @@ require_once __DIR__ . '/../layouts/head.php';
                     </div>
 
                     <!-- Contenido principal (Oculto mientras carga) -->
-                    <div id="user_modal_content" style="display: none;">
+                    <div id="category_modal_content" style="display: none;">
                         <div class="row align-items-center mb-4">
                             <div class="col-md-4 text-center border-right">
-                                <i class="fas fa-user-circle fa-6x text-secondary mb-2"></i>
-                                <h5 class="font-weight-bold mb-1" id="detail_full_name">---</h5>
-                                <p class="text-muted mb-2" id="detail_username">---</p>
-                                <div id="detail_status_badge">---</div>
+                                <i class="fas fa-tags fa-6x text-secondary mb-2"></i>
+                                <h5 class="font-weight-bold mb-1" id="detail_name">---</h5>
+                                <div id="detail_status_badge" class="mt-2">---</div>
                             </div>
 
                             <div class="col-md-8">
                                 <div class="row">
-                                    <div class="col-sm-6 mb-3">
-                                        <label class="text-muted small mb-0"><i class="fas fa-envelope mr-1"></i>Correo Electrónico</label>
-                                        <p class="font-weight-bold text-dark mb-0" id="detail_email">---</p>
+                                    <div class="col-sm-12 mb-3">
+                                        <label class="text-muted small mb-0"><i class="fas fa-align-left mr-1"></i>Descripción</label>
+                                        <p class="font-weight-bold text-dark mb-0" id="detail_description">---</p>
                                     </div>
-                                    <div class="col-sm-6 mb-3">
-                                        <label class="text-muted small mb-0"><i class="fas fa-id-card-alt mr-1"></i>Número de Documento</label>
-                                        <p class="font-weight-bold text-dark mb-0" id="detail_document">---</p>
-                                    </div>
-                                    <div class="col-sm-6 mb-3">
-                                        <label class="text-muted small mb-0"><i class="fas fa-phone mr-1"></i>Teléfono</label>
-                                        <p class="font-weight-bold text-dark mb-0" id="detail_phone">---</p>
-                                    </div>
-                                    <div class="col-sm-6 mb-3">
-                                        <label class="text-muted small mb-0"><i class="fas fa-user-shield mr-1"></i>Rol / Permisos</label>
-                                        <p class="font-weight-bold text-dark mb-0" id="detail_role">---</p>
+                                    <div class="col-sm-12 mb-3">
+                                        <label class="text-muted small mb-0"><i class="fas fa-sitemap mr-1"></i>Categoría Padre</label>
+                                        <p class="font-weight-bold text-dark mb-0" id="detail_parent_name">---</p>
                                     </div>
                                 </div>
                                 <hr class="my-2">
@@ -164,87 +155,62 @@ require_once __DIR__ . '/../layouts/head.php';
         </div>
     </div>
 
-    <!-- Modal Editar Usuario -->
-    <div class="modal fade" id="modalEditarUsuario" tabindex="-1" role="dialog" aria-labelledby="modalEditarUsuarioLabel" aria-hidden="true">
+    <!-- Modal Editar Categoría -->
+    <div class="modal fade" id="modalEditarCategoria" tabindex="-1" role="dialog" aria-labelledby="modalEditarCategoriaLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title font-weight-bold" id="modalEditarUsuarioLabel">
-                        <i class="fas fa-user-edit mr-2"></i>Editar Usuario
+                    <h5 class="modal-title font-weight-bold" id="modalEditarCategoriaLabel">
+                        <i class="fas fa-edit mr-2"></i>Editar Categoría
                     </h5>
                     <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-                <form id="formEditarUsuario" novalidate>
+                <form id="formEditarCategoria" novalidate>
                     <div class="modal-body">
                         <!-- Spinner de carga inicial -->
-                        <div id="edit_user_modal_loader" class="text-center py-5">
+                        <div id="edit_category_modal_loader" class="text-center py-5">
                             <div class="spinner-border text-warning" role="status" style="width: 3rem; height: 3rem;">
                                 <span class="sr-only">Cargando...</span>
                             </div>
-                            <p class="mt-2 text-muted font-weight-bold">Cargando información del usuario...</p>
+                            <p class="mt-2 text-muted font-weight-bold">Cargando información de la categoría...</p>
                         </div>
 
                         <!-- Campos del Formulario -->
-                        <div id="edit_user_modal_content" style="display: none;">
-                            <input type="hidden" id="edit_user_id" name="id_user">
+                        <div id="edit_category_modal_content" style="display: none;">
+                            <input type="hidden" id="edit_category_id" name="id_category">
 
                             <div class="row">
                                 <div class="col-md-6 form-group mb-3">
-                                    <label for="edit_first_name" class="font-weight-bold small">Nombre(s) <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_first_name" name="first_name" required placeholder="Ej: Juan">
+                                    <label for="edit_name" class="font-weight-bold small">Nombre <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="edit_name" name="name" required placeholder="Ej: Electrónica">
                                     <div class="invalid-feedback">El nombre es obligatorio.</div>
                                 </div>
 
                                 <div class="col-md-6 form-group mb-3">
-                                    <label for="edit_last_name" class="font-weight-bold small">Apellido(s) <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_last_name" name="last_name" required placeholder="Ej: Pérez">
-                                    <div class="invalid-feedback">El apellido es obligatorio.</div>
-                                </div>
-
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="edit_username" class="font-weight-bold small">Nombre de usuario <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_username" name="username" required placeholder="Ej: juanperez">
-                                    <div class="invalid-feedback">El nombre de usuario es obligatorio.</div>
-                                </div>
-
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="edit_email" class="font-weight-bold small">Correo electrónico <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="edit_email" name="email" required placeholder="correo@ejemplo.com">
-                                    <div class="invalid-feedback">Ingresa un correo electrónico válido.</div>
-                                </div>
-
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="edit_document_number" class="font-weight-bold small">Número de documento <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_document_number" name="document_number" placeholder="Ej: 123456789" required>
-                                    <div class="invalid-feedback">El número de documento es obligatorio.</div>
-                                </div>
-
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="edit_phone_number" class="font-weight-bold small">Teléfono</label>
-                                    <input type="text" class="form-control" id="edit_phone_number" name="phone_number" placeholder="Ej: 3001234567">
-                                </div>
-
-                                <!-- Roles (Select2) -->
-                                <div class="col-md-12 form-group mb-3">
-                                    <label for="edit_roles" class="font-weight-bold small">Rol(es) <span class="text-danger">*</span></label>
+                                    <label for="edit_parent_id" class="font-weight-bold small">Categoría Padre</label>
                                     <div class="select2-purple">
-                                        <select class="select2" id="edit_roles" name="roles" multiple="multiple" data-placeholder="Seleccionar rol(es)" data-dropdown-css-class="select2-purple" style="width: 100%;" required>
+                                        <select class="select2" id="edit_parent_id" name="parent" data-placeholder="Seleccionar categoría padre" data-dropdown-css-class="select2-purple" style="width: 100%;">
                                             <!-- Las opciones se cargarán por JS -->
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="col-md-12 form-group mb-3">
+                                    <label for="edit_description" class="font-weight-bold small">Descripción</label>
+                                    <textarea class="form-control" id="edit_description" name="description" rows="3" placeholder="Descripción de la categoría"></textarea>
+                                </div>
+
+                                <div class="col-md-12 form-group mb-3">
                                     <div class="custom-control custom-switch mt-2">
                                         <input type="checkbox" class="custom-control-input" id="edit_is_active" name="is_active">
-                                        <label class="custom-control-label font-weight-bold" for="edit_is_active">Categoria Activa</label>
+                                        <label class="custom-control-label font-weight-bold" for="edit_is_active">Categoría Activa</label>
                                     </div>
                                 </div>
                             </div>
-                        </div> <!-- Fin edit_user_modal_content -->
+                        </div> <!-- Fin edit_category_modal_content -->
                     </div> <!-- Fin modal-body -->
 
                     <div class="modal-footer bg-light">
@@ -269,9 +235,12 @@ require_once __DIR__ . '/../layouts/head.php';
         import CategoryListController from "<?php echo $URL; ?>/public/assets/js/controllers/categorias/listar.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
-            // Inicializar Select2 nativamente
-            $('.select2').select2({
-                theme: 'bootstrap4'
+            // Inicializar Select2 en el modal de edición cuando se muestre
+            $('#modalEditarCategoria').on('shown.bs.modal', function () {
+                $('#edit_parent_id').select2({
+                    theme: 'bootstrap4',
+                    dropdownParent: $('#modalEditarCategoria')
+                });
             });
 
             await App.bootstrap();

@@ -46,6 +46,7 @@ const LogoutController = (() => {
        * almacenados.
        */
       Storage.clear();
+      sessionStorage.removeItem("inventariopme_security_context");
 
       console.log("[LOGOUT] Sesión local eliminada.");
 
@@ -63,6 +64,7 @@ const LogoutController = (() => {
        * las credenciales locales.
        */
       Storage.clear();
+      sessionStorage.removeItem("inventariopme_security_context");
 
       const loginPath = Config.BASE_PATH + Config.LOGIN_PATH;
 

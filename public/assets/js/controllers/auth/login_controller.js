@@ -51,6 +51,16 @@ const LoginController = (() => {
         return;
       }
 
+      // Cargar correo recordado si existe
+      const rememberCheckbox = document.querySelector('input[name="remember"]');
+      const emailInput = document.querySelector("#email");
+      const rememberedEmail = localStorage.getItem("remembered_email");
+
+      if (rememberedEmail && emailInput && rememberCheckbox) {
+        emailInput.value = rememberedEmail;
+        rememberCheckbox.checked = true;
+      }
+
       form.addEventListener("submit", handleSubmit);
 
       console.log("[LOGIN] Controlador inicializado.");
@@ -158,6 +168,18 @@ const LoginController = (() => {
     const welcomeMessage = userName
       ? `Bienvenido, ${userName}.`
       : "Bienvenido al sistema.";
+
+    // Guardar o eliminar el correo electrónico recordado
+    const rememberCheckbox = document.querySelector('input[name="remember"]');
+    const emailInput = document.querySelector("#email");
+    
+    if (rememberCheckbox && emailInput) {
+      if (rememberCheckbox.checked) {
+        localStorage.setItem("remembered_email", emailInput.value.trim());
+      } else {
+        localStorage.removeItem("remembered_email");
+      }
+    }
 
     await NotificationService.toastSuccess(welcomeMessage);
 

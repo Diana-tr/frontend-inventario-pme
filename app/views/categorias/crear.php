@@ -32,7 +32,7 @@ require_once __DIR__ . '/../layouts/head.php';
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0"><i class="fas fa-users mr-2"></i>Gestión de Categorias</h1>
+                            <h1 class="m-0"><i class="fas fa-tags mr-2"></i>Gestión de Categorías</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -51,110 +51,44 @@ require_once __DIR__ . '/../layouts/head.php';
                         <div class="col-md-12">
                             <div class="card card-primary shadow-sm">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fas fa-address-card mr-1"></i> Formulario de Registro</h3>
+                                    <h3 class="card-title"><i class="fas fa-tags mr-1"></i> Formulario de Categoría</h3>
                                 </div>
                                 <!-- /.card-header -->
 
                                 <!-- Formulario inicio -->
-                                <form id="form_crear_usuario" action="#" method="POST" autocomplete="off">
+                                <form id="form_crear_categoria" action="#" method="POST" autocomplete="off">
                                     <div class="card-body">
                                         <div class="row">
 
-                                            <!-- First Name (Nombres) -->
+                                            <!-- Name -->
                                             <div class="col-md-6 form-group">
-                                                <label for="first_name">Nombre <span class="text-danger">*</span></label>
+                                                <label for="name">Nombre <span class="text-danger">*</span></label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-tag"></i></span>
                                                     </div>
-                                                    <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Ej. Juan" required>
+                                                    <input type="text" name="name" id="name" class="form-control" placeholder="Ej. Electrónica" required>
                                                 </div>
                                             </div>
 
-                                            <!-- Last Name (Apellidos) -->
+                                            <!-- Parent Category (Select2) -->
                                             <div class="col-md-6 form-group">
-                                                <label for="last_name">Apellidos <span class="text-danger">*</span></label>
-                                                <div class="input-group mb-3">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                                    </div>
-                                                    <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Ej. Pérez" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Username -->
-                                            <div class="col-md-6 form-group">
-                                                <label for="username">Nombre de Usuario <span class="text-danger">*</span></label>
-                                                <div class="input-group mb-3">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
-                                                    </div>
-                                                    <input type="text" name="username" id="username" class="form-control" placeholder="Ej. juanperez" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Document Number -->
-                                            <div class="col-md-6 form-group">
-                                                <label for="document_number">Número de Documento <span class="text-danger">*</span></label>
-                                                <div class="input-group mb-3">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                                    </div>
-                                                    <input type="text" name="document_number" id="document_number" class="form-control" placeholder="Ej. 123456789" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Email -->
-                                            <div class="col-md-6 form-group">
-                                                <label for="email">Correo Electrónico <span class="text-danger">*</span></label>
-                                                <div class="input-group mb-3">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                                    </div>
-                                                    <input type="email" name="email" id="email" class="form-control" placeholder="juan@gmail.com" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Phone Number -->
-                                            <div class="col-md-6 form-group">
-                                                <label for="phone_number">Número de Teléfono <span class="text-danger">*</span></label>
-                                                <div class="input-group mb-3">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                                    </div>
-                                                    <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Ej. 3001234567" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Password -->
-                                            <div class="col-md-6 form-group">
-                                                <label for="password">Contraseña <span class="text-danger">*</span></label>
-                                                <div class="input-group mb-3">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                                    </div>
-                                                    <input type="password" name="password" id="password" class="form-control" placeholder="Ingrese contraseña segura" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Confirmar Contraseña (para validación visual en cliente) -->
-                                            <div class="col-md-6 form-group">
-                                                <label for="password_repeat">Confirmar Contraseña <span class="text-danger">*</span></label>
-                                                <div class="input-group mb-3">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                                    </div>
-                                                    <input type="password" id="password_repeat" class="form-control" placeholder="Repita la contraseña" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Roles (Select2) -->
-                                            <div class="col-md-12 form-group">
-                                                <label for="roles">Rol(es) <span class="text-danger">*</span></label>
-                                                <div class="select2-purple">
-                                                    <select class="select2" id="roles" name="roles" multiple="multiple" data-placeholder="Seleccionar rol(es)" data-dropdown-css-class="select2-purple" style="width: 100%;" required>
+                                                <label for="parent_id">Categoría Padre</label>
+                                                <div class="select2-primary">
+                                                    <select class="select2" id="parent_id" name="parent_id" data-placeholder="Seleccionar categoría padre (opcional)" data-dropdown-css-class="select2-primary" style="width: 100%;">
                                                         <!-- Las opciones se cargarán por JS -->
                                                     </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Description -->
+                                            <div class="col-md-12 form-group">
+                                                <label for="description">Descripción</label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                                    </div>
+                                                    <textarea name="description" id="description" class="form-control" rows="3" placeholder="Descripción de la categoría"></textarea>
                                                 </div>
                                             </div>
 
@@ -167,7 +101,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                             <i class="fas fa-times-circle mr-1"></i> Cancelar
                                         </a>
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save mr-1"></i> Guardar Usuario
+                                            <i class="fas fa-save mr-1"></i> Guardar Categoría
                                         </button>
                                     </div>
                                 </form>
@@ -190,10 +124,10 @@ require_once __DIR__ . '/../layouts/head.php';
     <!-- Select2 JS -->
     <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/js/select2.full.min.js"></script>
 
-    <!-- Script de inicialización (ahora delegado al controlador JS) -->
+    <!-- Script de inicialización -->
     <script type="module">
         import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-        import CategoryListController from "<?php echo $URL; ?>/public/assets/js/controllers/categorias/crear.js";
+        import CrearCategoriaController from "<?php echo $URL; ?>/public/assets/js/controllers/categorias/crear.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
             // Inicializar Select2 nativamente
@@ -202,9 +136,8 @@ require_once __DIR__ . '/../layouts/head.php';
             });
 
             await App.bootstrap();
-            CategoryListController.init();
+            CrearCategoriaController.init();
         });
     </script>
 </body>
-
 </html>

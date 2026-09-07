@@ -26,6 +26,7 @@ import Storage from "../storage/storage.js";
 const AuthService = (() => {
   const LOGIN_ENDPOINT = "/api/v1/auth/login/";
   const LOGOUT_ENDPOINT = "/api/v1/auth/logout/";
+  const CACHE_KEY = "inventariopme_security_context";
 
   /**
    * Inicia sesión contra el backend.
@@ -78,14 +79,24 @@ const AuthService = (() => {
         };
       }
 
+      // ─── LIMPIEZA PREVENTIVA ───
+      // Antes de guardar la nueva sesión, eliminamos cualquier
+      // residuo de la sesión anterior (permisos, contexto en caché).
+      // Esto previene que los permisos del usuario anterior
+      // queden activos si la pestaña no fue cerrada.
+      Storage.clear();
+      sessionStorage.removeItem(CACHE_KEY);
+
+      // ─── GUARDAR NUEVA SESIÓN ───
       Storage.saveTokens(accessToken, refreshToken);
 
       if (user) {
         Storage.saveUser(user);
       }
 
-      // Fetch de contexto de seguridad luego de inicio de sesión exitoso
-      await fetchSecurityContext();
+      // Obtener los permisos REALES del nuevo usuario desde el backend.
+      // forceRefresh = true para garantizar que nunca use caché viejo.
+      await fetchSecurityContext(true);
 
       return {
         ok: true,
@@ -118,7 +129,6 @@ const AuthService = (() => {
    * manteniendo un nivel alto de seguridad (se borra al cerrar la pestaña).
    */
   async function fetchSecurityContext(forceRefresh = false) {
-    const CACHE_KEY = "inventariopme_security_context";
 
     try {
       if (!forceRefresh) {
