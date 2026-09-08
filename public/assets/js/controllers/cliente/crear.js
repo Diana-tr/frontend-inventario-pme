@@ -60,12 +60,12 @@ const CrearClienteController = (() => {
             last_name: document.getElementById('last_name')?.value.trim() || '',
             business_name: document.getElementById('business_name')?.value.trim() || '',
             email: document.getElementById('email')?.value.trim() || '',
-            movile: document.getElementById('movile')?.value.trim() || '',
+            mobile: document.getElementById('movile')?.value.trim() || '',
             address: document.getElementById('address')?.value.trim() || '',
             city: document.getElementById('city')?.value.trim() || '',
             country: document.getElementById('country')?.value.trim() || 'Colombia',
             notes: document.getElementById('notes')?.value.trim() || '',
-            phone_number: document.getElementById('phone_number')?.value.trim() || '',
+            phone: document.getElementById('phone_number')?.value.trim() || '',
             is_active: true // Por defecto activo al crear
         };
 

@@ -2,7 +2,6 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [] Realizar modulo de clientes. *(Asignado: Diana)*
 - [] Realizar modulo de proveedores. *(Asinado: )*
 
 ## ✅ Completado
@@ -26,3 +25,4 @@ Al hacer la prueba, la petición ya llega con éxito al backend, pero la API est
 - [x] Realizar modulo de categorias. *(Asignado: Diana)*
 - [x] Revisar el diseño del software mejoras pequeñas. *(Asignado: Diana)*
 - [x] realizar la implementacion de desactivar el usuario (Borrado logico). *(Asignado: Diana)*
+- [x] Realizar modulo de clientes. *(Asignado: Diana)*

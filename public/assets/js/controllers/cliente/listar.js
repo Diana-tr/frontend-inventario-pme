@@ -63,7 +63,10 @@ const ClienteListController = (() => {
             $("#detail_email").text(cliente.email || "Sin correo");
             $("#detail_phone").text(cliente.phone || "Sin teléfono");
             $("#detail_mobile").text(cliente.mobile || "Sin celular");
+            $("#detail_address").text(cliente.address || "Sin dirección");
             $("#detail_city").text(cliente.city || "Sin ciudad");
+            $("#detail_country").text(cliente.country || "Sin país");
+            $("#detail_notes").text(cliente.notes || "Sin notas");
 
             const badgeHtml = cliente.is_active
               ? '<span class="badge badge-success px-3 py-1 shadow-sm">Activo</span>'
@@ -119,7 +122,10 @@ const ClienteListController = (() => {
             $("#edit_email").val(cliente.email || "");
             $("#edit_phone").val(cliente.phone || "");
             $("#edit_mobile").val(cliente.mobile || "");
+            $("#edit_address").val(cliente.address || "");
             $("#edit_city").val(cliente.city || "");
+            $("#edit_country").val(cliente.country || "Colombia");
+            $("#edit_notes").val(cliente.notes || "");
             $("#edit_is_active").prop("checked", Boolean(cliente.is_active));
 
             $("#edit_customer_modal_loader").hide();
@@ -157,7 +163,10 @@ const ClienteListController = (() => {
           email: $("#edit_email").val().trim(),
           phone: $("#edit_phone").val().trim(),
           mobile: $("#edit_mobile").val().trim(),
+          address: $("#edit_address").val().trim(),
           city: $("#edit_city").val().trim(),
+          country: $("#edit_country").val().trim() || 'Colombia',
+          notes: $("#edit_notes").val().trim(),
           is_active: $("#edit_is_active").is(":checked"),
         };
 
@@ -241,11 +250,11 @@ const ClienteListController = (() => {
   // ───────────────────────────────────────────
 
   const COLUMN_ORDERING_MAP = {
-    1: "document_number",
-    2: "first_name",
+    1: "first_name",
+    2: "document_number",
     3: "email",
-    4: "mobile",
-    5: "city",
+    4: "address",
+    5: "mobile",
     6: "is_active",
   };
 
@@ -355,11 +364,11 @@ const ClienteListController = (() => {
 
               return [
                 data.start + index + 1,
-                `${cliente.document_type || "CC"} - ${cliente.document_number || "S/N"}`,
                 fullName,
+                `${cliente.document_type || "CC"} - ${cliente.document_number || "S/N"}`,
                 cliente.email || "Sin correo",
+                cliente.address || "Sin dirección",
                 cliente.mobile || cliente.phone || "Sin teléfono",
-                cliente.city || "Sin ciudad",
                 statusBadge,
                 actions,
               ];

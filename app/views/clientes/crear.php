@@ -62,20 +62,20 @@ require_once __DIR__ . '/../layouts/head.php';
 
                                             <!-- Name -->
                                             <div class="col-md-6 form-group">
-                                                <label for="name">Nombre <span class="text-danger">*</span></label>
+                                                <label for="first_name">Nombre <span class="text-danger">*</span></label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
                                                     </div>
-                                                    <input type="text" name="name" id="name" class="form-control" placeholder="Ej. Electrónica" required>
+                                                    <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Ej. Juan" required>
                                                 </div>
                                             </div>
 
                                             <!-- Tipo de Documento (Select2) -->
                                             <div class="col-md-6 form-group">
-                                                <label for="parent_id">Tipo de Documento <span class="text-danger">*</span></label>
+                                                <label for="document_type">Tipo de Documento <span class="text-danger">*</span></label>
                                                 <div class="select2-primary">
-                                                    <select class="select2" id="document_type" name="parent_id" data-placeholder="Seleccionar tipo de Documento" data-dropdown-css-class="select2-primary" style="width: 100%;">
+                                                    <select class="select2" id="document_type" name="document_type" data-placeholder="Seleccionar tipo de Documento" data-dropdown-css-class="select2-primary" style="width: 100%;">
                                                         <!-- Las opciones se cargarán por JS -->
                                                     </select>
                                                 </div>
@@ -83,88 +83,109 @@ require_once __DIR__ . '/../layouts/head.php';
 
                                             <!-- Apellidos -->
                                             <div class="col-md-6 form-group">
-                                                <label for="name">Apellidos <span class="text-danger">*</span></label>
+                                                <label for="last_name">Apellidos <span class="text-danger">*</span></label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
                                                     </div>
-                                                    <input type="text" name="name" id="name" class="form-control" placeholder="Ej. Pérez" required>
+                                                    <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Ej. Pérez" required>
                                                 </div>
                                             </div>
 
                                             <!-- Numero de Documento -->
                                             <div class="col-md-6 form-group">
-                                                <label for="name">Numero de Documento <span class="text-danger">*</span></label>
+                                                <label for="document_number">Numero de Documento <span class="text-danger">*</span></label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                                                     </div>
-                                                    <input type="text" name="name" id="name" class="form-control" placeholder="Ej. Electrónica" required>
+                                                    <input type="text" name="document_number" id="document_number" class="form-control" placeholder="Ej. 1010101010" required>
                                                 </div>
                                             </div>
 
                                             <!-- Empresa -->
                                             <div class="col-md-6 form-group">
-                                                <label for="description">Nombre de Empresa</label>
+                                                <label for="business_name">Nombre de Empresa</label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-building"></i></span>
                                                     </div>
-                                                    <input type="text" name="description" id="description" class="form-control" rows="3" placeholder="Ej. Distribuciones Pérez S.A.S."></input>
+                                                    <input type="text" name="business_name" id="business_name" class="form-control" placeholder="Ej. Distribuciones Pérez S.A.S.">
                                                 </div>
                                             </div>
 
                                              <!-- Email -->
                                             <div class="col-md-6 form-group">
-                                                <label for="description">Email</label>
+                                                <label for="email">Email</label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                                                     </div>
-                                                    <input type="text" name="description" id="description" class="form-control" rows="3" placeholder="Ej. juan@example.com"></input>
+                                                    <input type="email" name="email" id="email" class="form-control" placeholder="Ej. juan@example.com">
                                                 </div>
                                             </div>
 
                                              <!-- Movile -->
                                             <div class="col-md-6 form-group">
-                                                <label for="description">N° Celular</label>
+                                                <label for="movile">N° Celular</label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
                                                     </div>
-                                                    <input type="text" name="description" id="description" class="form-control" rows="3" placeholder="Ej. 3207250028"></input>
+                                                    <input type="text" name="movile" id="movile" class="form-control" placeholder="Ej. 3207250028">
                                                 </div>
                                             </div>
  <!-- Direccion -->
                                             <div class="col-md-6 form-group">
-                                                <label for="description">Direccion</label>
+                                                <label for="address">Direccion</label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                                                     </div>
-                                                    <input type="text" name="description" id="description" class="form-control" rows="3" placeholder="Ej. Carrera 10 #20-30"></input>
+                                                    <input type="text" name="address" id="address" class="form-control" placeholder="Ej. Carrera 10 #20-30">
                                                 </div>
                                             </div>
                                             
                                              <!-- Ciudad -->
                                             <div class="col-md-6 form-group">
-                                                <label for="description">Ciudad</label>
+                                                <label for="city">Ciudad</label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-city"></i></span>
                                                     </div>
-                                                    <input type="text" name="description" id="description" class="form-control" rows="3" placeholder="Ej. Bogotá"></input> 
-
+                                                    <input type="text" name="city" id="city" class="form-control" placeholder="Ej. Bogotá">
                                                 </div>
                                             </div>
  <!-- Pais -->
                                             <div class="col-md-6 form-group">
-                                                <label for="description">Pais</label>
+                                                <label for="country">Pais</label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
-                                                        <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                                        <span class="input-group-text"><i class="fas fa-globe"></i></span>
                                                     </div>
-                                                    <input type="text" name="description" id="description" class="form-control" rows="3" placeholder="Ej.Colombia"></input>
+                                                    <input type="text" name="country" id="country" class="form-control" placeholder="Ej. Colombia" value="Colombia">
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Teléfono -->
+                                            <div class="col-md-6 form-group">
+                                                <label for="phone_number">Teléfono</label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                                    </div>
+                                                    <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Ej. 6011234567">
+                                                </div>
+                                            </div>
+
+                                            <!-- Notas -->
+                                            <div class="col-md-12 form-group">
+                                                <label for="notes">Notas</label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fas fa-sticky-note"></i></span>
+                                                    </div>
+                                                    <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Notas adicionales"></textarea>
                                                 </div>
                                             </div>
                                         </div>

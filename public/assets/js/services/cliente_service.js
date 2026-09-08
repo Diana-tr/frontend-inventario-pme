@@ -1,7 +1,7 @@
 import ApiClient from "../core/apiClient.js";
 
 const ClienteService = (() => {
-  const Clientes_ENDPOINT = "/api/v1/clientes/";
+  const CLIENTES_ENDPOINT = "/api/v1/customers/";
 
   // Listar todas los clientes.
   async function listarClientes() {
@@ -17,7 +17,7 @@ const ClienteService = (() => {
    * Lista clientes con parámetros de paginación server-side.
    * @param {Object} params - { page, page_size, search, ordering }
    */
-  async function listarClientesPaginadas(params = {}) {
+  async function listarClientesPaginados(params = {}) {
     try {
       const query = new URLSearchParams();
 
@@ -88,7 +88,7 @@ const ClienteService = (() => {
 
   return Object.freeze({
     listarClientes,
-    listarClientesPaginadas,
+    listarClientesPaginados,
     obtenerClientePorId,
     crearCliente,
     actualizarCliente,
