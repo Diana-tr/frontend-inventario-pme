@@ -2,10 +2,7 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [x] Revisar el diseño del software mejoras pequeñas. *(Asignado: )*
-- [x] realizar la implementacion de desactivar el usuario (Borrado logico). *(Asignado: )*
-- [] Realizar modulo de clientes. *(Asignado: )*
-- [x] Realizar modulo de categorias. *(Asignado: )*
+- [] Realizar modulo de clientes. *(Asignado: Diana)*
 - [] Realizar modulo de proveedores. *(Asinado: )*
 
 ## ✅ Completado
@@ -26,3 +23,6 @@ Al hacer la prueba, la petición ya llega con éxito al backend, pero la API est
 - [x] Se implemento la creacion y el listado de usuario. *(Asignado: Jhan)*
 - [x] Falta realizar la implementacion de ver detalles, editar del modulo usuarios. *(Asignado: Jhan)*
 - [x] se implemento mejoras en la consulta hacia la base de datos. *(Asignado: Jhan)*
+- [x] Realizar modulo de categorias. *(Asignado: Diana)*
+- [x] Revisar el diseño del software mejoras pequeñas. *(Asignado: Diana)*
+- [x] realizar la implementacion de desactivar el usuario (Borrado logico). *(Asignado: Diana)*

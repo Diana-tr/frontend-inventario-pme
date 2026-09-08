@@ -127,6 +127,31 @@ require_once __DIR__ . '/../../config/app.php';
                     </ul>
                 </li>
 
+                <!-- Módulo de Cliente -->
+                <li class="nav-item" data-sidebar-module="clientes" data-permission="customers.view">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>
+                            Clientes
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" data-permission="customers.view">
+                            <a href="<?php echo $URL; ?>/clientes" class="nav-link" data-sidebar-path="/clientes">
+                                <i class="nav-icon fas fa-user-cog"></i>
+                                <p>Gestión de Clientes</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-permission="customers.view">
+                            <a href="<?php echo $URL; ?>/clientes/crear" class="nav-link" data-sidebar-path="/clientes/crear">
+                                <i class="nav-icon fas fa-user-plus"></i>
+                                <p>Crear Cliente</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 <!-- Separador visual -->
                 <li class="nav-header border-top border-secondary my-2"></li>
 

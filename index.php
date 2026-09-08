@@ -58,6 +58,17 @@ switch ($path) {
     case 'categorias/crear':
         require_once __DIR__ . '/app/views/categorias/crear.php';
         break;
+
+    
+    //RUTA DEL MODULO DE CLIENTES
+    case 'clientes':
+    case 'clientes/listar':
+        require_once __DIR__ . '/app/views/clientes/listar.php';
+        break;
+    
+    case 'clientes/crear':
+        require_once __DIR__ . '/app/views/clientes/crear.php';
+        break;
         
     default:
         // Evitar procesar archivos estáticos o directos por error
