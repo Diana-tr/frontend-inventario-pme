@@ -54,8 +54,7 @@ const SecurityManager = (() => {
    * @returns {boolean}
    */
   const hasAnyPermission = (permissionCodes) => {
-    const permissions = getPermissions();
-    return permissionCodes.some((code) => permissions[code] === true);
+    return permissionCodes.some((code) => hasPermission(code));
   };
 
   /**
@@ -64,8 +63,7 @@ const SecurityManager = (() => {
    * @returns {boolean}
    */
   const hasAllPermissions = (permissionCodes) => {
-    const permissions = getPermissions();
-    return permissionCodes.every((code) => permissions[code] === true);
+    return permissionCodes.every((code) => hasPermission(code));
   };
 
   /**
@@ -76,6 +74,7 @@ const SecurityManager = (() => {
    * Elementos sin permiso → se ocultan (display = "none").
    */
   const processDomPermissions = () => {
+    // Procesar elementos con un solo permiso requerido
     const elements = document.querySelectorAll("[data-permission]");
     elements.forEach((el) => {
       const required = el.getAttribute("data-permission");
@@ -83,6 +82,22 @@ const SecurityManager = (() => {
         el.style.display = ""; // Restaurar visibilidad
       } else {
         el.style.display = "none"; // Ocultar
+      }
+    });
+
+    // Procesar elementos que requieren AL MENOS UNO de varios permisos
+    const anyElements = document.querySelectorAll("[data-permission-any]");
+    anyElements.forEach((el) => {
+      const codes = el.getAttribute("data-permission-any");
+      if (!codes) {
+        el.style.display = "none";
+        return;
+      }
+      const permissionList = codes.split(",").map((c) => c.trim()).filter(Boolean);
+      if (hasAnyPermission(permissionList)) {
+        el.style.display = "";
+      } else {
+        el.style.display = "none";
       }
     });
   };

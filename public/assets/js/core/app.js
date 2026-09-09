@@ -11,12 +11,18 @@ const App = (() => {
    * Las rutas se comparan sin el BASE_PATH ni trailing slashes.
    */
   const ROUTE_PERMISSIONS = Object.freeze({
-    "/usuarios":        "users.view",
-    "/usuarios/listar": "users.view",
-    "/usuarios/crear":  "users.create",
-    "/roles":           "roles.view",
-    "/roles/listar":    "roles.view",
-    "/roles/crear":     "roles.create",
+    "/usuarios":          "users.view",
+    "/usuarios/listar":   "users.view",
+    "/usuarios/crear":    "users.create",
+    "/roles":             "roles.view",
+    "/roles/listar":      "roles.view",
+    "/roles/crear":       "roles.create",
+    "/categorias":        "categories.view",
+    "/categorias/listar": "categories.view",
+    "/categorias/crear":  "categories.create",
+    "/clientes":          "customers.view",
+    "/clientes/listar":   "customers.view",
+    "/clientes/crear":    "customers.create",
   });
 
   async function bootstrap() {

@@ -1,0 +1,65 @@
+/**
+ * ============================================================
+ * Inventario P.M.E — Sidebar Navigation Styles
+ * ============================================================
+ *
+ * Estilos para la navegación jerárquica de 3 niveles:
+ *   Nivel 1: Módulo        (ej. Administración y Seguridad)
+ *   Nivel 2: Submódulo     (ej. Usuarios)
+ *   Nivel 3: Funcionalidad (ej. Listar Usuarios)
+ *
+ * Complementa AdminLTE 3.x sin sobreescribir sus clases base.
+ */
+
+/* ─── Encabezados de Módulo (Nivel 1) ─── */
+.nav-sidebar .nav-header-module {
+    padding: 0.75rem 1rem 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #a0aec0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 0.5rem;
+}
+
+.nav-sidebar .nav-header-module:first-child {
+    margin-top: 0;
+}
+
+/* ─── Nivel 2: Submódulos (dentro de Módulo) ─── */
+.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-link {
+    padding-left: 1.5rem;
+    font-size: 0.88rem;
+}
+
+/* ─── Nivel 3: Funcionalidades (dentro de Submódulo) ─── */
+.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link {
+    padding-left: 2.8rem;
+    font-size: 0.84rem;
+    opacity: 0.9;
+}
+
+.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link:hover {
+    opacity: 1;
+}
+
+/* ─── Iconos del Nivel 3 más pequeños ─── */
+.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link > .nav-icon {
+    font-size: 0.65rem;
+    width: 1.2rem;
+    text-align: center;
+}
+
+/* ─── Transición suave para expand/collapse ─── */
+.nav-sidebar .nav-treeview {
+    transition: max-height 0.25s ease-in-out;
+}
+
+/* ─── Separador visual entre módulos ─── */
+.sidebar-module-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 0.25rem 0.8rem;
+}
