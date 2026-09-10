@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../config/app.php';
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo - Estilo Grande y Centrado -->
     <a href="<?php echo $URL; ?>/dashboard" class="brand-link d-flex flex-column align-items-center justify-content-center text-center" style="background-color: #1f2d3d; height: 110px; padding: 10px;">
-        <img src="<?php echo $URL; ?>/public/assets/img/logo-pme.png"
+        <img src="<?php echo $URL; ?>/public/assets/img/logo-sin-texto.png"
             alt="Logo inventario PME"
             class="elevation-2 mb-1"
             style="opacity: 1; width: 65px; height: 65px; object-fit: contain; background: white; border-radius: 50%; padding: 3px;">
@@ -104,6 +104,8 @@ require_once __DIR__ . '/../../config/app.php';
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+
+                        <!-- ── Submódulo: Usuarios ── -->
                         <li class="nav-item" data-permission-any="users.view,users.create">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>

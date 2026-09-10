@@ -1,101 +1,144 @@
-.dashboard{
+/* ═══════════════════════════════════════════════════════════
+   Dashboard — Estilos profesionales
+   ═══════════════════════════════════════════════════════════ */
 
-    display:flex;
+/* ── KPI Cards (small-box) ────────────────────────────────── */
 
-    min-height:100vh;
-
+#dashboard-kpi-row .small-box {
+  border-radius: 0.75rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
-.sidebar{
-
-    width:260px;
-
-    background:#0F172A;
-
-    color:white;
-
-    padding:30px;
-
+#dashboard-kpi-row .small-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.sidebar h2{
-
-    margin-bottom:40px;
-
+#dashboard-kpi-row .small-box .inner h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
 }
 
-.sidebar ul{
-
-    list-style:none;
-
-    padding:0;
-
+#dashboard-kpi-row .small-box .inner p {
+  font-size: 0.9rem;
+  opacity: 0.9;
 }
 
-.sidebar li{
-
-    padding:15px 0;
-
-    cursor:pointer;
-
+#dashboard-kpi-row .small-box .icon > i {
+  font-size: 4rem;
+  opacity: 0.2;
+  transition: opacity 0.2s ease;
 }
 
-.sidebar li:hover{
-
-    color:#60A5FA;
-
+#dashboard-kpi-row .small-box:hover .icon > i {
+  opacity: 0.35;
 }
 
-.content{
-
-    flex:1;
-
-    background:#F1F5F9;
-
-    padding:35px;
-
+#dashboard-kpi-row .small-box .small-box-footer {
+  font-size: 0.8rem;
+  padding: 6px 0;
+  background: rgba(0, 0, 0, 0.1);
+  transition: background 0.2s ease;
 }
 
-.topbar{
-
-    margin-bottom:40px;
-
+#dashboard-kpi-row .small-box:hover .small-box-footer {
+  background: rgba(0, 0, 0, 0.18);
 }
 
-.cards{
+/* ── Cards generales ──────────────────────────────────────── */
 
-    display:grid;
-
-    grid-template-columns:repeat(4,1fr);
-
-    gap:20px;
-
+#dashboard-chart-row .card,
+#dashboard-list-row .card,
+#dashboard-table-row .card {
+  border-radius: 0.75rem;
+  border: none;
+  transition: box-shadow 0.2s ease;
 }
 
-.card{
-
-    background:white;
-
-    padding:25px;
-
-    border-radius:12px;
-
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
-
+#dashboard-chart-row .card:hover,
+#dashboard-list-row .card:hover,
+#dashboard-table-row .card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-.card h3{
+/* ── Listas ────────────────────────────────────────────────── */
 
-    margin-bottom:15px;
-
+#erp_activity_container li,
+#needs_attention_container li,
+#top_selling_container li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  transition: background 0.15s ease;
 }
 
-.card span{
-
-    font-size:30px;
-
-    font-weight:bold;
-
-    color:#2563EB;
-
+#erp_activity_container li:last-child,
+#needs_attention_container li:last-child,
+#top_selling_container li:last-child {
+  border-bottom: none;
 }
+
+#erp_activity_container li:hover,
+#needs_attention_container li:hover,
+#top_selling_container li:hover {
+  background: rgba(0, 0, 0, 0.015);
+  border-radius: 0.35rem;
+}
+
+/* ── Tabla ─────────────────────────────────────────────────── */
+
+#dashboard-table-row .table thead th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#dashboard-table-row .table tbody tr {
+  transition: background 0.15s ease;
+}
+
+#dashboard-table-row .table tbody tr:hover {
+  background: rgba(0, 123, 255, 0.03);
+}
+
+/* ── Loading / Empty states ────────────────────────────────── */
+
+#kpi-loading i,
+.fa-spinner {
+  color: #adb5bd;
+}
+
+.text-light {
+  opacity: 0.35;
+}
+
+/* ── Animación de entrada para KPIs ────────────────────────── */
+
+@keyframes dashboardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#dashboard-kpi-row > .col-lg-3 {
+  animation: dashboardFadeIn 0.4s ease forwards;
+}
+
+#dashboard-kpi-row > .col-lg-3:nth-child(1) { animation-delay: 0.05s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(2) { animation-delay: 0.1s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(3) { animation-delay: 0.15s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(4) { animation-delay: 0.2s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(5) { animation-delay: 0.25s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(6) { animation-delay: 0.3s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(7) { animation-delay: 0.35s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(8) { animation-delay: 0.4s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(9) { animation-delay: 0.45s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(10) { animation-delay: 0.5s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(11) { animation-delay: 0.55s; }
+#dashboard-kpi-row > .col-lg-3:nth-child(12) { animation-delay: 0.6s; }

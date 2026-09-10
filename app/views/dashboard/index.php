@@ -25,90 +25,143 @@ require_once __DIR__ . '/../layouts/head.php';
         <div class="content-wrapper">
             <section class="content pt-4">
                 <div class="container-fluid">
-                    <!-- Contenido dinamico del dashboard -->
-                    <div class="row">
 
-                        <!-- Tarjeta 1: Usuarios -->
-                        <div class="col-lg-3 col-6" data-permission="users.view">
-                            <div class="small-box bg-info">
-                                <div class="inner">
-                                    <h3 id="total_usuarios">0</h3>
-                                    <p>Usuarios</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <a href="<?php echo $URL; ?>/usuarios" class="small-box-footer">
-                                    Ver Usuarios <i class="fas fa-arrow-circle-right"></i>
-                                </a>
-                            </div>
+                    <!-- ═══════════════════════════════════════════════
+                         FILA 1 — KPI Cards (generadas dinámicamente)
+                         ═══════════════════════════════════════════════ -->
+                    <div class="row" id="dashboard-kpi-row">
+                        <!-- El controlador JS inyecta aquí las tarjetas KPI -->
+                        <div class="col-12 text-center py-5" id="kpi-loading">
+                            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                            <p class="text-muted mt-2 mb-0">Cargando indicadores...</p>
                         </div>
-
-                        <!-- Tarjeta 2: Roles Creados -->
-                        <div class="col-lg-3 col-6" data-permission="roles.view">
-                            <div class="small-box bg-success">
-                                <div class="inner">
-                                    <h3 id="total_roles">0</h3>
-                                    <p>Roles Creados</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-user-shield"></i>
-                                </div>
-                                <a href="<?php echo $URL; ?>/roles" class="small-box-footer">
-                                    Ver Roles <i class="fas fa-arrow-circle-right"></i>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Tarjeta 3: Total Productos -->
-                        <div class="col-lg-3 col-6" data-permission="inventory.view">
-                            <div class="small-box bg-warning">
-                                <div class="inner">
-                                    <h3 id="total_productos">0</h3>
-                                    <p>Productos en Inventario</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-boxes"></i>
-                                </div>
-                                <a href="<?php echo $URL; ?>/inventario" class="small-box-footer">
-                                    Ver Inventario <i class="fas fa-arrow-circle-right"></i>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Tarjeta 4: Stock Crítico / Alertas -->
-                        <div class="col-lg-3 col-6" data-permission="inventory.view">
-                            <div class="small-box bg-danger">
-                                <div class="inner">
-                                    <h3 id="stock_bajo">0</h3>
-                                    <p>Stock Bajo / Crítico</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <a href="<?php echo $URL; ?>/inventario/alertas" class="small-box-footer">
-                                    Ver Alertas <i class="fas fa-arrow-circle-right"></i>
-                                </a>
-                            </div>
-                        </div>
-
                     </div>
 
-                    <!-- Segunda Fila: Módulos adicionales (Categorías) -->
-                    <div class="row">
-                        <!-- Tarjeta 5: Categorías -->
-                        <div class="col-lg-3 col-6" data-permission="categories.view">
-                            <div class="small-box bg-primary">
-                                <div class="inner">
-                                    <h3 id="total_categorias">0</h3>
-                                    <p>Categorías</p>
+                    <!-- ═══════════════════════════════════════════════
+                         FILA 2 — Gráficos
+                         ═══════════════════════════════════════════════ -->
+                    <div class="row mt-3" id="dashboard-chart-row">
+                        <div class="col-lg-6 col-md-12 mb-4">
+                            <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
+                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
+                                    <h3 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-chart-bar mr-2 text-primary"></i>Ventas vs Compras
+                                    </h3>
                                 </div>
-                                <div class="icon">
-                                    <i class="fas fa-tags"></i>
+                                <div class="card-body" id="chart-purchases-container">
+                                    <canvas id="chart-purchases-monthly" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                    <div class="text-center text-muted py-4 d-none" id="chart-purchases-empty">
+                                        <i class="fas fa-chart-bar fa-3x mb-3 text-light"></i>
+                                        <p class="mb-0">Sin datos suficientes</p>
+                                    </div>
                                 </div>
-                                <a href="<?php echo $URL; ?>/categorias" class="small-box-footer">
-                                    Ver Categorías <i class="fas fa-arrow-circle-right"></i>
-                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-12 mb-4">
+                            <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
+                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
+                                    <h3 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-chart-line mr-2 text-success"></i>Ventas últimos 30 días
+                                    </h3>
+                                </div>
+                                <div class="card-body" id="chart-sales-container">
+                                    <canvas id="chart-sales-monthly" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                    <div class="text-center text-muted py-4 d-none" id="chart-sales-empty">
+                                        <i class="fas fa-chart-line fa-3x mb-3 text-light"></i>
+                                        <p class="mb-0">Sin datos suficientes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════════════════════════════════
+                         FILA 3 — Listas / Cards informativas
+                         ═══════════════════════════════════════════════ -->
+                    <div class="row mt-2" id="dashboard-list-row">
+                        <div class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card h-100 shadow-sm border-0" style="border-radius: 0.75rem;">
+                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
+                                    <h3 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-server mr-2 text-dark"></i>Actividad del Sistema
+                                    </h3>
+                                </div>
+                                <div class="card-body pt-3 pb-4 px-4">
+                                    <ul class="list-unstyled mb-0" id="erp_activity_container">
+                                        <li class="text-center text-muted py-3">
+                                            <i class="fas fa-spinner fa-spin mr-1"></i> Cargando...
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card h-100 shadow-sm border-0" style="border-radius: 0.75rem;">
+                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
+                                    <h3 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-exclamation-circle mr-2 text-danger"></i>Requiere atención
+                                    </h3>
+                                </div>
+                                <div class="card-body pt-3 pb-4 px-4">
+                                    <ul class="list-unstyled mb-0" id="needs_attention_container">
+                                        <li class="text-center text-muted py-3">
+                                            <i class="fas fa-spinner fa-spin mr-1"></i> Cargando...
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card h-100 shadow-sm border-0" style="border-radius: 0.75rem;">
+                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
+                                    <h3 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-trophy mr-2 text-warning"></i>Productos más vendidos
+                                    </h3>
+                                </div>
+                                <div class="card-body pt-3 pb-4 px-4">
+                                    <ul class="list-unstyled mb-0" id="top_selling_container">
+                                        <li class="text-center text-muted py-3">
+                                            <i class="fas fa-spinner fa-spin mr-1"></i> Cargando...
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════════════════════════════════
+                         FILA 4 — Tabla de últimas ventas
+                         ═══════════════════════════════════════════════ -->
+                    <div class="row mt-2" id="dashboard-table-row">
+                        <div class="col-12 mb-4">
+                            <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
+                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
+                                    <h3 class="card-title font-weight-bold text-dark mb-0">
+                                        <i class="fas fa-receipt mr-2 text-success"></i>Últimas ventas
+                                    </h3>
+                                </div>
+                                <div class="card-body table-responsive p-0 mt-2 px-3 pb-3">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="border-top-0 text-muted font-weight-bold">ID</th>
+                                                <th class="border-top-0 text-muted font-weight-bold">Cliente</th>
+                                                <th class="border-top-0 text-muted font-weight-bold">Monto</th>
+                                                <th class="border-top-0 text-muted font-weight-bold">Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="latest_sales_container">
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-4">
+                                                    <i class="fas fa-spinner fa-spin mr-1"></i> Cargando...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -123,6 +176,9 @@ require_once __DIR__ . '/../layouts/head.php';
         ?>
 
     </div>
+
+    <!-- Chart.js (AdminLTE vendor) -->
+    <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/chart.js/Chart.bundle.min.js"></script>
 
     <!-- Script al final del archivo PHP -->
     <script type="module">

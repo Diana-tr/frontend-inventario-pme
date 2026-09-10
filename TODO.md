@@ -3,6 +3,7 @@
 ## ⏳ En Proceso / Pendientes
 
 - [] Realizar modulo de proveedores. *(Asinado: )*
+- [] Realizar modulo de productos. *(Asignado: )*
 
 ## ✅ Completado
 
