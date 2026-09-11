@@ -2,7 +2,6 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [x] Realizar modulo de proveedores. *(Asinado: Diana)*
 - [] Realizar modulo de productos. *(Asignado: )*
 
 ## ✅ Completado
@@ -27,3 +26,4 @@ Al hacer la prueba, la petición ya llega con éxito al backend, pero la API est
 - [x] Revisar el diseño del software mejoras pequeñas. *(Asignado: Diana)*
 - [x] realizar la implementacion de desactivar el usuario (Borrado logico). *(Asignado: Diana)*
 - [x] Realizar modulo de clientes. *(Asignado: Diana)*
+- [x] Realizar modulo de proveedores. *(Asinado: Diana)*
