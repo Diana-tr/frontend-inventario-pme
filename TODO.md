@@ -2,7 +2,7 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [] Realizar modulo de proveedores. *(Asinado: )*
+- [x] Realizar modulo de proveedores. *(Asinado: Diana)*
 - [] Realizar modulo de productos. *(Asignado: )*
 
 ## ✅ Completado

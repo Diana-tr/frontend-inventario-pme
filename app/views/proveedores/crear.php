@@ -32,12 +32,12 @@ require_once __DIR__ . '/../layouts/head.php';
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0"><i class="fas fa-tags mr-2"></i>Gestión de Clientes</h1>
+                            <h1 class="m-0"><i class="fas fa-tags mr-2"></i>Gestión de Proveedores</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="<?php echo $URL; ?>/dashboard">Inicio</a></li>
-                                <li class="breadcrumb-item active">Cliente</li>
+                                <li class="breadcrumb-item active">Proveedor</li>
                             </ol>
                         </div>
                     </div>
@@ -51,12 +51,12 @@ require_once __DIR__ . '/../layouts/head.php';
                         <div class="col-md-12">
                             <div class="card card-primary shadow-sm">
                                 <div class="card-header">
-                                    <h3 class="card-title"><i class="fas fa-tags mr-1"></i> Formulario de Cliente</h3>
+                                    <h3 class="card-title"><i class="fas fa-tags mr-1"></i> Formulario de Proveedor</h3>
                                 </div>
                                 <!-- /.card-header -->
 
                                 <!-- Formulario inicio -->
-                                <form id="form_crear_cliente" action="#" method="POST" autocomplete="off">
+                                <form id="form_crear_proveedor" action="#" method="POST" autocomplete="off">
                                     <div class="card-body">
                                         <div class="row">
 
@@ -135,7 +135,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                                     <input type="text" name="movile" id="movile" class="form-control" placeholder="Ej. 3207250028">
                                                 </div>
                                             </div>
- <!-- Direccion -->
+                                            <!-- Direccion -->
                                             <div class="col-md-6 form-group">
                                                 <label for="address">Direccion</label>
                                                 <div class="input-group mb-3">
@@ -169,12 +169,12 @@ require_once __DIR__ . '/../layouts/head.php';
                                             
                                             <!-- Teléfono -->
                                             <div class="col-md-6 form-group">
-                                                <label for="phone_number">Teléfono</label>
+                                                <label for="phone">Teléfono</label>
                                                 <div class="input-group mb-3">
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text"><i class="fas fa-phone"></i></span>
                                                     </div>
-                                                    <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Ej. 6011234567">
+                                                    <input type="text" name="phone" id="phone" class="form-control" placeholder="Ej. 6011234567">
                                                 </div>
                                             </div>
 
@@ -197,7 +197,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                             <i class="fas fa-times-circle mr-1"></i> Cancelar
                                         </a>
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save mr-1"></i> Guardar Cliente
+                                            <i class="fas fa-save mr-1"></i> Guardar Proveedor
                                         </button>
                                     </div>
                                 </form>
@@ -223,7 +223,7 @@ require_once __DIR__ . '/../layouts/head.php';
     <!-- Script de inicialización -->
     <script type="module">
         import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-        import CrearClienteController from "<?php echo $URL; ?>/public/assets/js/controllers/cliente/crear.js";
+        import CrearProveedorController from "<?php echo $URL; ?>/public/assets/js/controllers/proveedor/crear.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
             // Inicializar Select2 nativamente
@@ -232,7 +232,7 @@ require_once __DIR__ . '/../layouts/head.php';
             });
 
             await App.bootstrap();
-            CrearClienteController.init();
+            CrearProveedorController.init();
         });
     </script>
 </body>

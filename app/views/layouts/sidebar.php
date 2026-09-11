@@ -233,6 +233,44 @@ require_once __DIR__ . '/../../config/app.php';
                     </ul>
                 </li>
 
+                <!-- ============================================================
+                     MÓDULO 5: Compras y Proveedores
+                     ============================================================ -->
+                <li class="nav-item nav-item-module" data-sidebar-module="compras-proveedores" data-permission-any="suppliers.view,suppliers.create">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>
+                            Compras y Proveedores
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" data-permission-any="suppliers.view,suppliers.create">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-truck"></i>
+                                <p>
+                                    Proveedores
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item" data-permission="suppliers.view">
+                                    <a href="<?php echo $URL; ?>/proveedores" class="nav-link" data-sidebar-path="/proveedores">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Listar Proveedores</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-permission="customers.create">
+                                    <a href="<?php echo $URL; ?>/proveedores/crear" class="nav-link" data-sidebar-path="/proveedores/crear">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Crear Proveedores</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
             </ul>
         </nav>
 
