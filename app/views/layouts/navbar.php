@@ -1,3 +1,8 @@
+<?php
+require_once __DIR__ . '/../../config/app.php';
+?>
+
+
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
@@ -91,60 +96,13 @@
 </nav>
 <!-- /.navbar -->
 
-<script>
-    // Inyectar nombre y avatar con iniciales en el Navbar
-    (function() {
-        try {
-            const raw = localStorage.getItem("inventariopme_user");
-            if (!raw) return;
+<!-- Inicialización limpia mediante el controlador -->
+<script type="module">
+    import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js';
+    import LogoutController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js';
 
-            const user = JSON.parse(raw);
-
-            // 1. Obtener Nombre para mostrar
-            const displayName = user.name || user.first_name || user.username || "Usuario";
-
-            // 2. Obtener Iniciales
-            let initials = "";
-            if (user.first_name && user.last_name) {
-                initials = user.first_name.charAt(0) + user.last_name.charAt(0);
-            } else if (user.name) {
-                const parts = user.name.trim().split(/\s+/);
-                initials = parts[0].charAt(0);
-                if (parts.length > 1) {
-                    initials += parts[parts.length - 1].charAt(0);
-                }
-            } else if (user.first_name) {
-                initials = user.first_name.substring(0, 2);
-            } else if (user.username) {
-                initials = user.username.substring(0, 2);
-            } else {
-                initials = "U";
-            }
-            initials = initials.toUpperCase();
-
-            // 3. Inyectar datos en el DOM
-            const nbUsername = document.getElementById("navbar-username");
-            if (nbUsername) nbUsername.textContent = displayName;
-
-            const nbFullname = document.getElementById("navbar-fullname");
-            if (nbFullname) nbFullname.textContent = displayName;
-
-            // Inyectar rol si existe en el objeto (ej. user.role o usando el nombre del usuario temporalmente)
-            const nbRole = document.getElementById("navbar-role");
-            if (nbRole) {
-                // Si el backend envía un rol en el login, se usaría aquí. Por ahora estático o fallback:
-                nbRole.textContent = "Administrador"; // Ajustar si el usuario tiene una propiedad rol
-            }
-
-            // Inyectar iniciales en avatar pequeño y grande
-            const avatarSmall = document.getElementById("navbar-avatar-small");
-            if (avatarSmall) avatarSmall.querySelector("span").textContent = initials;
-
-            const avatarLarge = document.getElementById("navbar-avatar-large");
-            if (avatarLarge) avatarLarge.querySelector("span").textContent = initials;
-
-        } catch (e) {
-            console.error("Error cargando perfil en navbar", e);
-        }
-    })();
+    document.addEventListener('DOMContentLoaded', () => {
+        NavbarController.init();
+        LogoutController.init();
+    });
 </script>

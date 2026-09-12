@@ -26,6 +26,7 @@ import Storage from "../storage/storage.js";
 const AuthService = (() => {
   const LOGIN_ENDPOINT = "/api/v1/auth/login/";
   const LOGOUT_ENDPOINT = "/api/v1/auth/logout/";
+  const ME_ENDPOINT = "/api/v1/auth/me/";
   const CACHE_KEY = "inventariopme_security_context";
 
   /**
@@ -129,7 +130,6 @@ const AuthService = (() => {
    * manteniendo un nivel alto de seguridad (se borra al cerrar la pestaña).
    */
   async function fetchSecurityContext(forceRefresh = false) {
-
     try {
       if (!forceRefresh) {
         const cachedContext = sessionStorage.getItem(CACHE_KEY);
@@ -192,13 +192,15 @@ const AuthService = (() => {
         ok: response.ok && response.success,
         status: response.status,
         code: response.code ?? "LOGOUT_ERROR",
-        message: response.message ?? "No fue posible cerrar sesión en el servidor, pero se cerró localmente.",
+        message:
+          response.message ??
+          "No fue posible cerrar sesión en el servidor, pero se cerró localmente.",
         data: response.data ?? null,
         errors: response.errors ?? null,
       };
     } catch (error) {
       console.error("[AUTH] Error durante el logout:", error);
-      
+
       // Fallo de red severo, forzamos la limpieza de todas formas
       Storage.clear();
       sessionStorage.removeItem("inventariopme_security_context");
@@ -207,17 +209,78 @@ const AuthService = (() => {
         ok: false,
         status: 0,
         code: "NETWORK_ERROR",
-        message: "No se pudo conectar con el servidor, sesión cerrada localmente.",
+        message:
+          "No se pudo conectar con el servidor, sesión cerrada localmente.",
         data: null,
         errors: error,
       };
     }
   }
 
+  /**
+   * Obtiene la información del usuario autenticado actual desde el backend.
+   * Utiliza el token de acceso inyectado automáticamente por el ApiClient.
+   *
+   * @returns {Promise<Object>}
+   */
+  async function getCurrentUser() {
+    try {
+      const response = await ApiClient.get(ME_ENDPOINT);
+
+      if (!response.ok || !response.success) {
+        return {
+          ok: false,
+          status: response.status,
+          code: response.code ?? "FETCH_USER_ERROR",
+          message:
+            response.message ??
+            "No fue posible obtener la información del usuario.",
+          data: response.data ?? null,
+          errors: response.errors ?? null,
+        };
+      }
+
+      // Extraemos directamente el objeto 'user' del JSON que devuelve el backend
+      const userData = response.data?.user;
+
+      if (userData) {
+        Storage.saveUser(userData);
+      }
+
+      return {
+        ok: true,
+        status: response.status,
+        code: response.code,
+        message: response.message,
+        data: {
+          user: userData,
+        },
+        errors: null,
+      };
+    } catch (error) {
+      console.error("[AUTH] Error obteniendo información del usuario:", error);
+
+      return {
+        ok: false,
+        status: 0,
+        code: "NETWORK_ERROR",
+        message:
+          "No se pudo conectar con el servidor para obtener el perfil del usuario.",
+        data: null,
+        errors: error,
+      };
+    }
+  }
+
+
+
+
+
   return Object.freeze({
     login,
     logout,
     fetchSecurityContext,
+    getCurrentUser,
   });
 })();
 

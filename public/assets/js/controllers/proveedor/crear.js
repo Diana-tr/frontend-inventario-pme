@@ -84,22 +84,33 @@ const CrearProveedorController = (() => {
         NotificationService.loading('Guardando proveedor...');
 
         try {
-            const response = await ProveedorService.crearProveedor(data);
+          const response = await ProveedorService.crearProveedor(data);
 
-            if (response && response.success) {
-                NotificationService.success('El proveedor ha sido creado exitosamente.');
+          if (response && response.success) {
+            NotificationService.success(
+              "El proveedor ha sido creado exitosamente.",
+            );
 
-                // Redirigir al listado después de crear exitosamente
-                setTimeout(() => {
-                    window.location.href = 'listar.php';
-                }, 1500);
-            } else {
-                NotificationService.error(NotificationService.getApiErrorMessage(response));
-                isSubmitting = false;
-            }
-        } catch (error) {
-            NotificationService.error('Ocurrió un error inesperado al guardar el proveedor.');
+            // Redirigir de forma dinámica al listado de la misma carpeta
+            setTimeout(() => {
+              const actualPath = window.location.pathname.substring(
+                0,
+                window.location.pathname.lastIndexOf("/") + 1,
+              );
+              // O bien especificando el archivo exacto de la vista de lista:
+              window.location.href = `${actualPath}`;
+            }, 1500);
+          } else {
+            NotificationService.error(
+              NotificationService.getApiErrorMessage(response),
+            );
             isSubmitting = false;
+          }
+        } catch (error) {
+          NotificationService.error(
+            "Ocurrió un error inesperado al guardar el proveedor.",
+          );
+          isSubmitting = false;
         }
     }
 

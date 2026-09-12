@@ -17,7 +17,7 @@ require_once __DIR__ . '/../../config/app.php';
         <!-- Sidebar user panel -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <div id="sidebar-avatar"
+                <div id="sidebar-avatar-large"
                     class="img-circle elevation-2 d-flex align-items-center justify-content-center"
                     style="width: 34px; height: 34px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; border-radius: 50%;">
                     <span>--</span>
@@ -28,49 +28,15 @@ require_once __DIR__ . '/../../config/app.php';
             </div>
         </div>
 
-        <script>
-            // Inyectar nombre y avatar con iniciales del usuario autenticado
-            (function() {
-                try {
-                    const raw = localStorage.getItem("inventariopme_user");
-                    if (!raw) return;
+        <!-- Inicialización limpia mediante el controlador -->
+        <script type="module">
+            import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js';
+            import LogoutController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js';
 
-                    const user = JSON.parse(raw);
-
-                    // ── Nombre para mostrar ──
-                    const displayName = user.name || user.first_name || user.username || "Usuario";
-                    const nameEl = document.getElementById("sidebar-username");
-                    if (nameEl) nameEl.textContent = displayName;
-
-                    // ── Iniciales para el avatar ──
-                    let initials = "";
-
-                    if (user.first_name && user.last_name) {
-                        // Caso ideal: tiene nombre y apellido separados
-                        initials = user.first_name.charAt(0) + user.last_name.charAt(0);
-                    } else if (user.name) {
-                        // Caso: tiene un campo 'name' con nombre completo
-                        const parts = user.name.trim().split(/\s+/);
-                        initials = parts[0].charAt(0);
-                        if (parts.length > 1) {
-                            initials += parts[parts.length - 1].charAt(0);
-                        }
-                    } else if (user.first_name) {
-                        initials = user.first_name.substring(0, 2);
-                    } else if (user.username) {
-                        initials = user.username.substring(0, 2);
-                    } else {
-                        initials = "U";
-                    }
-
-                    const avatarEl = document.getElementById("sidebar-avatar");
-                    if (avatarEl) {
-                        avatarEl.querySelector("span").textContent = initials.toUpperCase();
-                    }
-                } catch (e) {
-                    /* silenciar */
-                }
-            })();
+            document.addEventListener('DOMContentLoaded', () => {
+                NavbarController.init();
+                LogoutController.init();
+            });
         </script>
 
         <!-- ============================================================
