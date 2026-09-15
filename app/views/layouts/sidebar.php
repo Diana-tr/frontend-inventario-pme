@@ -159,6 +159,56 @@ require_once __DIR__ . '/../../config/app.php';
                             </ul>
                         </li>
                     </ul>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" data-permission-any="products.view,products.create">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-box"></i>
+                                <p>
+                                    Productos
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item" data-permission="products.view">
+                                    <a href="<?php echo $URL; ?>/productos" class="nav-link" data-sidebar-path="/productos">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Gestionar Producto</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-permission="products.create">
+                                    <a href="<?php echo $URL; ?>/productos/crear" class="nav-link" data-sidebar-path="/productos/crear">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Crear Producto</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" data-permission-any="inventory.view,inventory.create">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-warehouse"></i>
+                                <p>
+                                    Inventario
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item" data-permission="inventory.view">
+                                    <a href="<?php echo $URL; ?>/inventario" class="nav-link" data-sidebar-path="/inventario">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Gestionar Inventario</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-permission="inventory.create">
+                                    <a href="<?php echo $URL; ?>/inventario/crear" class="nav-link" data-sidebar-path="/inventario/crear">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Crear Inventario</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </li>
 
                 <!-- ============================================================
