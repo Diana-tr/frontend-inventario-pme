@@ -79,7 +79,17 @@ switch ($path) {
     
     case 'proveedores/crear':
         require_once __DIR__ . '/app/views/proveedores/crear.php';
-        break;    
+        break;
+        
+    //RUTA DEL MODULO DE PRODUCTOS
+    case 'productos':
+    case 'productos/listar':
+        require_once __DIR__ . '/app/views/productos/listar.php';
+        break;
+    
+    case 'productos/crear':
+        require_once __DIR__ . '/app/views/productos/crear.php';
+        break;  
         
     default:
         // Evitar procesar archivos estáticos o directos por error
