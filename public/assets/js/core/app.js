@@ -50,9 +50,9 @@ const App = (() => {
       if (!authenticated) return;
 
       // ─── FASE CRÍTICA: Refrescar permisos desde el backend ───
-      // SIEMPRE forzamos la descarga fresca de permisos para
-      // evitar que se usen permisos obsoletos de otro usuario.
-      await AuthService.fetchSecurityContext(true);
+      // Consultamos el contexto. `false` permite que use el caché de sessionStorage
+      // y evita llamadas a la API redundantes en cada recarga de página.
+      await AuthService.fetchSecurityContext(false);
 
       // ─── Verificación de permiso por ruta ───
       const normalizedPath = currentPath

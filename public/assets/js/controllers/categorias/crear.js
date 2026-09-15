@@ -31,7 +31,7 @@ const CrearCategoriaController = (() => {
             const response = await CategoriaService.listarCategorias();
             if (response && response.success) {
                 const categorias = Array.isArray(response.data) ? response.data : (response.data.results || []);
-                
+
                 categorias.forEach(cat => {
                     const option = new Option(cat.name, cat.id_category, false, false);
                     select.append(option);
@@ -74,12 +74,19 @@ const CrearCategoriaController = (() => {
             const response = await CategoriaService.crearCategoria(data);
 
             if (response && response.success) {
-                NotificationService.success('La categoría ha sido creada exitosamente.');
+              NotificationService.success(
+                "La categoría ha sido creada exitosamente.",
+              );
 
-                // Redirigir al listado después de crear exitosamente
-                setTimeout(() => {
-                    window.location.href = 'index.php';
-                }, 1500);
+              // Redirigir de forma dinámica al listado de la misma carpeta
+              setTimeout(() => {
+                const actualPath = window.location.pathname.substring(
+                  0,
+                  window.location.pathname.lastIndexOf("/") + 1,
+                );
+                // O bien especificando el archivo exacto de la vista de lista:
+                window.location.href = `${actualPath}`;
+              }, 1500);
             } else {
                 NotificationService.error(NotificationService.getApiErrorMessage(response));
                 isSubmitting = false;

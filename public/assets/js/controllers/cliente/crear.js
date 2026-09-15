@@ -87,12 +87,19 @@ const CrearClienteController = (() => {
             const response = await ClienteService.crearCliente(data);
 
             if (response && response.success) {
-                NotificationService.success('El cliente ha sido creado exitosamente.');
+              NotificationService.success(
+                "El cliente ha sido creado exitosamente.",
+              );
 
-                // Redirigir al listado después de crear exitosamente
-                setTimeout(() => {
-                    window.location.href = 'index.php';
-                }, 1500);
+              // Redirigir de forma dinámica al listado de la misma carpeta
+              setTimeout(() => {
+                const actualPath = window.location.pathname.substring(
+                  0,
+                  window.location.pathname.lastIndexOf("/") + 1,
+                );
+                // O bien especificando el archivo exacto de la vista de lista:
+                window.location.href = `${actualPath}`;
+              }, 1500);
             } else {
                 NotificationService.error(NotificationService.getApiErrorMessage(response));
                 isSubmitting = false;

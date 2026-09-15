@@ -1,10 +1,10 @@
 {
   "CC-004": {
-    "occurrences": 1755,
+    "occurrences": 1821,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-23T21:48:38.836Z",
-    "last_seen": "2026-09-12T01:33:42.991Z"
+    "last_seen": "2026-09-14T21:41:23.962Z"
   },
   "CSS-002": {
     "occurrences": 177,
@@ -21,52 +21,52 @@
     "last_seen": "2026-08-23T23:15:17.427Z"
   },
   "ASYNC-001": {
-    "occurrences": 2038,
+    "occurrences": 2167,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:42:23.631Z",
-    "last_seen": "2026-09-12T01:33:42.983Z"
+    "last_seen": "2026-09-14T21:41:23.945Z"
   },
   "CC-001": {
-    "occurrences": 17,
+    "occurrences": 19,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:42:23.752Z",
-    "last_seen": "2026-09-02T21:47:27.699Z"
+    "last_seen": "2026-09-14T21:05:25.328Z"
   },
   "SEC-002": {
-    "occurrences": 40,
+    "occurrences": 44,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:45:08.428Z",
-    "last_seen": "2026-09-02T21:47:42.522Z"
+    "last_seen": "2026-09-14T17:41:36.158Z"
   },
   "JS-001": {
-    "occurrences": 2670,
+    "occurrences": 2730,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:51:04.053Z",
-    "last_seen": "2026-09-12T01:25:46.650Z"
+    "last_seen": "2026-09-14T21:41:23.962Z"
   },
   "SEC-004": {
-    "occurrences": 471,
+    "occurrences": 481,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-27T15:12:36.351Z",
-    "last_seen": "2026-09-02T23:35:36.411Z"
+    "last_seen": "2026-09-14T21:41:23.953Z"
   },
   "CC-002": {
-    "occurrences": 2,
+    "occurrences": 3,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-27T19:31:26.548Z",
-    "last_seen": "2026-09-02T21:47:27.692Z"
+    "last_seen": "2026-09-14T21:05:25.321Z"
   },
   "REACT-003": {
-    "occurrences": 291,
+    "occurrences": 292,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-28T16:53:52.496Z",
-    "last_seen": "2026-09-12T01:25:46.613Z"
+    "last_seen": "2026-09-14T21:33:40.968Z"
   }
 }

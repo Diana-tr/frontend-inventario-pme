@@ -11,6 +11,7 @@
  */
 
 import AuthService from "../../services/auth_service.js";
+import Storage from "../../storage/storage.js";
 
 const NavbarController = (() => {
   /**
@@ -18,30 +19,18 @@ const NavbarController = (() => {
    * @returns {Promise<void>}
    */
   async function init() {
-    let user = null;
+    // 1. Obtener usuario desde el Storage (fuente principal de verdad tras el login)
+    let user = Storage.getUser();
 
-    try {
-      // 1. Intentar obtener el usuario mediante la API
-      const result = await AuthService.getCurrentUser();
-      if (result && result.ok && result.data?.user) {
-        user = result.data.user;
-      }
-    } catch (error) {
-      console.warn(
-        "[NAVBAR] No se pudo obtener el usuario vía API, buscando en almacenamiento local...",
-        error,
-      );
-    }
-
-    // 2. Fallback: Si la API falla, intentar leer desde localStorage (como vimos en tus capturas)
+    // 2. Fallback: Si el Storage está vacío pero el usuario está logueado, intentamos recuperar por API
     if (!user) {
       try {
-        const localUserStr = localStorage.getItem("inventariopme_user");
-        if (localUserStr) {
-          user = JSON.parse(localUserStr);
+        const result = await AuthService.getCurrentUser();
+        if (result && result.ok && result.data?.user) {
+          user = result.data.user;
         }
-      } catch (e) {
-        console.error("[NAVBAR] Error al leer localStorage:", e);
+      } catch (error) {
+        console.warn("[NAVBAR] Error obteniendo usuario por API fallback:", error);
       }
     }
 

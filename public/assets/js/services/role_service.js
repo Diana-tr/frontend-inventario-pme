@@ -3,10 +3,21 @@ import ApiClient from "../core/apiClient.js";
 const RoleService = (() => {
   const ROLES_ENDPOINT = "/api/v1/roles/";
 
-  // Listar todos los roles.
-  async function listarRoles() {
+  const ROLES_CACHE_KEY = "inventariopme_roles_cache";
+
+  // Listar todos los roles (con caché de sesión para evitar peticiones repetidas)
+  async function listarRoles(forceRefresh = false) {
     try {
-      return await ApiClient.get(ROLES_ENDPOINT);
+      if (!forceRefresh) {
+        const cached = sessionStorage.getItem(ROLES_CACHE_KEY);
+        if (cached) return JSON.parse(cached);
+      }
+
+      const response = await ApiClient.get(ROLES_ENDPOINT);
+      if (response.ok && response.success) {
+        sessionStorage.setItem(ROLES_CACHE_KEY, JSON.stringify(response));
+      }
+      return response;
     } catch (error) {
       console.error("[ROLE SERVICE] Error al listar roles:", error);
       throw error;
@@ -51,7 +62,9 @@ const RoleService = (() => {
   // Crear un rol.
   async function crearRol(roleData) {
     try {
-      return await ApiClient.post(ROLES_ENDPOINT, roleData);
+      const response = await ApiClient.post(ROLES_ENDPOINT, roleData);
+      sessionStorage.removeItem(ROLES_CACHE_KEY);
+      return response;
     } catch (error) {
       console.error("[ROLE SERVICE] Error al crear rol:", error);
       throw error;
@@ -61,7 +74,9 @@ const RoleService = (() => {
   // Actualizar parcialmente un rol (PATCH).
   async function actualizarRol(id, roleData) {
     try {
-      return await ApiClient.patch(`${ROLES_ENDPOINT}${id}/`, roleData);
+      const response = await ApiClient.patch(`${ROLES_ENDPOINT}${id}/`, roleData);
+      sessionStorage.removeItem(ROLES_CACHE_KEY);
+      return response;
     } catch (error) {
       console.error(
         `[ROLE SERVICE] Error al actualizar (PATCH) rol ${id}:`,
@@ -74,9 +89,11 @@ const RoleService = (() => {
   // Alternar estado activo/inactivo (DELETE lógico)
   async function cambiarEstadoRol(id, is_active) {
     try {
-      return await ApiClient.patch(`${ROLES_ENDPOINT}${id}/`, {
+      const response = await ApiClient.patch(`${ROLES_ENDPOINT}${id}/`, {
         is_active: is_active,
       });
+      sessionStorage.removeItem(ROLES_CACHE_KEY);
+      return response;
     } catch (error) {
       console.error(
         `[ROLE SERVICE] Error al cambiar estado del rol ${id}:`,
