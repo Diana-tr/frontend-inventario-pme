@@ -8,8 +8,16 @@
  *   Nivel 2: Submódulo     (ej. Usuarios)
  *   Nivel 3: Funcionalidad (ej. Listar Usuarios)
  *
- * Complementa AdminLTE 3.x sin sobreescribir sus clases base.
+ * Aplicando la paleta oficial del proyecto P.M.E.
  */
+
+/* ─── Contenedor Principal del Sidebar (Fondo Azul Petróleo Oscuro) ─── */
+aside, 
+.main-sidebar, 
+.sidebar, 
+nav[class*="sidebar"] {
+    background-color: #172033 !important;
+}
 
 /* ─── Encabezados de Módulo (Nivel 1) ─── */
 .nav-sidebar .nav-header-module {
@@ -18,7 +26,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #a0aec0;
+    color: #CBD5E1; /* Texto de módulos: Gris claro */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -29,10 +37,52 @@
     margin-top: 0;
 }
 
+/* ─── Enlaces y Texto del Menú ─── */
+.nav-sidebar .nav-link {
+    color: #CBD5E1;
+}
+
+/* ─── Iconos de Módulos (Gris azulado) ─── */
+.nav-sidebar .nav-link > .nav-icon {
+    color: #94A3B8;
+}
+
+/* ─── Efecto Hover (Azul petróleo medio) ─── */
+.nav-sidebar .nav-link:hover {
+    background-color: #1E3A5F !important;
+    color: #FFFFFF !important;
+}
+
+.nav-sidebar .nav-link:hover > .nav-icon {
+    color: #FFFFFF !important;
+}
+
+/* ─── Módulo Activo / Seleccionado (Azul P.M.E. #2563EB) ─── */
+.nav-sidebar .nav-link.active,
+.nav-sidebar .nav-item.menu-open > .nav-link {
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+}
+
+.nav-sidebar .nav-link.active > .nav-icon,
+.nav-sidebar .nav-item.menu-open > .nav-link > .nav-icon {
+    color: #FFFFFF !important;
+}
+
 /* ─── Nivel 2: Submódulos (dentro de Módulo) ─── */
 .nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-link {
     padding-left: 1.5rem;
     font-size: 0.88rem;
+}
+
+.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-link:hover {
+    background-color: #1E3A5F !important;
+    color: #FFFFFF !important;
+}
+
+.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-link.active {
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
 }
 
 /* ─── Nivel 3: Funcionalidades (dentro de Submódulo) ─── */
@@ -44,6 +94,14 @@
 
 .nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link:hover {
     opacity: 1;
+    background-color: #1E3A5F !important;
+    color: #FFFFFF !important;
+}
+
+.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link.active {
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+    opacity: 1;
 }
 
 /* ─── Iconos del Nivel 3 más pequeños ─── */
@@ -51,6 +109,11 @@
     font-size: 0.65rem;
     width: 1.2rem;
     text-align: center;
+    color: #94A3B8;
+}
+
+.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link.active > .nav-icon {
+    color: #FFFFFF !important;
 }
 
 /* ─── Transición suave para expand/collapse ─── */
@@ -58,8 +121,8 @@
     transition: max-height 0.25s ease-in-out;
 }
 
-/* ─── Separador visual entre módulos ─── */
+/* ─── Separador visual entre módulos (Gris oscuro de tu maqueta) ─── */
 .sidebar-module-divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid #334155 !important;
     margin: 0.25rem 0.8rem;
-}
+} 
