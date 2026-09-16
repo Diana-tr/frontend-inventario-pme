@@ -16,72 +16,84 @@ const DashboardController = (() => {
       label: "Usuarios Totales",
       icon: "fas fa-users",
       color: "#2563EB",
+      url: "usuarios",
     },
     users_active: {
       type: "kpi",
       label: "Usuarios Activos",
       icon: "fas fa-user-check",
       color: "#16A34A",
+      url: "usuarios",
     },
     roles_distribution: {
       type: "kpi",
       label: "Distribución de Roles",
       icon: "fas fa-user-shield",
       color: "#0F172A",
+      url: "roles",
     },
     customers_total: {
       type: "kpi",
       label: "Total Clientes",
       icon: "fas fa-user-tie",
       color: "#2563EB",
+      url: "clientes",
     },
     customers_recent: {
       type: "kpi",
       label: "Clientes Recientes",
       icon: "fas fa-user-plus",
       color: "#0891B2",
+      url: "clientes",
     },
     suppliers_active: {
       type: "kpi",
       label: "Proveedores Activos",
       icon: "fas fa-truck",
       color: "#16A34A",
+      url: "proveedores",
     },
     products_total: {
       type: "kpi",
       label: "Productos",
       icon: "fas fa-box",
       color: "#2563EB",
+      url: "productos",
     },
     products_low_stock: {
       type: "kpi",
       label: "Productos Bajo Stock",
       icon: "fas fa-exclamation-triangle",
       color: "#F59E0B",
+      url: "inventarios",
     },
     purchases_pending: {
       type: "kpi",
       label: "Compras Pendientes",
       icon: "fas fa-shopping-cart",
       color: "#0891B2",
+      url: "compras",
     },
     purchases_summary: {
       type: "kpi",
       label: "Compras",
       icon: "fas fa-shopping-cart",
       color: "#0891B2",
+      url: "compras,
     },
     sales_summary: {
       type: "kpi",
       label: "Ventas",
       icon: "fas fa-cash-register",
       color: "#16A34A",
+      url: "ventas",
     },
     inventory_alerts: {
       type: "kpi",
       label: "Alertas de Inventario",
       icon: "fas fa-exclamation-triangle",
       color: "#DC2626",
+      url: "inventario",
     },
     purchases_monthly: {
       type: "chart",
@@ -194,11 +206,12 @@ const DashboardController = (() => {
       const displayValue =
         typeof value === "number" ? value.toLocaleString("es-CO") : "0";
       const accentColor = config.color || "#2563EB";
+      const targetUrl = config.url || "#"; // CORREGIDO: Definido correctamente para evitar ReferenceError
 
       const col = document.createElement("div");
       col.className = "col-lg-3 col-md-6 col-sm-12 mb-4";
       col.innerHTML = `
-        <div class="card kpi-card-hover shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #F8FAFC; border-top: 4px solid ${accentColor} !important; cursor: pointer;">
+        <div class="card kpi-card-hover shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #F8FAFC; border-top: 4px solid ${accentColor} !important; ${targetUrl !== "#" ? "cursor: pointer;" : ""}">
           <div class="card-body d-flex align-items-center justify-content-between p-4">
             <div>
               <span class="d-block text-muted font-weight-bold mb-1" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">${config.label}</span>
@@ -209,6 +222,15 @@ const DashboardController = (() => {
             </div>
           </div>
         </div>`;
+
+      // CORREGIDO: Asignación limpia del evento directamente al nodo de la tarjeta recién creada
+      const cardDiv = col.querySelector(".card");
+      if (cardDiv && targetUrl && targetUrl !== "#") {
+        cardDiv.addEventListener("click", () => {
+          window.location.href = targetUrl;
+        });
+      }
+
       row.appendChild(col);
     }
   }
