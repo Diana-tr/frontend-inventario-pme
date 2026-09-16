@@ -6,6 +6,7 @@
  */
 
 import ProductoService from "../../services/producto_service.js";
+import CategoriaService from "../../services/categoria_service.js";
 import SecurityManager from "../../core/security.js";
 import NotificationService from "../../core/notification.js";
 
@@ -31,10 +32,16 @@ const ProductoListController = (() => {
         return tbody;
     }
 
-    function formatDateTime(dateString){
-        if (!dateString) return '-';
+    /**
+     * Formatea una fecha ISO en formato legible con hora.
+     */
+    function formatDateTime(dateString) {
+        if (!dateString) return "N/A";
         const date = new Date(dateString);
-        return date.toLocaleDateString();
+        return date.toLocaleString("es-ES", {
+            dateStyle: "medium",
+            timeStyle: "short",
+        });
     }
 
     /**
@@ -114,13 +121,13 @@ const ProductoListController = (() => {
                             (producto.profit_margin_percentage ?? 0) + "%"
                         );
                         $("#detail_stock").text(
-                            getUnitTypeLabel(producto.stock)
+                            producto.stock ?? "N/A",
                         );
                         $("#detail_minimum_stock").text(
-                            getUnitTypeLabel(producto.minimum_stock)
+                            producto.minimum_stock ?? "N/A",
                         );
                         $("#detail_maximum_stock").text(
-                            getUnitTypeLabel(producto.maximum_stock)
+                            producto.maximum_stock ?? "N/A",
                         );
                         const lowStockHtml = producto.is_low_stock
                             ? '<span class="badge bg-danger">Si</span>'
@@ -212,7 +219,7 @@ const ProductoListController = (() => {
                         ) {
                             const producto = response.data;
 
-                            $("#edit_id").val(
+                            $("#edit_product_id").val(
                                 producto.id_product,
                             );
 
@@ -232,10 +239,14 @@ const ProductoListController = (() => {
                                 producto.description || "",
                             );
 
-                            setCategoryValue(producto);
+                            // Cargar unidades y categorías
+                            // dinámicamente antes de setear
+                            loadEditUnitTypes(
+                                producto.unit,
+                            );
 
-                            $("#edit_unit").val(
-                                producto.unit || "",
+                            await loadEditCategories(
+                                producto,
                             );
 
                             $("#edit_purchase_price").val(
@@ -292,6 +303,9 @@ const ProductoListController = (() => {
                 const productId = $("#edit_product_id").val();
                 const submitButton = $("#btn_guardar_edicion");
 
+                // Limpiar errores de validación previos
+                clearEditValidationErrors();
+
                 const payload = {
                     code: $("#edit_code").val().trim(),
                     barcode: $("#edit_barcode").val().trim(),
@@ -311,6 +325,18 @@ const ProductoListController = (() => {
                         ":checked",
                     ),
                 };
+
+                // Confirmación antes de guardar
+                const confirmResult =
+                    await NotificationService.warning(
+                        "¿Deseas guardar los cambios "
+                        + "realizados en este producto?",
+                        "Confirmar edición",
+                    );
+
+                if (!confirmResult.isConfirmed) {
+                    return;
+                }
 
                 try {
                     submitButton
@@ -335,6 +361,19 @@ const ProductoListController = (() => {
                             "Producto actualizado correctamente.",
                         );
                     } else {
+                        // Mostrar errores de validación
+                        // del backend en los campos
+                        if (
+                            response
+                            && response.errors
+                            && typeof response.errors
+                                === "object"
+                        ) {
+                            showEditValidationErrors(
+                                response.errors,
+                            );
+                        }
+
                         throw response;
                     }
                 } catch (error) {
@@ -627,29 +666,8 @@ const ProductoListController = (() => {
                         response?.success
                         && response.data
                     ) {
-                        const resultsContainer =
-                            response.data;
-
-                        const productos =
-                            Array.isArray(
-                                resultsContainer.results,
-                            )
-                                ? resultsContainer.results
-                                : (
-                                    Array.isArray(
-                                        resultsContainer,
-                                    )
-                                        ? resultsContainer
-                                        : (
-                                            resultsContainer.data
-                                            || []
-                                        )
-                                );
-
-                        const totalRecords =
-                            resultsContainer.count
-                            || productos.length
-                            || 0;
+                        const productos = response.data.results || [];
+                        const totalRecords = response.data.count || 0;
 
                         const rows = productos.map(
                             (producto, index) => {
@@ -914,6 +932,297 @@ const ProductoListController = (() => {
     }
 
     /**
+     * Carga las unidades de medida en el select de edición.
+     *
+     * @param {string} selectedUnit - Unidad actualmente
+     *     seleccionada.
+     */
+    function loadEditUnitTypes(selectedUnit) {
+        const select = $("#edit_unit");
+
+        if (!select.length) {
+            return;
+        }
+
+        select.empty();
+
+        select.append(
+            new Option(
+                "Seleccione una unidad",
+                "",
+                false,
+                false,
+            ),
+        );
+
+        const unitTypes = [
+            { value: "UNIT", label: "Unidad" },
+            { value: "BOX", label: "Caja" },
+            { value: "PACKAGE", label: "Paquete" },
+            { value: "KILOGRAM", label: "Kilogramo" },
+            { value: "GRAM", label: "Gramo" },
+            { value: "METER", label: "Metro" },
+            { value: "LITER", label: "Litro" },
+            { value: "GALLON", label: "Galón" },
+            { value: "ROLL", label: "Rollo" },
+            { value: "PAIR", label: "Par" },
+        ];
+
+        unitTypes.forEach((type) => {
+            const isSelected =
+                type.value === selectedUnit;
+
+            select.append(
+                new Option(
+                    type.label,
+                    type.value,
+                    isSelected,
+                    isSelected,
+                ),
+            );
+        });
+    }
+
+    /**
+     * Carga las categorías en el select de edición.
+     *
+     * @param {Object} producto - Producto actual para
+     *     preseleccionar la categoría.
+     */
+    async function loadEditCategories(producto) {
+        const select = $("#edit_category");
+
+        if (!select.length) {
+            return;
+        }
+
+        try {
+            select.empty();
+
+            select.append(
+                new Option(
+                    "Cargando categorías...",
+                    "",
+                    true,
+                    true,
+                ),
+            );
+
+            const response =
+                await CategoriaService.listarCategorias();
+
+            const categories =
+                getCategoriesFromResponse(response);
+
+            select.empty();
+
+            select.append(
+                new Option(
+                    "Seleccione una categoría",
+                    "",
+                    false,
+                    false,
+                ),
+            );
+
+            categories.forEach((category) => {
+                const catId =
+                    category.id_category
+                    || category.id
+                    || "";
+
+                const catName =
+                    category.name
+                    || category.category_name
+                    || "Sin nombre";
+
+                select.append(
+                    new Option(
+                        catName,
+                        catId,
+                        false,
+                        false,
+                    ),
+                );
+            });
+
+            // Preseleccionar la categoría actual
+            setCategoryValue(producto);
+
+            // Refrescar Select2 si está inicializado
+            if (select.hasClass("select2-hidden-accessible")) {
+                select.trigger("change.select2");
+            }
+        } catch (error) {
+            console.error(
+                "[PRODUCTOS] Error al cargar categorías "
+                + "en edición:",
+                error,
+            );
+
+            select.empty();
+
+            select.append(
+                new Option(
+                    "Error al cargar categorías",
+                    "",
+                    true,
+                    true,
+                ),
+            );
+        }
+    }
+
+    /**
+     * Normaliza la respuesta del endpoint de categorías.
+     *
+     * Permite trabajar tanto con una lista directa como
+     * con respuestas paginadas de Django REST Framework.
+     */
+    function getCategoriesFromResponse(response) {
+        if (!response) {
+            return [];
+        }
+
+        if (Array.isArray(response)) {
+            return response;
+        }
+
+        if (Array.isArray(response.results)) {
+            return response.results;
+        }
+
+        if (Array.isArray(response.data)) {
+            return response.data;
+        }
+
+        if (Array.isArray(response.data?.results)) {
+            return response.data.results;
+        }
+
+        return [];
+    }
+
+    /**
+     * Muestra errores de validación del backend en los
+     * campos del formulario de edición.
+     *
+     * @param {Object} errors - Objeto de errores del
+     *     backend { campo: [mensajes] }.
+     */
+    function showEditValidationErrors(errors) {
+        if (!errors || typeof errors !== "object") {
+            return;
+        }
+
+        const fieldMapping = {
+            code: "edit_code",
+            barcode: "edit_barcode",
+            name: "edit_name",
+            description: "edit_description",
+            category: "edit_category",
+            unit: "edit_unit",
+            purchase_price: "edit_purchase_price",
+            sale_price: "edit_sale_price",
+        };
+
+        Object.entries(errors).forEach(
+            ([field, messages]) => {
+                const inputId = fieldMapping[field];
+
+                if (!inputId) {
+                    return;
+                }
+
+                const input = $(`#${inputId}`);
+
+                if (!input.length) {
+                    return;
+                }
+
+                input.addClass("is-invalid");
+
+                const errorText =
+                    Array.isArray(messages)
+                        ? messages.join(" ")
+                        : String(messages);
+
+                const feedback = $(
+                    '<div class="invalid-feedback">'
+                    + errorText
+                    + "</div>",
+                );
+
+                // Remover feedback previo si existe
+                input
+                    .siblings(".invalid-feedback")
+                    .remove();
+
+                input.after(feedback);
+            },
+        );
+    }
+
+    /**
+     * Limpia todos los errores de validación del
+     * formulario de edición.
+     */
+    function clearEditValidationErrors() {
+        const form = document.getElementById(
+            EDIT_FORM_ID,
+        );
+
+        if (!form) {
+            return;
+        }
+
+        $(form)
+            .find(".is-invalid")
+            .removeClass("is-invalid");
+
+        $(form)
+            .find(".invalid-feedback")
+            .remove();
+    }
+
+    /**
+     * Configura la limpieza de modales al cerrarse.
+     */
+    function setupModalCleanup() {
+        // Limpiar modal de detalles al cerrar
+        $(`#${DETAIL_MODAL_ID}`).on(
+            "hidden.bs.modal",
+            function () {
+                $("#product_modal_loader").show();
+                $("#product_modal_content").hide();
+            },
+        );
+
+        // Limpiar modal de edición al cerrar
+        $(`#${EDIT_MODAL_ID}`).on(
+            "hidden.bs.modal",
+            function () {
+                const form =
+                    document.getElementById(
+                        EDIT_FORM_ID,
+                    );
+
+                if (form) {
+                    form.classList.remove(
+                        "was-validated",
+                    );
+                    form.reset();
+                }
+
+                clearEditValidationErrors();
+
+                $("#edit_product_modal_loader").show();
+                $("#edit_product_modal_content").hide();
+            },
+        );
+    }
+
+    /**
      * Recarga la tabla de productos.
      */
     function loadProductos() {
@@ -935,6 +1244,7 @@ const ProductoListController = (() => {
         setupViewDetailsListener();
         setupEditProductListener();
         setupToggleStatusListener();
+        setupModalCleanup();
     }
 
     return Object.freeze({

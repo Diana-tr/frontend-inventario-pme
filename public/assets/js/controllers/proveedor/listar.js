@@ -347,12 +347,8 @@ const ProveedorListController = (() => {
           });
 
           if (response?.success && response.data) {
-            const resultsContainer = response.data;
-            const proveedores = Array.isArray(resultsContainer.results) 
-              ? resultsContainer.results 
-              : (Array.isArray(resultsContainer) ? resultsContainer : (resultsContainer.data || []));
-            
-            const totalRecords = resultsContainer.count || proveedores.length || 0;
+            const proveedores = response.data.results || [];
+            const totalRecords = response.data.count || 0;
 
             const rows = proveedores.map((proveedor, index) => {
               const statusBadge = proveedor.is_active

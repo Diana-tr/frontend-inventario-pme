@@ -59,13 +59,13 @@ switch ($path) {
         require_once __DIR__ . '/app/views/categorias/crear.php';
         break;
 
-    
+
     //RUTA DEL MODULO DE CLIENTES
     case 'clientes':
     case 'clientes/listar':
         require_once __DIR__ . '/app/views/clientes/listar.php';
         break;
-    
+
     case 'clientes/crear':
         require_once __DIR__ . '/app/views/clientes/crear.php';
         break;
@@ -76,27 +76,42 @@ switch ($path) {
     case 'proveedores/listar':
         require_once __DIR__ . '/app/views/proveedores/listar.php';
         break;
-    
+
     case 'proveedores/crear':
         require_once __DIR__ . '/app/views/proveedores/crear.php';
         break;
-        
+
     //RUTA DEL MODULO DE PRODUCTOS
     case 'productos':
     case 'productos/listar':
         require_once __DIR__ . '/app/views/productos/listar.php';
         break;
-    
+
     case 'productos/crear':
         require_once __DIR__ . '/app/views/productos/crear.php';
-        break;  
-        
+        break;
+
+    //RUTA DEL MODULO DE INVENTARIO
+    case 'inventario':
+    case 'inventario/listar':
+        require_once __DIR__ . '/app/views/inventario/listar.php';
+        break;
+
+    case 'inventario/crear':
+        require_once __DIR__ . '/app/views/inventario/crear.php';
+        break;
+
+    case 'inventario/movimientos':
+        require_once __DIR__ . '/app/views/inventario/movimientos.php';
+        break;
+
+
     default:
         // Evitar procesar archivos estáticos o directos por error
         if (file_exists(__DIR__ . '/' . $path) && is_file(__DIR__ . '/' . $path)) {
-            return false; 
+            return false;
         }
-        
+
         http_response_code(404);
         echo "404 - Página no encontrada: " . htmlspecialchars($path);
         break;

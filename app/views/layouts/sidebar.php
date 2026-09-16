@@ -209,6 +209,25 @@ require_once __DIR__ . '/../../config/app.php';
                             </ul>
                         </li>
                     </ul>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" data-permission-any="inventory.view,inventory.create">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-exchange-alt"></i>
+                                <p>
+                                    Ajuste de inventario
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item" data-permission="inventory.view">
+                                    <a href="<?php echo $URL; ?>/inventario/movimientos" class="nav-link" data-sidebar-path="/inventario/movimientos">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Registrar Movimiento</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </li>
 
                 <!-- ============================================================

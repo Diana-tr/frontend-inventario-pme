@@ -61,7 +61,7 @@ const ProductoService = (() => {
   // Actualizar parcialmente un producto (PATCH).
   async function actualizarProducto(id, productoData) {
     try {
-      return await ApiClient.patch(`${PRODUCTO_ENDPOINT}${id}/`, productoData);
+      return await ApiClient.patch(`${PRODUCTOS_ENDPOINT}${id}/`, productoData);
     } catch (error) {
       console.error(
         `[PRODUCTO SERVICE] Error al actualizar (PATCH) producto ${id}:`,

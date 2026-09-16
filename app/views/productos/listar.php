@@ -1241,6 +1241,12 @@ require_once __DIR__ . '/../layouts/head.php';
 
         document.addEventListener("DOMContentLoaded", async () => {
 
+            // Inicializar Select2 en el modal de edición
+            $("#edit_category").select2({
+                theme: "bootstrap4",
+                dropdownParent: $("#modalEditarProducto"),
+            });
+
             await App.bootstrap();
 
             ProductoListController.init();

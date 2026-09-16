@@ -347,12 +347,8 @@ const ClienteListController = (() => {
           });
 
           if (response?.success && response.data) {
-            const resultsContainer = response.data;
-            const clientes = Array.isArray(resultsContainer.results) 
-              ? resultsContainer.results 
-              : (Array.isArray(resultsContainer) ? resultsContainer : (resultsContainer.data || []));
-            
-            const totalRecords = resultsContainer.count || clientes.length || 0;
+            const clientes = response.data.results || [];
+            const totalRecords = response.data.count || 0;
 
             const rows = clientes.map((cliente, index) => {
               const statusBadge = cliente.is_active
