@@ -79,7 +79,7 @@ const DashboardController = (() => {
       label: "Compras",
       icon: "fas fa-shopping-cart",
       color: "#0891B2",
-      url: "compras,
+      url: "compras",
     },
     sales_summary: {
       type: "kpi",

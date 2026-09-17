@@ -15,8 +15,8 @@ const Config = Object.freeze({
   SESSION_IDLE_TIMEOUT: 1800000,
 
   BASE_PATH: "/frontend-inventario-pme",
-  DASHBOARD_PATH: "/app/views/dashboard/index.php",
-  LOGIN_PATH: "/app/views/auth/login.php",
+  DASHBOARD_PATH: "/dashboard",
+  LOGIN_PATH: "/",
 });
 
 export default Config;
