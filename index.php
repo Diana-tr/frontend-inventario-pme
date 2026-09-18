@@ -105,6 +105,16 @@ switch ($path) {
         require_once __DIR__ . '/app/views/inventario/movimientos.php';
         break;
 
+    //RUTA DEL MODULO DE COMPRAS
+    case 'compras':
+    case 'compras/listar':
+        require_once __DIR__ . '/app/views/compras/listar.php';
+        break;
+
+    case 'compras/crear':
+        require_once __DIR__ . '/app/views/compras/crear.php';
+        break;
+
 
     default:
         // Evitar procesar archivos estáticos o directos por error
