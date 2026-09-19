@@ -2,9 +2,7 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [] Implementar modulo de inventario
-- [] Implementar modulo de compras se debe realizar el endpoint por que aun no esta creada la app en el backend.
-- [] Implementar modulo de ventas se debe realizar el endpoint por que aun no esta creada la app en el backend.
+- [] Implementar modulo de ventas se debe realizar el endpoint por que aun no esta creada la app en el backend. *(Asignado: )*
 
 ## ✅ Completado
 
@@ -30,3 +28,5 @@ Al hacer la prueba, la petición ya llega con éxito al backend, pero la API est
 - [x] Realizar modulo de clientes. *(Asignado: Diana)*
 - [x] Realizar modulo de proveedores. *(Asinado: Diana)*
 - [x] Realizar modulo de productos. *(Asignado:Diana )*
+- [x] Implementar modulo de inventario *(Asignado: Jhan)*
+- [x] Implementar modulo de compras se debe realizar el endpoint por que aun no esta creada la app en el backend. *(Asignado: Jhan)*
