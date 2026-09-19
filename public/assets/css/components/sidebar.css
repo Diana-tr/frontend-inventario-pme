@@ -125,4 +125,56 @@ nav[class*="sidebar"] {
 .sidebar-module-divider {
     border-top: 1px solid #334155 !important;
     margin: 0.25rem 0.8rem;
-} 
+}
+
+/* ============================================================
+   Estilos Profesionales para el Scroll del Sidebar
+   ============================================================ */
+
+/* Asegurar que el contenedor principal del sidebar tenga el alto correcto */
+aside.main-sidebar .sidebar {
+    height: calc(100vh - 110px) !important; /* Resta la altura del logo (110px) */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 60px !important; /* Espacio extra al final para que no se corten las últimas opciones */
+}
+
+/* Scrollbar personalizado (WebKit: Chrome, Safari, Edge) */
+aside.main-sidebar .sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+aside.main-sidebar .sidebar::-webkit-scrollbar-track {
+    background: transparent; 
+}
+aside.main-sidebar .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15); 
+    border-radius: 10px;
+}
+aside.main-sidebar .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4); 
+}
+
+/* Scrollbar personalizado para Firefox */
+aside.main-sidebar .sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Asegurar que si AdminLTE inyecta 'os-viewport' tome nuestro diseño de scroll */
+.os-viewport {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent !important;
+}
+.os-viewport::-webkit-scrollbar {
+    width: 6px;
+}
+.os-viewport::-webkit-scrollbar-track {
+    background: transparent; 
+}
+.os-viewport::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15); 
+    border-radius: 10px;
+}
+.os-viewport::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4); 
+}

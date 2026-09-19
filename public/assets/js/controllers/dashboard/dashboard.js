@@ -325,9 +325,17 @@ const DashboardController = (() => {
   }
 
   function renderLists(lists) {
-    for (const { code, value, config } of lists) {
+    for (const { code, value, config, count } of lists) {
       const container = document.getElementById(config.containerId);
       if (!container) continue;
+
+      // Actualizar el contador en el título si fue provisto
+      if (count !== undefined && code === "needs_attention") {
+        const cardTitle = container.closest('.card').querySelector('.card-title');
+        if (cardTitle) {
+          cardTitle.innerHTML = `<i class="${config.icon || 'fas fa-exclamation-circle'} mr-2 text-danger"></i>${config.label || 'Requiere atención'} (${count})`;
+        }
+      }
 
       if (Array.isArray(value) && value.length > 0) {
         container.innerHTML = "";
@@ -344,12 +352,31 @@ const DashboardController = (() => {
             </div>`;
           container.appendChild(li);
         }
+        
+        // Agregar botón de "Ver inventario" si es needs_attention
+        if (code === "needs_attention") {
+          const btnLi = document.createElement("li");
+          btnLi.className = "text-center mt-3 pt-3 border-top";
+          btnLi.innerHTML = `<a href="/frontend-inventario-pme/inventario" class="text-primary font-weight-bold" style="text-decoration: none;">Ver inventario <i class="fas fa-arrow-right ml-1"></i></a>`;
+          container.appendChild(btnLi);
+        }
       } else {
-        container.innerHTML = `
-          <li class="text-center text-muted py-3">
-            <i class="fas fa-inbox fa-2x mb-2 d-block text-light"></i>
-            No hay datos disponibles
-          </li>`;
+        if (code === "needs_attention") {
+          container.innerHTML = `
+            <li class="text-center py-4">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background-color: #dcfce7; color: #16a34a;">
+                  <i class="fas fa-check fa-2x"></i>
+              </div>
+              <h5 class="font-weight-bold text-dark mb-1">Todo en orden</h5>
+              <p class="text-muted mb-0 small">No hay productos con stock crítico.</p>
+            </li>`;
+        } else {
+          container.innerHTML = `
+            <li class="text-center text-muted py-3">
+              <i class="fas fa-inbox fa-2x mb-2 d-block text-light"></i>
+              No hay datos disponibles
+            </li>`;
+        }
       }
     }
   }
