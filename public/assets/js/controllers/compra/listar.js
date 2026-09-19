@@ -116,6 +116,14 @@ const CompraListController = (() => {
                 <div class="alert alert-info py-2 px-3 mb-0" style="font-size: 0.9rem;">
                   <i class="fas fa-file-invoice mr-2"></i> Factura <strong>${invoice.invoice_number}</strong> 
                   <span class="badge badge-light ml-2">${invoice.status}</span>
+                  <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-info btn-view-invoice" data-id="${invoice.id}">
+                        <i class="fas fa-eye mr-1"></i> Ver factura
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-info btn-print-invoice ml-1" data-id="${invoice.id}">
+                        <i class="fas fa-print mr-1"></i> Imprimir
+                    </button>
+                  </div>
                 </div>
               `);
             } else {
@@ -218,6 +226,81 @@ const CompraListController = (() => {
         NotificationService.error(errorMsg);
       } finally {
         $(this).prop("disabled", false);
+      }
+    });
+
+    $(document).off("click", ".btn-print-invoice, .btn-print-invoice-modal").on("click", ".btn-print-invoice, .btn-print-invoice-modal", function (e) {
+      e.preventDefault();
+      const invoiceId = $(this).data("id");
+      NotificationService.toastInfo("Funcionalidad de impresión en desarrollo...");
+    });
+
+    $(document).off("click", ".btn-view-invoice").on("click", ".btn-view-invoice", async function (e) {
+      e.preventDefault();
+      const invoiceId = $(this).data("id");
+      if (!invoiceId) return;
+
+      $("#factura_modal_loader").show();
+      $("#factura_modal_content").hide();
+      $("#modalVisualizarFactura").modal("show");
+
+      try {
+        const response = await CompraService.obtenerFacturaPorId(invoiceId);
+        if (response && response.success && response.data) {
+          const factura = response.data;
+          
+          $("#factura_modal_number").text(factura.invoice_number);
+          $("#factura_modal_date").text(factura.issue_date || "N/A");
+          
+          if (factura.template) {
+            $("#factura_modal_header_template").html(factura.template.header_content || "");
+            $("#factura_modal_footer_template").html(factura.template.footer_content || "");
+          } else {
+            $("#factura_modal_header_template").empty();
+            $("#factura_modal_footer_template").empty();
+          }
+          
+          let badgeClass = "badge-secondary";
+          let statusLabel = factura.status;
+          if(statusLabel === "DRAFT") { badgeClass = "badge-warning"; statusLabel = "Borrador"; }
+          else if(statusLabel === "ISSUED") { badgeClass = "badge-success"; statusLabel = "Emitida"; }
+          else if(statusLabel === "CANCELLED") { badgeClass = "badge-danger"; statusLabel = "Anulada"; }
+          
+          $("#factura_modal_status").html(`<span class="badge ${badgeClass}">${statusLabel}</span>`);
+          $("#factura_modal_purchase").text(factura.purchase || "N/A");
+          $("#factura_modal_notes").text(factura.notes || "Sin observaciones");
+          
+          const tbody = $("#factura_modal_items");
+          tbody.empty();
+          
+          if (factura.items && factura.items.length > 0) {
+            factura.items.forEach(item => {
+              tbody.append(`
+                <tr>
+                  <td>${item.product_name || `Producto #${item.product}`}</td>
+                  <td class="text-center">${item.quantity}</td>
+                  <td class="text-right">${formatCurrency(item.unit_price)}</td>
+                  <td class="text-right">${formatCurrency(item.subtotal)}</td>
+                </tr>
+              `);
+            });
+          } else {
+            tbody.append('<tr><td colspan="4" class="text-center text-muted">No hay ítems en esta factura.</td></tr>');
+          }
+          
+          $("#factura_modal_subtotal").text(formatCurrency(factura.subtotal));
+          $("#factura_modal_total").text(formatCurrency(factura.total));
+          $(".btn-print-invoice-modal").data("id", factura.id);
+
+          $("#factura_modal_loader").hide();
+          $("#factura_modal_content").fadeIn();
+        } else {
+          throw new Error("No se pudo cargar la factura");
+        }
+      } catch (error) {
+        console.error("Error cargando factura:", error);
+        $("#modalVisualizarFactura").modal("hide");
+        NotificationService.toastError("No se pudo cargar el detalle de la factura");
       }
     });
   }

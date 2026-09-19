@@ -8,3 +8,4 @@
 if (isset($router)) {
     $router->add('/categorias', 'app/views/categorias/index.php');
 }
+

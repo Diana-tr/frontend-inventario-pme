@@ -115,6 +115,10 @@ switch ($path) {
         require_once __DIR__ . '/app/views/compras/crear.php';
         break;
 
+    case 'compras/facturas':
+        require_once __DIR__ . '/app/views/compras/facturas.php';
+        break;
+
 
     default:
         // Evitar procesar archivos estáticos o directos por error

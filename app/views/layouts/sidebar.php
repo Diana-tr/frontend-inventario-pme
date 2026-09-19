@@ -326,6 +326,12 @@ require_once __DIR__ . '/../../config/app.php';
                                         <p>Registrar compra</p>
                                     </a>
                                 </li>
+                                <li class="nav-item" data-permission="purchases.view">
+                                    <a href="<?php echo $URL; ?>/compras/facturas" class="nav-link" data-sidebar-path="/compras/facturas">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Ver facturas</p>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     </ul>

@@ -194,6 +194,77 @@ require_once __DIR__ . '/../layouts/head.php';
         </div>
     </div>
 
+    <!-- Modal Visualizar Factura -->
+    <div class="modal fade" id="modalVisualizarFactura" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title"><i class="fas fa-file-invoice mr-2"></i>Factura: <span id="factura_modal_number"></span></h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- loader -->
+                    <div id="factura_modal_loader" class="text-center py-4">
+                        <div class="spinner-border text-info" role="status"></div>
+                    </div>
+                    <!-- content -->
+                    <div id="factura_modal_content" style="display:none;">
+                        
+                        <!-- Template Header -->
+                        <div id="factura_modal_header_template" class="w-100 mb-3"></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <strong>Fecha Emisión:</strong> <span id="factura_modal_date"></span><br>
+                                <strong>Estado:</strong> <span id="factura_modal_status"></span><br>
+                            </div>
+                            <div class="col-sm-6 text-right">
+                                <strong>Compra Asociada:</strong> #<span id="factura_modal_purchase"></span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center">Cant.</th>
+                                        <th class="text-right">Precio Unit.</th>
+                                        <th class="text-right">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="factura_modal_items"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="3" class="text-right">Subtotal:</th>
+                                        <th class="text-right" id="factura_modal_subtotal"></th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="3" class="text-right text-success">Total:</th>
+                                        <th class="text-right text-success" id="factura_modal_total"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <strong>Observaciones:</strong>
+                            <p id="factura_modal_notes" class="text-muted"></p>
+                        </div>
+
+                        <!-- Template Footer -->
+                        <div id="factura_modal_footer_template" class="w-100 mt-4"></div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-info btn-print-invoice-modal" data-id=""><i class="fas fa-print mr-1"></i> Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Select2 JS -->
     <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/js/select2.full.min.js"></script>
 

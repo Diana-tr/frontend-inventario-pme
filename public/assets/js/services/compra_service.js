@@ -105,6 +105,28 @@ const CompraService = (() => {
     }
   }
 
+  async function listarFacturasPaginadas(params = {}) {
+    try {
+      const query = new URLSearchParams();
+
+      if (params.page) query.set("page", params.page);
+      if (params.page_size) query.set("page_size", params.page_size);
+      if (params.search) query.set("search", params.search);
+      if (params.ordering) query.set("ordering", params.ordering);
+      if (params.document_type) query.set("document_type", params.document_type);
+
+      const queryString = query.toString();
+      const url = queryString
+        ? `${INVOICES_ENDPOINT}?${queryString}`
+        : INVOICES_ENDPOINT;
+
+      return await ApiClient.get(url);
+    } catch (error) {
+      console.error("[COMPRA SERVICE] Error al listar facturas paginadas:", error);
+      throw error;
+    }
+  }
+
   return Object.freeze({
     listarComprasPaginadas,
     obtenerCompraPorId,
@@ -114,7 +136,8 @@ const CompraService = (() => {
     completarCompra,
     cancelarCompra,
     obtenerFacturasPorCompra,
-    obtenerFacturaPorId
+    obtenerFacturaPorId,
+    listarFacturasPaginadas
   });
 })();
 
