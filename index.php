@@ -119,6 +119,20 @@ switch ($path) {
         require_once __DIR__ . '/app/views/compras/facturas.php';
         break;
 
+    //RUTA DEL MODULO DE VENTAS
+    case 'ventas':
+    case 'ventas/listar':
+        require_once __DIR__ . '/app/views/ventas/listar.php';
+        break;
+
+    case 'ventas/crear':
+        require_once __DIR__ . '/app/views/ventas/crear.php';
+        break;
+
+    case 'ventas/facturas':
+        require_once __DIR__ . '/app/views/ventas/facturas.php';
+        break;
+
 
     default:
         // Evitar procesar archivos estáticos o directos por error

@@ -265,6 +265,35 @@ require_once __DIR__ . '/../../config/app.php';
                                 </li>
                             </ul>
                         </li>
+                        <li class="nav-item" data-permission-any="sales.view,sales.create">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-user-tie"></i>
+                                <p>
+                                    Ventas
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item" data-permission="customers.view">
+                                    <a href="<?php echo $URL; ?>/ventas" class="nav-link" data-sidebar-path="/ventas">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Gestion de Ventas</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-permission="sales.create">
+                                    <a href="<?php echo $URL; ?>/ventas/crear" class="nav-link" data-sidebar-path="/ventas/crear">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Crear Venta</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-permission="sales.create">
+                                    <a href="<?php echo $URL; ?>/ventas/facturas" class="nav-link" data-sidebar-path="/ventas/facturas">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Facturas de Ventas</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
 
