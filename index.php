@@ -129,6 +129,10 @@ switch ($path) {
         require_once __DIR__ . '/app/views/ventas/crear.php';
         break;
 
+    case 'ventas/pos':
+        require_once __DIR__ . '/app/views/ventas/pos.php';
+        break;
+
     case 'ventas/facturas':
         require_once __DIR__ . '/app/views/ventas/facturas.php';
         break;

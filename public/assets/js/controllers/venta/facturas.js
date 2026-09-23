@@ -90,12 +90,19 @@ const FacturaVentaController = (() => {
             );
 
             if (factura.template) {
-              $("#factura_modal_header_template").html(
-                factura.template.header_content || "",
-              );
-              $("#factura_modal_footer_template").html(
-                factura.template.footer_content || "",
-              );
+              let headerHTML = factura.template.header_content || "";
+              let footerHTML = factura.template.footer_content || "";
+              
+              const compName = factura.company_name_snapshot || "Inventario P.M.E";
+              const compTax = factura.company_tax_id_snapshot ? `NIT: ${factura.company_tax_id_snapshot}` : "";
+              
+              headerHTML = headerHTML.replace(/{{company_name}}/g, compName)
+                                     .replace(/{{company_tax_id}}/g, compTax);
+              footerHTML = footerHTML.replace(/{{company_name}}/g, compName)
+                                     .replace(/{{company_tax_id}}/g, compTax);
+
+              $("#factura_modal_header_template").html(headerHTML);
+              $("#factura_modal_footer_template").html(footerHTML);
             } else {
               $("#factura_modal_header_template").empty();
               $("#factura_modal_footer_template").empty();

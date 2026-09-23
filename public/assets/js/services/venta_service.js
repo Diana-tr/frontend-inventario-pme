@@ -2,6 +2,7 @@ import ApiClient from "../core/apiClient.js";
 
 const VentaService = (() => {
   const SALES_ENDPOINT = "/api/v1/sales/";
+  const INVOICES_ENDPOINT = "/api/v1/invoices/";
 
   // Listar ventas con parámetros de paginación server-side.
   async function listarVentasPaginadas(params = {}) {
@@ -12,6 +13,8 @@ const VentaService = (() => {
       if (params.page_size) query.set("page_size", params.page_size);
       if (params.search) query.set("search", params.search);
       if (params.ordering) query.set("ordering", params.ordering);
+      if (params.status) query.set("status", params.status);
+      if (params.customer_id) query.set("customer_id", params.customer_id);
 
       const queryString = query.toString();
       const url = queryString
@@ -35,12 +38,22 @@ const VentaService = (() => {
     }
   }
 
-  // Crear una nueva venta.
+  // Crear una nueva venta (flujo admin PENDING).
   async function crearVenta(ventaData) {
     try {
       return await ApiClient.post(SALES_ENDPOINT, ventaData);
     } catch (error) {
       console.error("[VENTA SERVICE] Error al crear venta:", error);
+      throw error;
+    }
+  }
+
+  // Quick Sale: crear y completar en una sola operación atómica (flujo POS).
+  async function quickSale(ventaData) {
+    try {
+      return await ApiClient.post(`${SALES_ENDPOINT}quick-sale/`, ventaData);
+    } catch (error) {
+      console.error("[VENTA SERVICE] Error en quick sale POS:", error);
       throw error;
     }
   }
@@ -108,31 +121,35 @@ const VentaService = (() => {
     }
   }
 
-  // Facturas
+  // Obtener facturas asociadas a una venta por saleId.
+  // FIX: usa el endpoint de invoices, no de sales.
   async function obtenerFacturasPorVentas(saleId) {
     try {
-      return await ApiClient.get(`${SALES_ENDPOINT}?purchase=${saleId}`);
+      return await ApiClient.get(`${INVOICES_ENDPOINT}?sale_id=${saleId}`);
     } catch (error) {
       console.error(
-        `[VENTA SERVICE] Error al obtener facturas de la venta ${ventaId}:`,
+        `[VENTA SERVICE] Error al obtener facturas de la venta ${saleId}:`,
         error,
       );
       throw error;
     }
   }
 
-  async function obtenerFacturaPorId(saleId) {
+  // Obtener factura por ID.
+  async function obtenerFacturaPorId(facturaId) {
     try {
-      return await ApiClient.get(`${SALES_ENDPOINT}${saleId}/`);
+      return await ApiClient.get(`${INVOICES_ENDPOINT}${facturaId}/`);
     } catch (error) {
       console.error(
-        `[SALE SERVICE] Error al obtener factura ${saleId}:`,
+        `[VENTA SERVICE] Error al obtener factura ${facturaId}:`,
         error,
       );
       throw error;
     }
   }
 
+  // Listar facturas paginadas.
+  // FIX: usa el endpoint de invoices, no de sales.
   async function listarFacturasPaginadas(params = {}) {
     try {
       const query = new URLSearchParams();
@@ -146,13 +163,13 @@ const VentaService = (() => {
 
       const queryString = query.toString();
       const url = queryString
-        ? `${SALES_ENDPOINT}?${queryString}`
-        : SALES_ENDPOINT;
+        ? `${INVOICES_ENDPOINT}?${queryString}`
+        : INVOICES_ENDPOINT;
 
       return await ApiClient.get(url);
     } catch (error) {
       console.error(
-        "[COMPRA SERVICE] Error al listar facturas paginadas:",
+        "[VENTA SERVICE] Error al listar facturas paginadas:",
         error,
       );
       throw error;
@@ -163,6 +180,7 @@ const VentaService = (() => {
     listarVentasPaginadas,
     obtenerVentaPorId,
     crearVenta,
+    quickSale,
     actualizarVenta,
     actualizarParcialVenta,
     desactivarVenta,

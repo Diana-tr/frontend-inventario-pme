@@ -267,7 +267,7 @@ require_once __DIR__ . '/../../config/app.php';
                         </li>
                         <li class="nav-item" data-permission-any="sales.view,sales.create">
                             <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-user-tie"></i>
+                                <i class="nav-icon fas fa-cash-register"></i>
                                 <p>
                                     Ventas
                                     <i class="right fas fa-angle-left"></i>
@@ -283,7 +283,13 @@ require_once __DIR__ . '/../../config/app.php';
                                 <li class="nav-item" data-permission="sales.create">
                                     <a href="<?php echo $URL; ?>/ventas/crear" class="nav-link" data-sidebar-path="/ventas/crear">
                                         <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Venta</p>
+                                        <p>Factura Venta (Formal)</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-permission="sales.create">
+                                    <a href="<?php echo $URL; ?>/ventas/pos" class="nav-link" data-sidebar-path="/ventas/pos">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Punto de Venta (POS)</p>
                                     </a>
                                 </li>
                                 <li class="nav-item" data-permission="sales.create">

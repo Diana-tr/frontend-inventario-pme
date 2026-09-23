@@ -249,6 +249,105 @@ const VentaListController = (() => {
       });
 
     $(document)
+      .off("click", ".btn-view-invoice")
+      .on("click", ".btn-view-invoice", async function (e) {
+        e.preventDefault();
+        const invoiceId = $(this).data("id");
+
+        if (!invoiceId) return;
+
+        // No ocultamos el modal de detalles de venta para que se superpongan
+        $("#factura_modal_loader").show();
+        $("#factura_modal_content").hide();
+        $("#modalVisualizarFactura").modal("show");
+
+        // Restaurar el scroll al modal principal cuando se cierre el de factura
+        $("#modalVisualizarFactura").off('hidden.bs.modal').on('hidden.bs.modal', function () {
+            if ($(`#${DETAIL_MODAL_ID}`).is(':visible')) {
+                $('body').addClass('modal-open');
+            }
+        });
+
+        try {
+          const response = await VentaService.obtenerFacturaPorId(invoiceId);
+
+          if (response && response.success && response.data) {
+            const factura = response.data;
+
+            $("#factura_modal_number").text(factura.invoice_number);
+            $("#factura_modal_date").text(
+              factura.issue_date ? formatDate(factura.issue_date) : "N/A",
+            );
+            
+            // Format status for invoice
+            let statusBadge = "";
+            if (factura.status === "DRAFT") statusBadge = '<span class="badge badge-warning px-3 py-2" style="border-radius:20px;font-size:0.75rem">Borrador</span>';
+            else if (factura.status === "ISSUED") statusBadge = '<span class="badge badge-success px-3 py-2" style="border-radius:20px;font-size:0.75rem">Emitida</span>';
+            else if (factura.status === "CANCELLED") statusBadge = '<span class="badge badge-danger px-3 py-2" style="border-radius:20px;font-size:0.75rem">Anulada</span>';
+            else statusBadge = `<span class="badge badge-secondary px-3 py-2" style="border-radius:20px;font-size:0.75rem">${factura.status}</span>`;
+
+            $("#factura_modal_status").html(statusBadge);
+            $("#factura_modal_sale").text(
+              factura.sale ? `Venta #${factura.sale}` : "N/A",
+            );
+            $("#factura_modal_notes").text(
+              factura.notes || "Sin observaciones",
+            );
+
+            if (factura.template) {
+              $("#factura_modal_header_template").html(
+                factura.template.header_content || "",
+              );
+              $("#factura_modal_footer_template").html(
+                factura.template.footer_content || "",
+              );
+            } else {
+              $("#factura_modal_header_template").empty();
+              $("#factura_modal_footer_template").empty();
+            }
+
+            $("#factura_modal_subtotal").text(formatCurrency(factura.subtotal));
+            $("#factura_modal_total").text(formatCurrency(factura.total));
+
+            const tbody = $("#factura_modal_items");
+            tbody.empty();
+            if (factura.items && factura.items.length > 0) {
+              factura.items.forEach((item) => {
+                const tr = `
+                  <tr>
+                    <td>${item.product_name || `Producto #${item.product}`}</td>
+                    <td class="text-center">${item.quantity}</td>
+                    <td class="text-right">${formatCurrency(item.unit_price)}</td>
+                    <td class="text-right">${formatCurrency(item.subtotal)}</td>
+                  </tr>
+                `;
+                tbody.append(tr);
+              });
+            } else {
+              tbody.append(
+                '<tr><td colspan="4" class="text-center text-muted">No hay ítems en esta factura.</td></tr>',
+              );
+            }
+
+            $(".btn-print-invoice-modal").data("id", factura.id);
+
+            $("#factura_modal_loader").hide();
+            $("#factura_modal_content").fadeIn();
+          } else {
+            throw new Error(
+              "Respuesta inválida al consultar la factura de venta.",
+            );
+          }
+        } catch (error) {
+          console.error("[VENTAS] Error al obtener detalle de factura:", error);
+          $("#modalVisualizarFactura").modal("hide");
+          NotificationService.toastError(
+            "No se pudo cargar el detalle de la factura.",
+          );
+        }
+      });
+
+    $(document)
       .off("click", ".btn-print-invoice, .btn-print-invoice-modal")
       .on(
         "click",
