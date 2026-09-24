@@ -65,7 +65,7 @@ const DashboardController = (() => {
       label: "Productos Bajo Stock",
       icon: "fas fa-exclamation-triangle",
       color: "#F59E0B",
-      url: "inventarios",
+      url: "inventario",
     },
     purchases_pending: {
       type: "kpi",
