@@ -8,6 +8,8 @@
 import VentaService from "../../services/venta_service.js";
 import SecurityManager from "../../core/security.js";
 import NotificationService from "../../core/notification.js";
+import DocumentTemplateRenderer from "../../utils/DocumentTemplateRenderer.js";
+import { formatCurrency, renderInvoiceItems } from "../../utils/invoice_utils.js";
 
 const VentaListController = (() => {
   const TABLE_BODY_ID = "tablaVentasBody";
@@ -31,13 +33,7 @@ const VentaListController = (() => {
     });
   }
 
-  function formatCurrency(amount) {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 2,
-    }).format(amount);
-  }
+  // formatCurrency se importa de invoice_utils.js
 
   function getStatusBadge(status) {
     const badges = {
@@ -294,40 +290,53 @@ const VentaListController = (() => {
               factura.notes || "Sin observaciones",
             );
 
-            if (factura.template) {
-              $("#factura_modal_header_template").html(
-                factura.template.header_content || "",
-              );
-              $("#factura_modal_footer_template").html(
-                factura.template.footer_content || "",
-              );
-            } else {
-              $("#factura_modal_header_template").empty();
-              $("#factura_modal_footer_template").empty();
+            if (typeof DocumentTemplateRenderer !== 'undefined') {
+              const normalizedCompanyData = {
+                name: factura.company_name_snapshot,
+                tax_id: factura.company_tax_id_snapshot,
+                address: factura.company_address_snapshot,
+                phone: factura.company_phone_snapshot,
+                email: factura.company_email_snapshot,
+                city: factura.company_city_snapshot,
+                receipt_footer: factura.company_receipt_footer_snapshot
+              };
+
+              const normalizedDocumentData = {
+                document_number: factura.invoice_number,
+                document_date: factura.issue_date || factura.created_at,
+                customer_name: factura.customer_name || "Consumidor Final",
+                subtotal: factura.subtotal,
+                discount: factura.discount,
+                tax: factura.tax,
+                total: factura.total,
+                amount_received: factura.amount_received,
+                change_amount: factura.change_amount,
+                items: (factura.items || []).map(item => ({
+                  product_name: item.product_name || item.product,
+                  quantity: item.quantity,
+                  unit_price: item.unit_price,
+                  subtotal: item.subtotal
+                }))
+              };
+
+              const renderer = new DocumentTemplateRenderer(factura.template, normalizedDocumentData, normalizedCompanyData);
+              
+              if (factura.template) {
+                // Si la plantilla tiene body, usar renderer general. Si solo tiene header/footer, usar parcial
+                if (factura.template.body_content) {
+                   $("#factura_modal_header_template").empty();
+                   $("#factura_modal_footer_template").empty();
+                   $("#factura_modal_items").closest('table').parent().html(renderer.render());
+                } else {
+                   $("#factura_modal_header_template").html(renderer._parseTemplate(factura.template.header_content || ""));
+                   $("#factura_modal_footer_template").html(renderer._parseTemplate(factura.template.footer_content || ""));
+                   renderInvoiceItems(factura.items, "#factura_modal_items");
+                }
+              }
             }
 
             $("#factura_modal_subtotal").text(formatCurrency(factura.subtotal));
             $("#factura_modal_total").text(formatCurrency(factura.total));
-
-            const tbody = $("#factura_modal_items");
-            tbody.empty();
-            if (factura.items && factura.items.length > 0) {
-              factura.items.forEach((item) => {
-                const tr = `
-                  <tr>
-                    <td>${item.product_name || `Producto #${item.product}`}</td>
-                    <td class="text-center">${item.quantity}</td>
-                    <td class="text-right">${formatCurrency(item.unit_price)}</td>
-                    <td class="text-right">${formatCurrency(item.subtotal)}</td>
-                  </tr>
-                `;
-                tbody.append(tr);
-              });
-            } else {
-              tbody.append(
-                '<tr><td colspan="4" class="text-center text-muted">No hay ítems en esta factura.</td></tr>',
-              );
-            }
 
             $(".btn-print-invoice-modal").data("id", factura.id);
 
@@ -352,11 +361,79 @@ const VentaListController = (() => {
       .on(
         "click",
         ".btn-print-invoice, .btn-print-invoice-modal",
-        function (e) {
+        async function (e) {
           e.preventDefault();
-          NotificationService.toastInfo(
-            "Funcionalidad de impresión en desarrollo...",
-          );
+          const invoiceId = $(this).data("id");
+          if (!invoiceId) return;
+
+          try {
+            NotificationService.loading("Generando documento para impresión...");
+            const response = await VentaService.obtenerFacturaPorId(invoiceId);
+            NotificationService.close();
+
+            if (response && response.success && response.data) {
+              const factura = response.data;
+              const template = factura.template;
+              
+              if (!template) {
+                NotificationService.toastError("La factura no tiene una plantilla asociada.");
+                return;
+              }
+
+              const normalizedCompanyData = {
+                name: factura.company_name_snapshot,
+                tax_id: factura.company_tax_id_snapshot,
+                address: factura.company_address_snapshot,
+                phone: factura.company_phone_snapshot,
+                email: factura.company_email_snapshot,
+                city: factura.company_city_snapshot,
+                receipt_footer: factura.company_receipt_footer_snapshot
+              };
+
+              const normalizedDocumentData = {
+                document_number: factura.invoice_number,
+                document_date: factura.issue_date || factura.created_at,
+                customer_name: factura.customer_name || "Consumidor Final",
+                subtotal: factura.subtotal,
+                discount: factura.discount,
+                tax: factura.tax,
+                total: factura.total,
+                amount_received: factura.amount_received,
+                change_amount: factura.change_amount,
+                items: (factura.items || []).map(item => ({
+                  product_name: item.product_name || item.product,
+                  quantity: item.quantity,
+                  unit_price: item.unit_price,
+                  subtotal: item.subtotal
+                }))
+              };
+
+              const renderer = new DocumentTemplateRenderer(template, normalizedDocumentData, normalizedCompanyData);
+              const printHtml = renderer.renderForPrint("300px");
+
+              const printWindow = window.open("", "_blank", "width=400,height=600");
+              if (printWindow) {
+                printWindow.document.open();
+                printWindow.document.write(printHtml);
+                printWindow.document.close();
+                printWindow.onload = function () {
+                  printWindow.focus();
+                  printWindow.print();
+                  printWindow.onafterprint = function () {
+                    printWindow.close();
+                  };
+                };
+              } else {
+                NotificationService.toastError("El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes e intenta de nuevo.");
+              }
+            } else {
+              NotificationService.toastError("No se pudo obtener la información de la factura.");
+            }
+          } catch (error) {
+            NotificationService.close();
+            console.error("Error al imprimir:", error);
+            NotificationService.toastError("Error al generar la impresión.");
+          }
         },
       );
   }

@@ -163,6 +163,7 @@ require_once __DIR__ . '/../layouts/head.php';
     <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/js/select2.full.min.js"></script>
 
     <!-- Script de inicialización -->
+    <script src="<?php echo $URL; ?>/public/assets/js/utils/DocumentTemplateRenderer.js"></script>
     <script type="module">
         import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
         import FacturaVentaController from "<?php echo $URL; ?>/public/assets/js/controllers/venta/facturas.js";

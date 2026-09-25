@@ -12,11 +12,32 @@ require_once __DIR__ . '/../layouts/head.php';
 <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
 <!-- Custom POS CSS -->
 <style>
-    .pos-cart-container { height: 400px; overflow-y: auto; }
-    .pos-product-list td { vertical-align: middle; }
-    .amount-input { font-size: 1.5rem; font-weight: bold; text-align: right; }
-    .total-display { font-size: 2.5rem; font-weight: bold; color: #28a745; }
-    .change-display { font-size: 1.5rem; font-weight: bold; color: #17a2b8; }
+    .pos-cart-container {
+        height: 400px;
+        overflow-y: auto;
+    }
+
+    .pos-product-list td {
+        vertical-align: middle;
+    }
+
+    .amount-input {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: right;
+    }
+
+    .total-display {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .change-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #17a2b8;
+    }
 </style>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -129,7 +150,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                             <span>Subtotal:</span>
                                             <span id="pos_subtotal" class="font-weight-bold">$0.00</span>
                                         </div>
-                                        
+
                                         <div class="d-flex justify-content-between mb-3 align-items-center">
                                             <span>Descuento global <i class="fas fa-lock text-muted" id="discount_lock_icon" style="display:none;" title="Requiere permisos"></i>:</span>
                                             <div class="input-group input-group-sm w-50">
@@ -176,10 +197,10 @@ require_once __DIR__ . '/../layouts/head.php';
                 </div>
             </section>
         </div>
-        
+
         <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
     </div>
-    
+
     <!-- Modal para impresión de Ticket -->
     <div class="modal fade" id="modal_print_ticket" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
         <div class="modal-dialog modal-sm" role="document">
@@ -215,10 +236,18 @@ require_once __DIR__ . '/../layouts/head.php';
     <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/js/select2.full.min.js"></script>
     <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/js/i18n/es.js"></script>
 
+    <!-- Script de inicialización de POS -->
     <script type="module">
         import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-        // POSController no se ha envuelto en bootstrap así que lo cargamos igual
+        import POSController from "<?php echo $URL; ?>/public/assets/js/controllers/venta/pos.js";
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await App.bootstrap();
+            if (typeof POSController.init === "function") {
+                POSController.init();
+            }
+        });
     </script>
-    <script type="module" src="<?php echo $URL; ?>/public/assets/js/controllers/venta/pos.js"></script>
 </body>
+
 </html>
