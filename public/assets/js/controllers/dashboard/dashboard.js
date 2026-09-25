@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * Inventario PME
- * Dashboard Controller v2.0
+ * Dashboard Controller v2
  * ============================================================
  */
 
@@ -11,223 +11,211 @@ const DashboardController = (() => {
   const DASHBOARD_ENDPOINT = "/api/v1/security/dashboard/";
 
   const WIDGET_CONFIG = {
-    users_total: {
-      type: "kpi",
-      label: "Usuarios Totales",
-      icon: "fas fa-users",
-      color: "#2563EB",
-      url: "usuarios",
-    },
-    users_active: {
-      type: "kpi",
-      label: "Usuarios Activos",
-      icon: "fas fa-user-check",
-      color: "#16A34A",
-      url: "usuarios",
-    },
-    roles_distribution: {
-      type: "kpi",
-      label: "Distribución de Roles",
-      icon: "fas fa-user-shield",
-      color: "#0F172A",
-      url: "roles",
-    },
-    customers_total: {
-      type: "kpi",
-      label: "Total Clientes",
-      icon: "fas fa-user-tie",
-      color: "#2563EB",
-      url: "clientes",
-    },
-    customers_recent: {
-      type: "kpi",
-      label: "Clientes Recientes",
-      icon: "fas fa-user-plus",
-      color: "#0891B2",
-      url: "clientes",
-    },
-    suppliers_active: {
-      type: "kpi",
-      label: "Proveedores Activos",
-      icon: "fas fa-truck",
-      color: "#16A34A",
-      url: "proveedores",
-    },
-    products_total: {
-      type: "kpi",
-      label: "Productos",
-      icon: "fas fa-box",
-      color: "#2563EB",
-      url: "productos",
-    },
-    products_low_stock: {
-      type: "kpi",
-      label: "Productos Bajo Stock",
-      icon: "fas fa-exclamation-triangle",
-      color: "#F59E0B",
-      url: "inventario",
-    },
-    purchases_pending: {
-      type: "kpi",
-      label: "Compras Pendientes",
-      icon: "fas fa-shopping-cart",
-      color: "#0891B2",
-      url: "compras",
-    },
-    purchases_summary: {
-      type: "kpi",
-      label: "Compras",
-      icon: "fas fa-shopping-cart",
-      color: "#0891B2",
-      url: "compras",
-    },
-    sales_summary: {
-      type: "kpi",
-      label: "Ventas",
-      icon: "fas fa-cash-register",
-      color: "#16A34A",
-      url: "ventas",
-    },
-    inventory_alerts: {
-      type: "kpi",
-      label: "Alertas de Inventario",
-      icon: "fas fa-exclamation-triangle",
-      color: "#DC2626",
-      url: "inventario",
-    },
-    purchases_monthly: {
-      type: "chart",
-      canvasId: "chart-purchases-monthly",
-      emptyId: "chart-purchases-empty",
-    },
-    sales_monthly: {
-      type: "chart",
-      canvasId: "chart-sales-monthly",
-      emptyId: "chart-sales-empty",
-    },
-    erp_activity: {
-      type: "list",
-      containerId: "erp_activity_container",
-    },
-    needs_attention: {
-      type: "list",
-      containerId: "needs_attention_container",
-    },
-    top_selling_products: {
-      type: "list",
-      containerId: "top_selling_container",
-    },
-    latest_sales: {
-      type: "table",
-      containerId: "latest_sales_container",
-    },
+    purchases_monthly: { type: "chart", canvasId: "chart-purchases-monthly", emptyId: "chart-purchases-empty" },
+    sales_monthly: { type: "chart", canvasId: "chart-sales-monthly", emptyId: "chart-sales-empty" },
+    payment_methods: { type: "chart", canvasId: "chart-payment-methods", emptyId: "chart-payment-empty" },
+    erp_activity: { type: "list", containerId: "erp_activity_container" },
+    needs_attention: { type: "list", containerId: "needs_attention_container" },
+    top_selling_products: { type: "list", containerId: "top_selling_container" },
+    latest_sales: { type: "table", containerId: "latest_sales_container" },
   };
 
   async function init() {
-    console.log("[DASHBOARD] Inicializando controlador v2...");
+    console.log("[DASHBOARD] Cargando datos del sistema...");
 
     try {
       const response = await ApiClient.get(DASHBOARD_ENDPOINT);
 
-      if (!response.ok || !response.success || !response.data) {
-        console.warn("[DASHBOARD] No se pudo obtener las métricas.");
-        hideLoading();
+      if (!response || (!response.data && !Array.isArray(response))) {
+        console.warn("[DASHBOARD] La API no devolvió una estructura válida.");
         return;
       }
 
-      const widgets = response.data.widgets || [];
-      const kpis = [];
+      const rawData = response.data || response;
+      const widgets = rawData.widgets || (Array.isArray(rawData) ? rawData : []);
+
       const charts = [];
       const lists = [];
       const tables = [];
 
-      for (const widget of widgets) {
-        const config = WIDGET_CONFIG[widget.code];
-        if (!config) continue;
+      // Procesar widgets configurados
+      if (Array.isArray(widgets)) {
+        for (const widget of widgets) {
+          const config = WIDGET_CONFIG[widget.code];
+          if (!config) continue;
 
-        switch (config.type) {
-          case "kpi":
-            kpis.push({ ...widget, config });
-            break;
-          case "chart":
-            charts.push({ ...widget, config });
-            break;
-          case "list":
-            lists.push({ ...widget, config });
-            break;
-          case "table":
-            tables.push({ ...widget, config });
-            break;
+          switch (config.type) {
+            case "chart":
+              charts.push({ ...widget, config });
+              break;
+            case "list":
+              lists.push({ ...widget, config });
+              break;
+            case "table":
+              tables.push({ ...widget, config });
+              break;
+          }
         }
       }
 
-      renderKPIs(kpis);
-      renderCharts(charts);
+      // Verificación directa para Métodos de Pago
+      if (!charts.some(c => c.code === "payment_methods") && rawData.payment_methods) {
+        charts.push({
+          code: "payment_methods",
+          value: rawData.payment_methods,
+          config: WIDGET_CONFIG.payment_methods
+        });
+      }
+
+      // Renderizar 6 KPIs consolidados
+      renderConsolidatedKPIs(rawData, widgets);
+      
+      // Renderizar Gráficos, Listas y Tablas
+      renderCharts(charts, rawData);
       renderLists(lists);
       renderTables(tables);
+
     } catch (error) {
-      console.error("[DASHBOARD] Error al cargar métricas:", error);
+      console.error("[DASHBOARD] Error en la inicialización:", error);
+    } finally {
       hideLoading();
     }
   }
 
-  function renderKPIs(kpis) {
+  // 🎯 RENDERIZADO DE LAS 6 TARJETAS CONSOLIDADAS
+  function renderConsolidatedKPIs(rawData, widgets) {
     const row = document.getElementById("dashboard-kpi-row");
     if (!row) return;
 
     row.innerHTML = "";
 
-    if (kpis.length === 0) {
-      row.innerHTML = `
-        <div class="col-12 text-center py-4">
-          <p class="text-muted mb-0">No hay indicadores disponibles para tu perfil.</p>
-        </div>`;
-      return;
-    }
+    const getValue = (code, fallbackProp) => {
+      if (Array.isArray(widgets)) {
+        const found = widgets.find(w => w.code === code);
+        if (found !== undefined && found.value !== undefined) return found.value;
+      }
+      return rawData[fallbackProp] ?? 0;
+    };
 
-    // Estilo CSS dinámico con transición de hover mejorada
+    const usersTotal = getValue("users_total", "users_total");
+    const usersActive = getValue("users_active", "users_active");
+
+    const customersTotal = getValue("customers_total", "customers_total");
+    const customersRecent = getValue("customers_recent", "customers_recent");
+
+    const productsTotal = getValue("products_total", "products_total");
+    const lowStock = getValue("products_low_stock", "products_low_stock");
+
+    const purchasesSummary = getValue("purchases_summary", "purchases_summary");
+    const purchasesPending = getValue("purchases_pending", "purchases_pending");
+
+    const salesSummary = getValue("sales_summary", "sales_summary");
+
+    const suppliersActive = getValue("suppliers_active", "suppliers_active");
+
+    const kpiCards = [
+      {
+        title: "USUARIOS",
+        value: usersTotal,
+        subtext: `${usersActive} activos`,
+        icon: "fas fa-users",
+        color: "#2563EB",
+        bgIcon: "#EFF6FF",
+        textColor: "text-success",
+        url: "usuarios"
+      },
+      {
+        title: "CLIENTES",
+        value: customersTotal,
+        subtext: `${customersRecent} recientes`,
+        icon: "fas fa-user-tie",
+        color: "#0891B2",
+        bgIcon: "#ECFEFF",
+        textColor: "text-info",
+        url: "clientes"
+      },
+      {
+        title: "PRODUCTOS",
+        value: productsTotal,
+        subtext: `${lowStock} bajo stock`,
+        icon: "fas fa-box",
+        color: "#F59E0B",
+        bgIcon: "#FFFBEB",
+        textColor: Number(lowStock) > 0 ? "text-warning" : "text-muted",
+        url: "productos?filter=alerts" // 👈 Redirige aplicando el filtro de alertas
+      },
+      {
+        title: "COMPRAS",
+        value: purchasesSummary,
+        subtext: `${purchasesPending} pendientes`,
+        icon: "fas fa-shopping-cart",
+        color: "#6366F1",
+        bgIcon: "#EEF2FF",
+        textColor: Number(purchasesPending) > 0 ? "text-danger" : "text-muted",
+        url: "compras"
+      },
+      {
+        title: "VENTAS",
+        value: typeof salesSummary === "number" ? `$${salesSummary.toLocaleString("es-CO")}` : salesSummary,
+        subtext: "Últimos 30 días",
+        icon: "fas fa-cash-register",
+        color: "#16A34A",
+        bgIcon: "#F0FDF4",
+        textColor: "text-success",
+        url: "ventas"
+      },
+      {
+        title: "PROVEEDORES",
+        value: suppliersActive,
+        subtext: `${suppliersActive} activos`,
+        icon: "fas fa-truck",
+        color: "#0D9488",
+        bgIcon: "#F0FDFA",
+        textColor: "text-success",
+        url: "proveedores"
+      }
+    ];
+
     const styleId = "kpi-hover-style";
     if (!document.getElementById(styleId)) {
       const style = document.createElement("style");
       style.id = styleId;
       style.innerHTML = `
-        .kpi-card-hover {
-          transition: all 0.25s ease-in-out;
-        }
-        .kpi-card-hover:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 .75rem 1.25rem rgba(0,0,0,.08) !important;
-        }
+        .kpi-card-hover { transition: all 0.25s ease-in-out; }
+        .kpi-card-hover:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important; }
       `;
       document.head.appendChild(style);
     }
 
-    for (const { config, value } of kpis) {
-      const displayValue =
-        typeof value === "number" ? value.toLocaleString("es-CO") : "0";
-      const accentColor = config.color || "#2563EB";
-      const targetUrl = config.url || "#"; // CORREGIDO: Definido correctamente para evitar ReferenceError
+    for (const card of kpiCards) {
+      const displayValue = typeof card.value === "number" ? card.value.toLocaleString("es-CO") : (card.value ?? "0");
 
       const col = document.createElement("div");
-      col.className = "col-lg-3 col-md-6 col-sm-12 mb-4";
+      col.className = "col-xl-2 col-lg-4 col-md-6 mb-3";
       col.innerHTML = `
-        <div class="card kpi-card-hover shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #F8FAFC; border-top: 4px solid ${accentColor} !important; ${targetUrl !== "#" ? "cursor: pointer;" : ""}">
-          <div class="card-body d-flex align-items-center justify-content-between p-4">
-            <div>
-              <span class="d-block text-muted font-weight-bold mb-1" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">${config.label}</span>
-              <h3 class="font-weight-bold mb-0" style="color: #0F172A; font-size: 2rem; font-weight: 800 !important;">${displayValue}</h3>
+        <div class="card kpi-card-hover shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF; border-left: 4px solid ${card.color} !important; ${card.url !== "#" ? "cursor: pointer;" : ""}">
+          <div class="card-body p-3 d-flex flex-column justify-content-between">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <span class="text-uppercase text-muted font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">${card.title}</span>
+                <h4 class="font-weight-bold mb-0 mt-1" style="color: #0F172A; font-size: 1.4rem;">${displayValue}</h4>
+              </div>
+              <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: ${card.bgIcon}; flex-shrink: 0;">
+                <i class="${card.icon}" style="color: ${card.color}; font-size: 0.95rem;"></i>
+              </div>
             </div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 55px; height: 55px; background-color: ${accentColor}15; color: ${accentColor}; flex-shrink: 0;">
-              <i class="${config.icon} fa-lg"></i>
+            <div class="mt-2 pt-2 border-top" style="border-color: #F1F5F9 !important;">
+              <small class="${card.textColor} font-weight-bold" style="font-size: 0.75rem;">
+                ${card.subtext}
+              </small>
             </div>
           </div>
         </div>`;
 
-      // CORREGIDO: Asignación limpia del evento directamente al nodo de la tarjeta recién creada
       const cardDiv = col.querySelector(".card");
-      if (cardDiv && targetUrl && targetUrl !== "#") {
+      if (cardDiv && card.url && card.url !== "#") {
         cardDiv.addEventListener("click", () => {
-          window.location.href = targetUrl;
+          window.location.href = card.url;
         });
       }
 
@@ -235,7 +223,8 @@ const DashboardController = (() => {
     }
   }
 
-  function renderCharts(charts) {
+  // 🎯 RENDERIZADO DE GRÁFICOS
+  function renderCharts(charts, fullResponseData) {
     for (const { code, value, config } of charts) {
       const canvas = document.getElementById(config.canvasId);
       const emptyMsg = document.getElementById(config.emptyId);
@@ -248,79 +237,178 @@ const DashboardController = (() => {
       }
 
       if (emptyMsg) emptyMsg.classList.add("d-none");
+      if (canvas) canvas.classList.remove("d-none");
 
       if (code === "purchases_monthly") {
         renderBarChart(canvas, value);
       } else if (code === "sales_monthly") {
         renderLineChart(canvas, value);
+      } else if (code === "payment_methods") {
+        renderPaymentMethodsChart(canvas, value);
+      }
+    }
+
+    // 🎯 Gráfico Doughnut (Stock de Inventario - SIEMPRE CON LAS 3 OPCIONES)
+    const pieCanvas = document.getElementById("chart-sales-pie");
+    const pieEmpty = document.getElementById("chart-pie-empty");
+
+    const extractWidgetVal = (code, fallbackKey) => {
+      if (Array.isArray(fullResponseData.widgets)) {
+        const found = fullResponseData.widgets.find(w => w.code === code);
+        if (found && found.value !== undefined) return Number(found.value) || 0;
+      }
+      return Number(fullResponseData[fallbackKey]) || 0;
+    };
+
+    const totalProd = extractWidgetVal("products_total", "products_total");
+    const lowStockProd = extractWidgetVal("products_low_stock", "products_low_stock");
+    const criticalStockProd = extractWidgetVal("inventory_alerts", "products_critical");
+    const normalStock = Math.max(0, totalProd - lowStockProd - criticalStockProd);
+
+    // Siempre estructuramos los 3 estados
+    const stockData = [
+      { label: "Stock Normal", value: normalStock },
+      { label: "Bajo Stock", value: lowStockProd },
+      { label: "Stock Crítico", value: criticalStockProd }
+    ];
+
+    if (pieCanvas) {
+      if (totalProd > 0) {
+        if (pieEmpty) pieEmpty.classList.add("d-none");
+        pieCanvas.classList.remove("d-none");
+        renderPieChart(pieCanvas, stockData);
+      } else {
+        pieCanvas.classList.add("d-none");
+        if (pieEmpty) pieEmpty.classList.remove("d-none");
       }
     }
   }
 
   function renderBarChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    const labels = data.map((d) => d.label || d.month || "");
+    if (window.myBarChartInstance) window.myBarChartInstance.destroy();
+
+    const labels = data.map((d) => d.label || d.month || d.mes || "");
     const ventas = data.map((d) => d.ventas ?? d.sales ?? 0);
     const compras = data.map((d) => d.compras ?? d.purchases ?? 0);
 
-    new Chart(canvas.getContext("2d"), {
+    window.myBarChartInstance = new Chart(canvas.getContext("2d"), {
       type: "bar",
       data: {
         labels,
         datasets: [
-          {
-            label: "Ventas",
-            backgroundColor: "rgba(22, 163, 74, 0.8)",
-            borderColor: "rgba(22, 163, 74, 1)",
-            borderWidth: 1,
-            data: ventas,
-          },
-          {
-            label: "Compras",
-            backgroundColor: "rgba(37, 99, 235, 0.8)",
-            borderColor: "rgba(37, 99, 235, 1)",
-            borderWidth: 1,
-            data: compras,
-          },
+          { label: "Ventas", backgroundColor: "#16A34A", borderRadius: 4, data: ventas },
+          { label: "Compras", backgroundColor: "#2563EB", borderRadius: 4, data: compras },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        legend: { position: "top" },
-        scales: { yAxes: [{ ticks: { beginAtZero: true } }] },
+        plugins: {
+          legend: { position: "top", labels: { usePointStyle: true, font: { size: 10 } } }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: (val) => "$" + Number(val).toLocaleString("es-CO") } }
+        }
       },
     });
   }
 
   function renderLineChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    const labels = data.map((d) => d.label || d.date || "");
-    const values = data.map((d) => d.value ?? d.total ?? 0);
+    if (window.myLineChartInstance) window.myLineChartInstance.destroy();
 
-    new Chart(canvas.getContext("2d"), {
+    const labels = data.map((d) => d.label || d.date || d.fecha || d.dia || "");
+    const values = data.map((d) => d.value ?? d.total ?? d.monto ?? d.total_ventas ?? 0);
+
+    window.myLineChartInstance = new Chart(canvas.getContext("2d"), {
       type: "line",
       data: {
         labels,
-        datasets: [
-          {
-            label: "Ventas",
-            backgroundColor: "rgba(22, 163, 74, 0.1)",
-            borderColor: "rgba(22, 163, 74, 1)",
-            borderWidth: 2,
-            pointBackgroundColor: "rgba(22, 163, 74, 1)",
-            pointRadius: 3,
-            fill: true,
-            data: values,
-          },
-        ],
+        datasets: [{
+          label: "Ventas ($)",
+          backgroundColor: "rgba(22, 163, 74, 0.1)",
+          borderColor: "#16A34A",
+          borderWidth: 2,
+          pointRadius: 3,
+          fill: true,
+          tension: 0.3,
+          data: values,
+        }],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        legend: { position: "top" },
-        scales: { yAxes: [{ ticks: { beginAtZero: true } }] },
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: (val) => "$" + Number(val).toLocaleString("es-CO") } }
+        }
       },
+    });
+  }
+
+  function renderPieChart(canvas, data) {
+    if (!canvas || typeof Chart === "undefined") return;
+    if (window.myPieChartInstance) window.myPieChartInstance.destroy();
+
+    const labels = data.map((d) => d.label);
+    const values = data.map((d) => Number(d.value) || 0);
+
+    // Mapeo fijo de los 3 colores para los 3 estados obligatorios
+    const colorMap = {
+      "Stock Normal": "#16A34A",  // Verde
+      "Bajo Stock": "#F59E0B",    // Amarillo/Naranja
+      "Stock Crítico": "#DC2626"  // Rojo
+    };
+
+    const backgroundColors = labels.map(label => colorMap[label] || "#2563EB");
+
+    window.myPieChartInstance = new Chart(canvas.getContext("2d"), {
+      type: "doughnut",
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: backgroundColors,
+          borderWidth: 2,
+          borderColor: "#FFFFFF"
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "right", labels: { boxWidth: 10, font: { size: 10 } } }
+        }
+      },
+    });
+  }
+
+  function renderPaymentMethodsChart(canvas, data) {
+    if (!canvas || typeof Chart === "undefined") return;
+    if (window.myPaymentChartInstance) window.myPaymentChartInstance.destroy();
+
+    const labels = data.map((d) => d.metodo || d.forma_pago || d.label || d.nombre || "");
+    const values = data.map((d) => d.monto || d.total || d.value || d.cantidad || 0);
+
+    window.myPaymentChartInstance = new Chart(canvas.getContext("2d"), {
+      type: "doughnut",
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: ["#2563EB", "#0891B2", "#8B5CF6", "#EC4899", "#10B981"],
+          borderWidth: 2,
+          borderColor: "#FFFFFF"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "right", labels: { boxWidth: 10, font: { size: 10 } } }
+        }
+      }
     });
   }
 
@@ -329,9 +417,8 @@ const DashboardController = (() => {
       const container = document.getElementById(config.containerId);
       if (!container) continue;
 
-      // Actualizar el contador en el título si fue provisto
       if (count !== undefined && code === "needs_attention") {
-        const cardTitle = container.closest('.card').querySelector('.card-title');
+        const cardTitle = container.closest('.card')?.querySelector('.card-title');
         if (cardTitle) {
           cardTitle.innerHTML = `<i class="${config.icon || 'fas fa-exclamation-circle'} mr-2 text-danger"></i>${config.label || 'Requiere atención'} (${count})`;
         }
@@ -340,43 +427,26 @@ const DashboardController = (() => {
       if (Array.isArray(value) && value.length > 0) {
         container.innerHTML = "";
         for (const item of value) {
+          const title = item.title || item.label || item.name || "";
+          const subtitle = item.subtitle || item.date || "";
+          const badgeVal = item.value ?? item.badge ?? "";
+          const badgeColor = item.color || item.badgeClass || "secondary";
+
           const li = document.createElement("li");
-          li.className = "d-flex justify-content-between align-items-center mb-3";
+          li.className = "d-flex justify-content-between align-items-center py-2 px-1 mb-1 border-bottom";
           li.innerHTML = `
-            <div>
-              <i class="${item.icon || "fas fa-circle"} text-${item.color || "muted"} mr-2"></i>
-              <span class="font-weight-600 text-dark">${item.label || item.name || ""}</span>
+            <div class="d-flex align-items-center">
+              <i class="${item.icon || "fas fa-circle"} text-${badgeColor} mr-2" style="font-size: 0.75rem;"></i>
+              <div>
+                <span class="font-weight-bold text-dark d-block" style="font-size: 0.88rem;">${title}</span>
+                ${subtitle ? `<small class="text-muted d-block" style="font-size: 0.75rem;">${subtitle}</small>` : ''}
+              </div>
             </div>
-            <div>
-              <span class="badge badge-${item.color || "secondary"} px-2 py-1" style="font-size: 0.9em;">${item.value ?? ""}</span>
-            </div>`;
+            ${badgeVal !== "" ? `<div><span class="badge badge-${badgeColor} px-2 py-1">${badgeVal}</span></div>` : ''}`;
           container.appendChild(li);
         }
-        
-        // Agregar botón de "Ver inventario" si es needs_attention
-        if (code === "needs_attention") {
-          const btnLi = document.createElement("li");
-          btnLi.className = "text-center mt-3 pt-3 border-top";
-          btnLi.innerHTML = `<a href="/frontend-inventario-pme/inventario" class="text-primary font-weight-bold" style="text-decoration: none;">Ver inventario <i class="fas fa-arrow-right ml-1"></i></a>`;
-          container.appendChild(btnLi);
-        }
       } else {
-        if (code === "needs_attention") {
-          container.innerHTML = `
-            <li class="text-center py-4">
-              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background-color: #dcfce7; color: #16a34a;">
-                  <i class="fas fa-check fa-2x"></i>
-              </div>
-              <h5 class="font-weight-bold text-dark mb-1">Todo en orden</h5>
-              <p class="text-muted mb-0 small">No hay productos con stock crítico.</p>
-            </li>`;
-        } else {
-          container.innerHTML = `
-            <li class="text-center text-muted py-3">
-              <i class="fas fa-inbox fa-2x mb-2 d-block text-light"></i>
-              No hay datos disponibles
-            </li>`;
-        }
+        container.innerHTML = `<li class="text-center text-muted py-3 list-unstyled">Sin datos registrados</li>`;
       }
     }
   }
@@ -389,22 +459,21 @@ const DashboardController = (() => {
       if (Array.isArray(value) && value.length > 0) {
         tbody.innerHTML = "";
         for (const row of value) {
+          const id = row.id ?? "#";
+          const client = row.cliente ?? row.customer ?? row.client_name ?? "Cliente Ocasional";
+          const amount = row.monto ?? row.amount ?? row.total ?? 0;
+          const date = row.fecha ?? row.date ?? row.created_at ?? "";
+
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${row.id ?? ""}</td>
-            <td>${row.cliente ?? row.customer ?? ""}</td>
-            <td>$${(row.monto ?? row.amount ?? 0).toLocaleString("es-CO")}</td>
-            <td>${row.fecha ?? row.date ?? ""}</td>`;
+            <td class="font-weight-bold">${id}</td>
+            <td>${client}</td>
+            <td class="text-success font-weight-bold">$${Number(amount).toLocaleString("es-CO")}</td>
+            <td><small class="text-muted">${date}</small></td>`;
           tbody.appendChild(tr);
         }
       } else {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="4" class="text-center text-muted py-4">
-              <i class="fas fa-inbox fa-2x mb-2 d-block text-light"></i>
-              No hay datos disponibles
-            </td>
-          </tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No hay datos disponibles</td></tr>`;
       }
     }
   }
@@ -414,9 +483,7 @@ const DashboardController = (() => {
     if (loader) loader.remove();
   }
 
-  return Object.freeze({
-    init,
-  });
+  return Object.freeze({ init });
 })();
 
 export default DashboardController;
