@@ -141,7 +141,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                                 <input type="checkbox" class="custom-control-input" id="pos_generate_invoice">
                                                 <label class="custom-control-label" for="pos_generate_invoice">Generar Factura Formal</label>
                                             </div>
-                                            <small class="form-text text-muted">Si está apagado, solo se generará un ticket de compra interno.</small>
+                                            <small class="form-text text-muted">Si está apagado, solo se generará un ticket de venta interno.</small>
                                         </div>
 
                                         <hr>
@@ -170,11 +170,9 @@ require_once __DIR__ . '/../layouts/head.php';
                                                 <div class="input-group-prepend"><span class="input-group-text">$</span></div>
                                                 <input type="number" id="pos_amount_received" class="form-control amount-input text-success" placeholder="0" step="100">
                                             </div>
+                                            <!-- Denominaciones dinámicas: JS las genera en base al total -->
                                             <div class="d-flex justify-content-between flex-wrap btn-group-sm" id="quick_cash_buttons">
-                                                <button type="button" class="btn btn-outline-secondary mb-1 flex-fill mx-1 btn-quick-cash" data-amount="exact">Exacto</button>
-                                                <button type="button" class="btn btn-outline-info mb-1 flex-fill mx-1 btn-quick-cash" data-amount="20000">$ 20.000</button>
-                                                <button type="button" class="btn btn-outline-info mb-1 flex-fill mx-1 btn-quick-cash" data-amount="50000">$ 50.000</button>
-                                                <button type="button" class="btn btn-outline-info mb-1 flex-fill mx-1 btn-quick-cash" data-amount="100000">$ 100.000</button>
+                                                <!-- Se generan dinámicamente en pos.js -->
                                             </div>
                                         </div>
 
@@ -205,24 +203,46 @@ require_once __DIR__ . '/../layouts/head.php';
     <div class="modal fade" id="modal_print_ticket" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
-                <div class="modal-header bg-success">
-                    <h5 class="modal-title"><i class="fas fa-print mr-2"></i> Venta Exitosa</h5>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-check-circle mr-2"></i> Venta Exitosa</h5>
                 </div>
-                <div class="modal-body text-center">
-                    <div class="mb-3">
-                        <i class="fas fa-check-circle text-success fa-4x"></i>
+                <div class="modal-body text-center px-4">
+                    <i class="fas fa-check-circle text-success fa-3x mb-2"></i>
+                    <h4 class="font-weight-bold mb-0">¡Cobro realizado!</h4>
+                    <p class="text-muted text-sm mb-3">La venta se registró correctamente.</p>
+
+                    <!-- Desglose de la venta -->
+                    <div class="text-left small border rounded p-2 mb-3 bg-light" id="modal_sale_breakdown">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Subtotal:</span>
+                            <span id="modal_breakdown_subtotal" class="font-weight-bold">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between" id="modal_breakdown_discount_row">
+                            <span class="text-muted">Descuento:</span>
+                            <span id="modal_breakdown_discount" class="text-warning font-weight-bold">$0.00</span>
+                        </div>
+                        <hr class="my-1">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Total:</span>
+                            <span id="modal_breakdown_total" class="text-success font-weight-bold">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between" id="modal_breakdown_received_row">
+                            <span class="text-muted">Recibido:</span>
+                            <span id="modal_breakdown_received" class="font-weight-bold">$0.00</span>
+                        </div>
                     </div>
-                    <h4>¡Cobro realizado!</h4>
-                    <p class="text-muted">La venta se registró correctamente.</p>
-                    <p class="h3 font-weight-bold mb-3" id="modal_change_amount">$0.00</p>
-                    <p class="text-muted text-sm">Cambio a entregar</p>
+
+                    <div class="bg-success text-white rounded py-2 px-3 mb-1">
+                        <div class="text-sm">Cambio a entregar</div>
+                        <div class="h2 font-weight-bold mb-0" id="modal_change_amount">$0.00</div>
+                    </div>
                 </div>
-                <div class="modal-footer flex-column">
+                <div class="modal-footer flex-column pt-2">
                     <button type="button" class="btn btn-primary btn-block btn-lg" id="btn_print_ticket">
                         <i class="fas fa-print mr-2"></i> Imprimir Ticket
                     </button>
                     <button type="button" class="btn btn-default btn-block mt-2" id="btn_new_sale" data-dismiss="modal">
-                        Siguiente Venta
+                        <i class="fas fa-arrow-right mr-1"></i> Siguiente Venta
                     </button>
                 </div>
             </div>

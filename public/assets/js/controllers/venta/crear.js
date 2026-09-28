@@ -131,14 +131,17 @@ const CrearVentaController = (() => {
       const quantity = parseFloat(qtyStr);
       const unitPrice = parseFloat(priceStr);
       const itemDiscount = parseFloat(discountStr);
-      const stockAvailable = parseFloat(select.data("stock") || 0);
+      
+      const rawStock = select.data("stock");
+      const isStockTracked = rawStock !== undefined && rawStock !== null && rawStock !== "";
+      const stockAvailable = isStockTracked ? parseFloat(rawStock) : Infinity;
 
       if (isNaN(quantity) || quantity <= 0) {
         NotificationService.toastError("La cantidad debe ser mayor a 0.");
         return;
       }
 
-      if (quantity > stockAvailable) {
+      if (isStockTracked && quantity > stockAvailable) {
         NotificationService.toastError(
           `Stock insuficiente. Disponible: ${stockAvailable}`,
         );
@@ -154,13 +157,13 @@ const CrearVentaController = (() => {
 
       // Verificar si ya existe en el detalle para sumarlo
       const existingIndex = saleDetails.findIndex(
-        (item) => item.product_id == productId,
+        (item) => item.product_id === productId || String(item.product_id) === String(productId),
       );
 
       if (existingIndex !== -1) {
         const nuevaCantidadTotal =
           saleDetails[existingIndex].quantity + quantity;
-        if (nuevaCantidadTotal > stockAvailable) {
+        if (isStockTracked && nuevaCantidadTotal > stockAvailable) {
           NotificationService.toastError(
             `Supera el stock disponible (${stockAvailable}).`,
           );

@@ -28,29 +28,20 @@ const InvoiceTemplateService = (function () {
         is_active: "true",
       });
 
-      if (!response) {
-        console.warn(
-          "[InvoiceTemplateService] La API no devolvió respuesta.",
-        );
-
+      if (!response || !response.ok) {
+        console.warn("[InvoiceTemplateService] La API devolvió un error o no hay respuesta.");
         return null;
       }
 
-      const responseData = response.data ?? response;
-
+      // ApiClient propaga el JSON en el primer nivel. 
+      // Puede estar en 'data' (nuestro estándar) o en 'results' (paginación DRF nativa)
       let templates = [];
-
-      if (Array.isArray(responseData)) {
-        templates = responseData;
-      } else if (Array.isArray(responseData.results)) {
-        templates = responseData.results;
-      } else if (Array.isArray(responseData.data)) {
-        templates = responseData.data;
-      } else if (
-        responseData.data &&
-        Array.isArray(responseData.data.results)
-      ) {
-        templates = responseData.data.results;
+      if (Array.isArray(response.data)) {
+        templates = response.data;
+      } else if (Array.isArray(response.results)) {
+        templates = response.results;
+      } else if (response.data && Array.isArray(response.data.results)) {
+        templates = response.data.results;
       }
 
       const activeTemplates = templates.filter((template) => {
@@ -62,68 +53,34 @@ const InvoiceTemplateService = (function () {
       });
 
       if (activeTemplates.length === 0) {
-        console.warn(
-          "[InvoiceTemplateService] No existe una plantilla activa " +
-            `para ${documentType}.`,
-        );
-
+        console.warn(`[InvoiceTemplateService] No existe una plantilla activa para ${documentType}.`);
         return null;
       }
 
-      const selectedTemplate =
-        activeTemplates.find((template) => template.is_default === true) ||
-        activeTemplates[0];
+      const selectedTemplate = activeTemplates.find((t) => t.is_default) || activeTemplates[0];
 
       if (!selectedTemplate.id) {
-        console.error(
-          "[InvoiceTemplateService] La plantilla seleccionada " +
-            "no contiene ID.",
-        );
-
+        console.error("[InvoiceTemplateService] La plantilla seleccionada no contiene ID.");
         return null;
       }
 
-      const detailResponse = await ApiClient.get(
-        `${API_URL}${selectedTemplate.id}/`,
-      );
+      const detailResponse = await ApiClient.get(`${API_URL}${selectedTemplate.id}/`);
 
-      if (!detailResponse) {
-        console.error(
-          "[InvoiceTemplateService] No se pudo obtener el detalle " +
-            `de la plantilla ${selectedTemplate.id}.`,
-        );
-
+      if (!detailResponse || !detailResponse.ok) {
+        console.error(`[InvoiceTemplateService] No se pudo obtener el detalle de la plantilla ${selectedTemplate.id}.`);
         return null;
       }
 
-      const detailResponseData = detailResponse.data ?? detailResponse;
-
-      let template = detailResponseData;
-
-      if (
-        detailResponseData &&
-        detailResponseData.data &&
-        typeof detailResponseData.data === "object"
-      ) {
-        template = detailResponseData.data;
-      }
+      // Para el detalle, la data viene en detailResponse.data o directamente propagada en detailResponse
+      const template = detailResponse.data || detailResponse;
 
       if (!template || typeof template !== "object") {
-        console.error(
-          "[InvoiceTemplateService] El detalle de la plantilla " +
-            "no tiene un formato válido.",
-        );
-
+        console.error("[InvoiceTemplateService] El detalle de la plantilla no tiene un formato válido.");
         return null;
       }
 
       if (template.document_type !== documentType) {
-        console.error(
-          "[InvoiceTemplateService] La plantilla recibida no " +
-            `corresponde a ${documentType}.`,
-          template,
-        );
-
+        console.error(`[InvoiceTemplateService] La plantilla recibida no corresponde a ${documentType}.`, template);
         return null;
       }
 

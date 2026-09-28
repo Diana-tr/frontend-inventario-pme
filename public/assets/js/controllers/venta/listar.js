@@ -10,6 +10,7 @@ import SecurityManager from "../../core/security.js";
 import NotificationService from "../../core/notification.js";
 import DocumentTemplateRenderer from "../../utils/DocumentTemplateRenderer.js";
 import { formatCurrency, renderInvoiceItems } from "../../utils/invoice_utils.js";
+import { viewInvoice, printInvoice } from "../../utils/InvoiceActions.js";
 
 const VentaListController = (() => {
   const TABLE_BODY_ID = "tablaVentasBody";
@@ -252,11 +253,6 @@ const VentaListController = (() => {
 
         if (!invoiceId) return;
 
-        // No ocultamos el modal de detalles de venta para que se superpongan
-        $("#factura_modal_loader").show();
-        $("#factura_modal_content").hide();
-        $("#modalVisualizarFactura").modal("show");
-
         // Restaurar el scroll al modal principal cuando se cierre el de factura
         $("#modalVisualizarFactura").off('hidden.bs.modal').on('hidden.bs.modal', function () {
             if ($(`#${DETAIL_MODAL_ID}`).is(':visible')) {
@@ -264,96 +260,10 @@ const VentaListController = (() => {
             }
         });
 
-        try {
-          const response = await VentaService.obtenerFacturaPorId(invoiceId);
-
-          if (response && response.success && response.data) {
-            const factura = response.data;
-
-            $("#factura_modal_number").text(factura.invoice_number);
-            $("#factura_modal_date").text(
-              factura.issue_date ? formatDate(factura.issue_date) : "N/A",
-            );
-            
-            // Format status for invoice
-            let statusBadge = "";
-            if (factura.status === "DRAFT") statusBadge = '<span class="badge badge-warning px-3 py-2" style="border-radius:20px;font-size:0.75rem">Borrador</span>';
-            else if (factura.status === "ISSUED") statusBadge = '<span class="badge badge-success px-3 py-2" style="border-radius:20px;font-size:0.75rem">Emitida</span>';
-            else if (factura.status === "CANCELLED") statusBadge = '<span class="badge badge-danger px-3 py-2" style="border-radius:20px;font-size:0.75rem">Anulada</span>';
-            else statusBadge = `<span class="badge badge-secondary px-3 py-2" style="border-radius:20px;font-size:0.75rem">${factura.status}</span>`;
-
-            $("#factura_modal_status").html(statusBadge);
-            $("#factura_modal_sale").text(
-              factura.sale ? `Venta #${factura.sale}` : "N/A",
-            );
-            $("#factura_modal_notes").text(
-              factura.notes || "Sin observaciones",
-            );
-
-            if (typeof DocumentTemplateRenderer !== 'undefined') {
-              const normalizedCompanyData = {
-                name: factura.company_name_snapshot,
-                tax_id: factura.company_tax_id_snapshot,
-                address: factura.company_address_snapshot,
-                phone: factura.company_phone_snapshot,
-                email: factura.company_email_snapshot,
-                city: factura.company_city_snapshot,
-                receipt_footer: factura.company_receipt_footer_snapshot
-              };
-
-              const normalizedDocumentData = {
-                document_number: factura.invoice_number,
-                document_date: factura.issue_date || factura.created_at,
-                customer_name: factura.customer_name || "Consumidor Final",
-                subtotal: factura.subtotal,
-                discount: factura.discount,
-                tax: factura.tax,
-                total: factura.total,
-                amount_received: factura.amount_received,
-                change_amount: factura.change_amount,
-                items: (factura.items || []).map(item => ({
-                  product_name: item.product_name || item.product,
-                  quantity: item.quantity,
-                  unit_price: item.unit_price,
-                  subtotal: item.subtotal
-                }))
-              };
-
-              const renderer = new DocumentTemplateRenderer(factura.template, normalizedDocumentData, normalizedCompanyData);
-              
-              if (factura.template) {
-                // Si la plantilla tiene body, usar renderer general. Si solo tiene header/footer, usar parcial
-                if (factura.template.body_content) {
-                   $("#factura_modal_header_template").empty();
-                   $("#factura_modal_footer_template").empty();
-                   $("#factura_modal_items").closest('table').parent().html(renderer.render());
-                } else {
-                   $("#factura_modal_header_template").html(renderer._parseTemplate(factura.template.header_content || ""));
-                   $("#factura_modal_footer_template").html(renderer._parseTemplate(factura.template.footer_content || ""));
-                   renderInvoiceItems(factura.items, "#factura_modal_items");
-                }
-              }
-            }
-
-            $("#factura_modal_subtotal").text(formatCurrency(factura.subtotal));
-            $("#factura_modal_total").text(formatCurrency(factura.total));
-
-            $(".btn-print-invoice-modal").data("id", factura.id);
-
-            $("#factura_modal_loader").hide();
-            $("#factura_modal_content").fadeIn();
-          } else {
-            throw new Error(
-              "Respuesta inválida al consultar la factura de venta.",
-            );
-          }
-        } catch (error) {
-          console.error("[VENTAS] Error al obtener detalle de factura:", error);
-          $("#modalVisualizarFactura").modal("hide");
-          NotificationService.toastError(
-            "No se pudo cargar el detalle de la factura.",
-          );
-        }
+        await viewInvoice(invoiceId, {
+          fetchFn: VentaService.obtenerFacturaPorId,
+          modalId: "modalVisualizarFactura"
+        });
       });
 
     $(document)
@@ -366,74 +276,10 @@ const VentaListController = (() => {
           const invoiceId = $(this).data("id");
           if (!invoiceId) return;
 
-          try {
-            NotificationService.loading("Generando documento para impresión...");
-            const response = await VentaService.obtenerFacturaPorId(invoiceId);
-            NotificationService.close();
-
-            if (response && response.success && response.data) {
-              const factura = response.data;
-              const template = factura.template;
-              
-              if (!template) {
-                NotificationService.toastError("La factura no tiene una plantilla asociada.");
-                return;
-              }
-
-              const normalizedCompanyData = {
-                name: factura.company_name_snapshot,
-                tax_id: factura.company_tax_id_snapshot,
-                address: factura.company_address_snapshot,
-                phone: factura.company_phone_snapshot,
-                email: factura.company_email_snapshot,
-                city: factura.company_city_snapshot,
-                receipt_footer: factura.company_receipt_footer_snapshot
-              };
-
-              const normalizedDocumentData = {
-                document_number: factura.invoice_number,
-                document_date: factura.issue_date || factura.created_at,
-                customer_name: factura.customer_name || "Consumidor Final",
-                subtotal: factura.subtotal,
-                discount: factura.discount,
-                tax: factura.tax,
-                total: factura.total,
-                amount_received: factura.amount_received,
-                change_amount: factura.change_amount,
-                items: (factura.items || []).map(item => ({
-                  product_name: item.product_name || item.product,
-                  quantity: item.quantity,
-                  unit_price: item.unit_price,
-                  subtotal: item.subtotal
-                }))
-              };
-
-              const renderer = new DocumentTemplateRenderer(template, normalizedDocumentData, normalizedCompanyData);
-              const printHtml = renderer.renderForPrint("300px");
-
-              const printWindow = window.open("", "_blank", "width=400,height=600");
-              if (printWindow) {
-                printWindow.document.open();
-                printWindow.document.write(printHtml);
-                printWindow.document.close();
-                printWindow.onload = function () {
-                  printWindow.focus();
-                  printWindow.print();
-                  printWindow.onafterprint = function () {
-                    printWindow.close();
-                  };
-                };
-              } else {
-                NotificationService.toastError("El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes e intenta de nuevo.");
-              }
-            } else {
-              NotificationService.toastError("No se pudo obtener la información de la factura.");
-            }
-          } catch (error) {
-            NotificationService.close();
-            console.error("Error al imprimir:", error);
-            NotificationService.toastError("Error al generar la impresión.");
-          }
+          await printInvoice(invoiceId, {
+            fetchFn: VentaService.obtenerFacturaPorId,
+            $btn: $(this)
+          });
         },
       );
   }

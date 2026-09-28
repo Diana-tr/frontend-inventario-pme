@@ -123,7 +123,7 @@ const VentaService = (() => {
 
   // Obtener facturas asociadas a una venta por saleId.
   // FIX: usa el endpoint de invoices, no de sales.
-  async function obtenerFacturasPorVentas(saleId) {
+  async function obtenerFacturasPorVenta(saleId) {
     try {
       return await ApiClient.get(`${INVOICES_ENDPOINT}?sale_id=${saleId}`);
     } catch (error) {
@@ -187,7 +187,7 @@ const VentaService = (() => {
     cancelarVenta,
     completarVenta,
     restaurarVenta,
-    obtenerFacturasPorVentas,
+    obtenerFacturasPorVenta,
     obtenerFacturaPorId,
     listarFacturasPaginadas,
   });

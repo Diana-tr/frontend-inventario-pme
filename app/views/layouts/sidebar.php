@@ -66,7 +66,6 @@ require_once __DIR__ . '/../../config/app.php';
                         <i class="nav-icon fas fa-shield-alt"></i>
                         <p>
                             Admin. y Seguridad
-                            <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
@@ -131,7 +130,6 @@ require_once __DIR__ . '/../../config/app.php';
                         <i class="nav-icon fas fa-boxes"></i>
                         <p>
                             Catálogo e Inventario
-                            <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
@@ -238,7 +236,6 @@ require_once __DIR__ . '/../../config/app.php';
                         <i class="nav-icon fas fa-cash-register"></i>
                         <p>
                             Ventas y Facturación
-                            <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
@@ -311,7 +308,6 @@ require_once __DIR__ . '/../../config/app.php';
                         <i class="nav-icon fas fa-shopping-cart"></i>
                         <p>
                             Prov. y Compras
-                            <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">

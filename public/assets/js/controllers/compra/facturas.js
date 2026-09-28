@@ -138,9 +138,14 @@ const FacturaCompraController = (() => {
       if (!invoiceId) return;
 
       try {
-        NotificationService.loading("Generando documento para impresión...");
+        // Se deshabilita el botón en lugar de usar SweetAlert para evitar congelamientos
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+        $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Cargando...');
+
         const response = await CompraService.obtenerFacturaPorId(invoiceId);
-        NotificationService.close();
+
+        $btn.prop("disabled", false).html(originalHtml);
 
         if (response && response.success && response.data) {
           const factura = response.data;
@@ -183,27 +188,34 @@ const FacturaCompraController = (() => {
             const renderer = new DocumentTemplateRenderer(template, normalizedDocumentData, normalizedCompanyData);
             const printHtml = renderer.renderForPrint("300px");
 
-            const printWindow = window.open("", "_blank", "width=400,height=600");
-            if (printWindow) {
-              printWindow.document.open();
-              printWindow.document.write(printHtml);
-              printWindow.document.close();
-              printWindow.onload = function () {
-                printWindow.focus();
-                printWindow.print();
-                printWindow.onafterprint = function () {
-                  printWindow.close();
-                };
-              };
-            } else {
-              NotificationService.toastError("El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes e intenta de nuevo.");
+            // Usar un iframe oculto para imprimir sin parpadeos ni bloqueos del navegador
+            let printIframe = document.getElementById("hidden-print-iframe");
+            if (!printIframe) {
+              printIframe = document.createElement("iframe");
+              printIframe.id = "hidden-print-iframe";
+              printIframe.style.position = "fixed";
+              printIframe.style.right = "0";
+              printIframe.style.bottom = "0";
+              printIframe.style.width = "0";
+              printIframe.style.height = "0";
+              printIframe.style.border = "0";
+              document.body.appendChild(printIframe);
             }
+
+            const doc = printIframe.contentWindow.document;
+            doc.open();
+            doc.write(printHtml);
+            doc.close();
+
+            setTimeout(() => {
+              printIframe.contentWindow.focus();
+              printIframe.contentWindow.print();
+            }, 250);
           }
         } else {
           NotificationService.toastError("No se pudo obtener la información de la factura.");
         }
       } catch (error) {
-        NotificationService.close();
         console.error("Error al imprimir:", error);
         NotificationService.toastError("Error al generar la impresión.");
       }

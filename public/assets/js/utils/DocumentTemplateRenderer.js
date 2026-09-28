@@ -70,7 +70,7 @@ class DocumentTemplateRenderer {
                     .border-bottom { border-bottom: 1px dashed #000; }
                 </style>
             </head>
-            <body onload="window.print(); window.close();">
+            <body class="print-body">
                 ${html}
             </body>
             </html>
