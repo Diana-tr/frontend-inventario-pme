@@ -107,7 +107,7 @@ const POSController = (() => {
         if (select.hasClass("select2-hidden-accessible")) {
           select.select2("destroy");
         }
-        select.empty().append('<option></option>');
+        select.empty().append("<option></option>");
 
         allProducts.forEach((p) => {
           select.append(
@@ -137,7 +137,10 @@ const POSController = (() => {
           })
           .on("select2:close", function () {
             // Cuando se cierra por Escape, devolver foco al contenedor
-            $(this).next(".select2-container").find(".select2-search__field").focus();
+            $(this)
+              .next(".select2-container")
+              .find(".select2-search__field")
+              .focus();
           });
       }
     } catch (e) {
@@ -146,8 +149,13 @@ const POSController = (() => {
   }
 
   function addProductToCart(product) {
-    const isStockTracked = product.stock !== undefined && product.stock !== null && product.stock !== "";
-    const stockAvailable = isStockTracked ? parseFloat(product.stock) : Infinity;
+    const isStockTracked =
+      product.stock !== undefined &&
+      product.stock !== null &&
+      product.stock !== "";
+    const stockAvailable = isStockTracked
+      ? parseFloat(product.stock)
+      : Infinity;
 
     const existing = cart.find(
       (item) => item.id === (product.id_product || product.id),
@@ -180,7 +188,7 @@ const POSController = (() => {
         discount: 0,
         subtotal: parseFloat(product.sale_price || product.price || 0),
         stock: stockAvailable, // Guardar stock para futuras validaciones
-        isStockTracked: isStockTracked
+        isStockTracked: isStockTracked,
       });
     }
     renderCart();
@@ -188,18 +196,36 @@ const POSController = (() => {
 
   function updateItemQuantity(id, newQty) {
     const item = cart.find((i) => i.id === id);
-    if (item && newQty > 0) {
-      if (item.isStockTracked && newQty > item.stock) {
-        NotificationService.toastWarning(
-          `Stock máximo alcanzado para ${item.name}`,
-        );
-        // Opcional: revertir el input a la cantidad anterior, pero como esto se re-renderiza, bastará con no actualizar
-        return;
-      }
-      item.quantity = newQty;
-      item.subtotal = item.price * item.quantity - item.discount;
-      renderCart();
+    if (!item) return;
+
+    const $row = $(TABLE_BODY).find(`tr[data-id="${id}"]`);
+    const $input = $row.find(".item-qty");
+
+    // 🔧 NaN o <= 0 → revertir el input al valor real, sin re-render
+    if (isNaN(newQty) || newQty <= 0) {
+      NotificationService.toastWarning("Cantidad inválida.");
+      $input.val(item.quantity).removeClass("is-invalid");
+      return;
     }
+
+    //Stock insuficiente → revertir el input al valor real
+    if (item.isStockTracked && newQty > item.stock) {
+      NotificationService.toastWarning(
+        `Stock máximo alcanzado para ${item.name}`,
+      );
+      $input.val(item.quantity).removeClass("is-invalid");
+      return;
+    }
+
+    // OK: actualizar estado y solo esta fila (sin re-render completo)
+    item.quantity = newQty;
+    item.subtotal = item.price * item.quantity - item.discount;
+
+    $input.removeClass("is-invalid");
+    $row.find(".item-subtotal").text(formatCurrency(item.subtotal));
+
+    updateTotals();
+    updateCartCounter();
   }
 
   function removeItem(id) {
@@ -215,50 +241,89 @@ const POSController = (() => {
 
     if (cart.length === 0) {
       tbody.append(`
-            <tr id="empty_cart_row">
-                <td colspan="7" class="text-center text-muted py-4">
-                    <i class="fas fa-shopping-cart fa-3x mb-3 opacity-50"></i>
-                    <h5>Carrito vacío</h5>
-                    <p>Busque productos para agregarlos a la venta</p>
-                </td>
-            </tr>
-        `);
+      <tr id="empty_cart_row">
+        <td colspan="7" class="text-center text-muted py-4">
+          <i class="fas fa-shopping-cart fa-3x mb-3 opacity-50"></i>
+          <h5>Carrito vacío</h5>
+          <p>Busque productos para agregarlos a la venta</p>
+        </td>
+      </tr>
+    `);
       updateCartCounter();
       updateTotals();
       return;
     }
 
-    cart.forEach((item) => {
-      const row = `
-            <tr>
-                <td></td>
-                <td><span class="badge badge-secondary">${item.code}</span></td>
-                <td class="font-weight-bold">${item.name}</td>
-                <td class="text-right">${formatCurrency(item.price)}</td>
-                <td class="text-center">
-                    <input type="number" class="form-control form-control-sm item-qty mx-auto" data-id="${item.id}" value="${item.quantity}" min="1" style="width: 70px;">
-                </td>
-                <td class="font-weight-bold text-success text-right">${formatCurrency(item.subtotal)}</td>
-                <td>
-                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove" data-id="${item.id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-      tbody.append(row);
-    });
+    // Construir HTML en un fragmento y hacer un solo .append()
+    // Evita N reflows por cada fila.
+    const rows = cart
+      .map(
+        (item) => `
+    <tr data-id="${item.id}">
+      <td></td>
+      <td><span class="badge badge-secondary">${item.code}</span></td>
+      <td class="font-weight-bold">${item.name}</td>
+      <td class="text-right">${formatCurrency(item.price)}</td>
+      <td class="text-center">
+        <input type="number"
+               class="form-control form-control-sm item-qty mx-auto"
+               data-id="${item.id}"
+               value="${item.quantity}"
+               min="1"
+               style="width: 70px;">
+      </td>
+      <td class="font-weight-bold text-success text-right item-subtotal">
+        ${formatCurrency(item.subtotal)}
+      </td>
+      <td>
+        <button type="button" class="btn btn-sm btn-outline-danger btn-remove" data-id="${item.id}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `,
+      )
+      .join("");
 
-    // Listeners de filas dinámicas
-    $(".item-qty").off("change").on("change", function () {
-      updateItemQuantity($(this).data("id"), parseInt($(this).val()));
-    });
-    $(".btn-remove").off("click").on("click", function () {
-      removeItem($(this).data("id"));
-    });
+    tbody.append(rows);
 
+    //Ya NO se re-vinculan listeners aquí.
+    // La delegación vive en setupCartEvents() y se llama UNA sola vez.
     updateTotals();
     updateCartCounter();
+  }
+
+  // 🔧 Se llama UNA vez en setupEvents(). Sobrevive a todos los renderCart().
+  function setupCartEvents() {
+    const tbody = $(TABLE_BODY);
+
+    // Cambio de cantidad
+    tbody
+      .off("change.pos", ".item-qty")
+      .on("change.pos", ".item-qty", function () {
+        const id = $(this).data("id");
+        const val = parseInt($(this).val(), 10);
+        updateItemQuantity(id, val);
+      });
+
+    // Input en vivo (opcional): valida NaN mientras escribe, sin tocar el estado
+    tbody
+      .off("input.pos", ".item-qty")
+      .on("input.pos", ".item-qty", function () {
+        const val = parseInt($(this).val(), 10);
+        if (isNaN(val) || val < 1) {
+          $(this).addClass("is-invalid");
+        } else {
+          $(this).removeClass("is-invalid");
+        }
+      });
+
+    // Eliminar item
+    tbody
+      .off("click.pos", ".btn-remove")
+      .on("click.pos", ".btn-remove", function () {
+        removeItem($(this).data("id"));
+      });
   }
 
   // Contador de ítems y unidades en el encabezado del carrito
@@ -268,7 +333,7 @@ const POSController = (() => {
     const $counter = $("#pos_cart_counter_th");
     if (totalItems > 0) {
       $counter.html(
-        `<span class="badge badge-success">${totalItems} prod.</span><br><span class="badge badge-secondary">${totalUnits} uds.</span>`
+        `<span class="badge badge-success">${totalItems} prod.</span><br><span class="badge badge-secondary">${totalUnits} uds.</span>`,
       );
     } else {
       $counter.html("");
@@ -282,13 +347,15 @@ const POSController = (() => {
 
     // Botón fijo: monto exacto
     $container.append(
-      `<button type="button" class="btn btn-outline-secondary mb-1 flex-fill mx-1 btn-quick-cash" data-amount="exact">Exacto</button>`
+      `<button type="button" class="btn btn-outline-secondary mb-1 flex-fill mx-1 btn-quick-cash" data-amount="exact">Exacto</button>`,
     );
 
     if (total <= 0) return;
 
     // Denominaciones COP disponibles (de menor a mayor)
-    const denominations = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000];
+    const denominations = [
+      1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000,
+    ];
 
     // Calcular los 3 denominaciones más cercanas superiores al total
     const suggestions = [];
@@ -303,27 +370,32 @@ const POSController = (() => {
 
     // Si no conseguimos 3 sugerencias (total muy alto), completar con redondeos
     if (suggestions.length < 3 && total > 0) {
-      const rounded = [100000, 200000, 500000].filter(v => v >= total && !suggestions.includes(v));
+      const rounded = [100000, 200000, 500000].filter(
+        (v) => v >= total && !suggestions.includes(v),
+      );
       suggestions.push(...rounded.slice(0, 3 - suggestions.length));
     }
 
-    suggestions.forEach(amount => {
-      const label = amount >= 1000
-        ? `$ ${new Intl.NumberFormat("es-CO").format(amount)}`
-        : `$ ${amount}`;
+    suggestions.forEach((amount) => {
+      const label =
+        amount >= 1000
+          ? `$ ${new Intl.NumberFormat("es-CO").format(amount)}`
+          : `$ ${amount}`;
       $container.append(
-        `<button type="button" class="btn btn-outline-info mb-1 flex-fill mx-1 btn-quick-cash" data-amount="${amount}">${label}</button>`
+        `<button type="button" class="btn btn-outline-info mb-1 flex-fill mx-1 btn-quick-cash" data-amount="${amount}">${label}</button>`,
       );
     });
 
     // Re-vincular el listener para los nuevos botones
-    $(".btn-quick-cash").off("click").on("click", function () {
-      const raw = $(this).data("amount");
-      const val = raw === "exact" ? Math.max(0, total) : parseFloat(raw);
-      $("#pos_amount_received").val(val);
-      updateTotals();
-      $("#pos_amount_received").focus();
-    });
+    $(".btn-quick-cash")
+      .off("click")
+      .on("click", function () {
+        const raw = $(this).data("amount");
+        const val = raw === "exact" ? Math.max(0, total) : parseFloat(raw);
+        $("#pos_amount_received").val(val);
+        updateTotals();
+        $("#pos_amount_received").focus();
+      });
   }
 
   function updateTotals() {
@@ -429,16 +501,21 @@ const POSController = (() => {
 
         // Llenar desglose del modal de cobro
         const saleSubtotal = parseFloat(saleResult.subtotal || 0);
-        const saleDiscount = parseFloat(saleResult.discount || saleData.discount || 0);
+        const saleDiscount = parseFloat(
+          saleResult.discount || saleData.discount || 0,
+        );
         const saleTotal = parseFloat(saleResult.total || 0);
         const saleReceived = pm === "CASH" ? received : null;
-        const saleChange = pm === "CASH" ? Math.max(0, received - saleTotal) : 0;
+        const saleChange =
+          pm === "CASH" ? Math.max(0, received - saleTotal) : 0;
 
         $("#modal_breakdown_subtotal").text(formatCurrency(saleSubtotal));
         $("#modal_breakdown_discount").text(formatCurrency(saleDiscount));
         $("#modal_breakdown_discount_row").toggle(saleDiscount > 0);
         $("#modal_breakdown_total").text(formatCurrency(saleTotal));
-        $("#modal_breakdown_received").text(saleReceived != null ? formatCurrency(saleReceived) : "N/A");
+        $("#modal_breakdown_received").text(
+          saleReceived != null ? formatCurrency(saleReceived) : "N/A",
+        );
         $("#modal_breakdown_received_row").toggle(pm === "CASH");
         $("#modal_change_amount").text(formatCurrency(saleChange));
 
@@ -458,7 +535,7 @@ const POSController = (() => {
       if (error.response && error.response.data && error.response.data.errors) {
         NotificationService.toastError(
           error.response.data.errors[0].message ||
-          "Error al completar la venta",
+            "Error al completar la venta",
         );
       } else {
         NotificationService.toastError(
@@ -476,14 +553,21 @@ const POSController = (() => {
   // Generar HTML del ticket para imprimir
   async function printTicket() {
     if (!lastSaleData) return;
-
-    // Guard: si ya se está imprimiendo, ignorar el clic extra
     if (isPrinting) return;
+
     isPrinting = true;
 
     const $btn = $("#btn_print_ticket");
     const originalHtml = $btn.html();
-    $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Generando...');
+    $btn
+      .prop("disabled", true)
+      .html('<i class="fas fa-spinner fa-spin mr-1"></i> Generando...');
+
+    //Único punto de restauración. Prop correcta: "disabled".
+    const restoreButton = () => {
+      $btn.prop("disabled", false).html(originalHtml);
+      isPrinting = false;
+    };
 
     try {
       let template = null;
@@ -498,16 +582,20 @@ const POSController = (() => {
       }
 
       if (!template) {
-        console.error("[POS] No se puede imprimir el ticket: no existe una plantilla POS_TICKET activa.");
-        if (typeof NotificationService !== "undefined") {
-          NotificationService.error("No existe una plantilla de ticket POS activa.");
-        }
+        console.error("[POS] No existe una plantilla POS_TICKET activa.");
+        NotificationService.error(
+          "No existe una plantilla de ticket POS activa.",
+        );
+        restoreButton();
         return;
       }
 
       if (typeof DocumentTemplateRenderer === "undefined") {
         console.warn("[POS] Falta DocumentTemplateRenderer.");
-        NotificationService.toastError("Plantilla POS no configurada o motor inactivo.");
+        NotificationService.toastError(
+          "Plantilla POS no configurada o motor inactivo.",
+        );
+        restoreButton();
         return;
       }
 
@@ -551,7 +639,6 @@ const POSController = (() => {
 
       const ticketHtml = renderer.renderForPrint("300px");
 
-      // Reutilizar el iframe oculto, limpiar su contenido antes de escribir
       let printIframe = document.getElementById("hidden-print-iframe");
       if (!printIframe) {
         printIframe = document.createElement("iframe");
@@ -570,47 +657,52 @@ const POSController = (() => {
       doc.write(ticketHtml);
       doc.close();
 
-      // Llamar print y restaurar botón DESPUÉS (no en un finally que corre antes del setTimeout)
+      // El setTimeout es la ÚNICA vía de restauración en el camino feliz.
+      // Sin finally colgado — el finally correría ANTES que este callback.
       setTimeout(() => {
         try {
           printIframe.contentWindow.focus();
           printIframe.contentWindow.print();
+        } catch (printErr) {
+          console.error("[POS] Error al invocar print():", printErr);
+          NotificationService.toastError(
+            "No se pudo abrir el diálogo de impresión.",
+          );
         } finally {
-          // Restaurar botón solo cuando el diálogo de impresión ya se mostró
-          $btn.prop("disabled", false).html(originalHtml);
-          isPrinting = false;
+          restoreButton();
         }
       }, 300);
 
-      // No se restaura el botón aquí — lo hace el setTimeout de arriba
       return;
     } catch (rendererError) {
       console.error("[POS] Error en DocumentTemplateRenderer:", rendererError);
-      NotificationService.toastError("El motor de plantillas rechazó la estructura de la plantilla.");
-    } finally {
-      // Este finally solo restaura en caso de errores tempranos (antes del setTimeout)
-      // Si llegamos al setTimeout, ya retornamos arriba y este finally no hace nada extra
-      if (isPrinting) {
-        $btn.prop("disabled", false).html(originalHtml);
-        isPrinting = false;
-      }
+      NotificationService.toastError(
+        "El motor de plantillas rechazó la estructura de la plantilla.",
+      );
+      restoreButton();
     }
+    //SIN finally al final. Todo camino de salida llama a restoreButton().
   }
 
   function setupEvents() {
-    $("#pos_payment_method").off("change").on("change", function () {
-      if ($(this).val() === "CASH") {
-        $("#cash_payment_section").slideDown();
-        $("#change_section").slideDown();
-      } else {
-        $("#cash_payment_section").slideUp();
-        $("#change_section").slideUp();
-        $("#pos_amount_received").val("");
-      }
-      updateTotals();
-    });
+    setupCartEvents();
+    $("#pos_payment_method")
+      .off("change")
+      .on("change", function () {
+        if ($(this).val() === "CASH") {
+          $("#cash_payment_section").slideDown();
+          $("#change_section").slideDown();
+        } else {
+          $("#cash_payment_section").slideUp();
+          $("#change_section").slideUp();
+          $("#pos_amount_received").val("");
+        }
+        updateTotals();
+      });
 
-    $("#pos_global_discount, #pos_amount_received").off("input").on("input", updateTotals);
+    $("#pos_global_discount, #pos_amount_received")
+      .off("input")
+      .on("input", updateTotals);
 
     // Botones de denominación: se vinculan dinámicamente desde renderDenominationButtons()
     // El listener estático del botón "exact" lo configura esa función también.
@@ -620,38 +712,46 @@ const POSController = (() => {
     // .off() CRÍTICO: evita acumulación de listeners que causaban doble impresión
     $("#btn_print_ticket").off("click").on("click", printTicket);
 
-    $("#btn_cancel_pos").off("click").on("click", function () {
-      cart = [];
-      renderCart();
-      $("#pos_global_discount").val("0.00");
-      $("#pos_amount_received").val("");
-      $(SELECT_CUSTOMER).val("").trigger("change");
-      // Autofocus al buscador al limpiar
-      setTimeout(() => $("#pos_search_product").select2("open"), 80);
-    });
+    $("#btn_cancel_pos")
+      .off("click")
+      .on("click", function () {
+        cart = [];
+        renderCart();
+        $("#pos_global_discount").val("0.00");
+        $("#pos_amount_received").val("");
+        $(SELECT_CUSTOMER).val("").trigger("change");
+        // Autofocus al buscador al limpiar
+        setTimeout(() => $("#pos_search_product").select2("open"), 80);
+      });
 
     // Autofocus al monto recibido cuando se abre el modal de éxito
-    $("#modal_print_ticket").off("shown.bs.modal").on("shown.bs.modal", function () {
-      // Foco al botón de imprimir para poder activarlo con Enter
-      $("#btn_print_ticket").focus();
-    });
+    $("#modal_print_ticket")
+      .off("shown.bs.modal")
+      .on("shown.bs.modal", function () {
+        // Foco al botón de imprimir para poder activarlo con Enter
+        $("#btn_print_ticket").focus();
+      });
 
     // Al cerrar el modal, volver a buscar productos
-    $("#modal_print_ticket").off("hidden.bs.modal").on("hidden.bs.modal", function () {
-      setTimeout(() => $("#pos_search_product").select2("open"), 100);
-    });
+    $("#modal_print_ticket")
+      .off("hidden.bs.modal")
+      .on("hidden.bs.modal", function () {
+        setTimeout(() => $("#pos_search_product").select2("open"), 100);
+      });
 
     // Keyboard shortcuts
-    $(document).off("keydown.pos").on("keydown.pos", function (e) {
-      if (e.key === "F2") {
-        e.preventDefault();
-        $(`#${FORM_ID}`).submit();
-      }
-      if (e.key === "Escape") {
-        if ($("#modal_print_ticket").hasClass("show")) return; // No cancelar si el modal está abierto
-        $("#btn_cancel_pos").click();
-      }
-    });
+    $(document)
+      .off("keydown.pos")
+      .on("keydown.pos", function (e) {
+        if (e.key === "F2") {
+          e.preventDefault();
+          $(`#${FORM_ID}`).submit();
+        }
+        if (e.key === "Escape") {
+          if ($("#modal_print_ticket").hasClass("show")) return; // No cancelar si el modal está abierto
+          $("#btn_cancel_pos").click();
+        }
+      });
 
     // Validar permisos de descuento global
     if (!SecurityManager.hasPermission("sales.update")) {
