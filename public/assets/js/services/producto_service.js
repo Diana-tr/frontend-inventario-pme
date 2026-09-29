@@ -71,6 +71,20 @@ const ProductoService = (() => {
     }
   }
 
+  //Busqueda de productos para el POS (server-side).
+  async function buscarProductos(query, limit = 20) {
+    try {
+      const params = new URLSearchParams({
+        q: query || "",
+        limit: String(limit),
+      });
+      return await ApiClient.get(`${PRODUCTOS_ENDPOINT}search/?${params.toString()}`,);
+    } catch (error) {
+      console.error("[PRODUCTO SERVICE] Error al buscar productos:", error);
+      throw error;
+    }
+  }
+
   // Alternar estado activo/inactivo (DELETE lógico)
   async function cambiarEstadoProducto(id, is_active) {
     try {
@@ -92,6 +106,7 @@ const ProductoService = (() => {
     obtenerProductoPorId,
     crearProducto,
     actualizarProducto,
+    buscarProductos,
     cambiarEstadoProducto,
   });
 })();

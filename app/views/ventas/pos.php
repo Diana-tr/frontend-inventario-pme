@@ -75,12 +75,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card-body">
                                     <div class="row mb-3">
                                         <div class="col-md-12">
-                                            <div class="input-group input-group-lg">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                                                </div>
-                                                <input type="text" id="pos_search_product" class="form-control" placeholder="Buscar producto por código o nombre (Enter para agregar)..." autofocus>
-                                            </div>
+                                            <select id="pos_search_product" class="form-control" style="width: 100%;"></select>
                                         </div>
                                     </div>
                                     <div class="table-responsive pos-cart-container border rounded">

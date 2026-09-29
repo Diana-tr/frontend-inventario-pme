@@ -85,67 +85,74 @@ const POSController = (() => {
   }
 
   // Autocomplete y búsqueda con Typeahead / Input listener
-  async function initProductSearch() {
-    // Para el POS, una simple búsqueda en el frontend sobre la lista cargada o peticiones al backend
-    // Como no tenemos un endpoint específico de búsqueda rápida, traeremos todos los activos y filtraremos en memoria
-    try {
-      const response = await ProductoService.listarProductos();
-      if (response && response.success) {
-        const allProducts = (response.data.results || response.data).filter(
-          (p) => p.is_active,
-        );
+  function initProductSearch() {
+    const select = $(INPUT_SEARCH);
 
-        // Evitar replaceWith si ya es un select para no destruir referencias
-        let $input = $(INPUT_SEARCH);
-        if ($input.is("input")) {
-          $input.replaceWith(
-            '<select id="pos_search_product" class="form-control"><option></option></select>',
-          );
-        }
-
-        const select = $("#pos_search_product");
-        if (select.hasClass("select2-hidden-accessible")) {
-          select.select2("destroy");
-        }
-        select.empty().append("<option></option>");
-
-        allProducts.forEach((p) => {
-          select.append(
-            $("<option></option>")
-              .val(p.id_product || p.id)
-              .text(`[${p.code}] ${p.name} - $${p.sale_price}`)
-              .data("product", p),
-          );
-        });
-
-        select
-          .select2({
-            theme: "bootstrap4",
-            placeholder: "Buscar producto por código o nombre...",
-            allowClear: true,
-          })
-          .on("select2:select", function (e) {
-            const product = $(this).find(":selected").data("product");
-            if (product) {
-              addProductToCart(product);
-              $(this).val(null).trigger("change");
-              // Autofocus: reabrir el dropdown de búsqueda inmediatamente
-              setTimeout(() => {
-                $(this).select2("open");
-              }, 80);
-            }
-          })
-          .on("select2:close", function () {
-            // Cuando se cierra por Escape, devolver foco al contenedor
-            $(this)
-              .next(".select2-container")
-              .find(".select2-search__field")
-              .focus();
-          });
-      }
-    } catch (e) {
-      console.error("[POS] Error al inicializar búsqueda de productos", e);
+    // Si ya estaba inicializado select2, destruirlo antes de reinicializar
+    if (select.hasClass("select2-hidden-accessible")) {
+      select.select2("destroy");
     }
+    select.empty();
+
+    select
+      .select2({
+        theme: "bootstrap4",
+        placeholder: "Buscar por código, nombre o código de barras...",
+        allowClear: true,
+        minimumInputLength: 1,
+        language: "es",
+        ajax: {
+          delay: 250, // debounce
+          cache: true, // cachea por término buscado
+          data: (params) => ({
+            q: params.term || "",
+            limit: 20,
+          }),
+          transport: (params, success, failure) => {
+            // 🔧 Usamos ProductoService → hereda token, refresh y manejo de 401
+            // del ApiClient. No duplicamos lógica de auth aquí.
+            ProductoService.buscarProductos(params.data.q, params.data.limit)
+              .then((response) => {
+                // ApiClient ya redirige al login si el refresh falla,
+                // y ya despachó security_forbidden en 403.
+                if (!response || !response.ok || !response.success) {
+                  failure(response);
+                  return;
+                }
+
+                const results = (response.data || []).map((p) => ({
+                  id: p.id_product,
+                  text: `[${p.code}] ${p.name} - $${p.sale_price}`,
+                  product: p, // objeto completo para addProductToCart
+                }));
+
+                success({ results });
+              })
+              .catch((error) => {
+                console.error("[POS] Error en búsqueda de productos:", error);
+                failure(error);
+              });
+          },
+        },
+      })
+      .off("select2:select.pos")
+      .on("select2:select.pos", function () {
+        const selected = $(this).select2("data")[0];
+        if (selected && selected.product) {
+          addProductToCart(selected.product);
+          $(this).val(null).trigger("change");
+          // Reabrir dropdown para escaneo continuo
+          setTimeout(() => $(this).select2("open"), 80);
+        }
+      })
+      .off("select2:close.pos")
+      .on("select2:close.pos", function () {
+        // Escape → devolver foco al input interno de select2
+        $(this)
+          .next(".select2-container")
+          .find(".select2-search__field")
+          .focus();
+      });
   }
 
   function addProductToCart(product) {
@@ -773,7 +780,7 @@ const POSController = (() => {
       initClock();
       await loadCompanyInfo();
       await initCustomerSelect();
-      await initProductSearch();
+      initProductSearch();
       setupEvents();
     },
   };
