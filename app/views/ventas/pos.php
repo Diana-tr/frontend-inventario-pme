@@ -87,6 +87,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                         <table class="table table-hover table-striped pos-product-list mb-0" id="pos_cart_table">
                                             <thead class="bg-light sticky-top">
                                                 <tr>
+                                                    <th id="pos_cart_counter_th" class="text-center" style="font-size:0.8rem; width:80px;"></th>
                                                     <th>Código</th>
                                                     <th>Producto</th>
                                                     <th class="text-right" width="15%">Precio</th>
@@ -97,7 +98,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                             </thead>
                                             <tbody>
                                                 <tr id="empty_cart_row">
-                                                    <td colspan="6" class="text-center text-muted py-4">
+                                                    <td colspan="7" class="text-center text-muted py-4">
                                                         <i class="fas fa-shopping-cart fa-3x mb-3 opacity-50"></i>
                                                         <h5>Carrito vacío</h5>
                                                         <p>Busque productos para agregarlos a la venta</p>

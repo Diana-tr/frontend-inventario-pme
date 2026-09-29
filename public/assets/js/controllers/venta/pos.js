@@ -102,7 +102,7 @@ const POSController = (() => {
             '<select id="pos_search_product" class="form-control"><option></option></select>',
           );
         }
-        
+
         const select = $("#pos_search_product");
         if (select.hasClass("select2-hidden-accessible")) {
           select.select2("destroy");
@@ -216,13 +216,14 @@ const POSController = (() => {
     if (cart.length === 0) {
       tbody.append(`
             <tr id="empty_cart_row">
-                <td colspan="6" class="text-center text-muted py-4">
+                <td colspan="7" class="text-center text-muted py-4">
                     <i class="fas fa-shopping-cart fa-3x mb-3 opacity-50"></i>
                     <h5>Carrito vacío</h5>
                     <p>Busque productos para agregarlos a la venta</p>
                 </td>
             </tr>
         `);
+      updateCartCounter();
       updateTotals();
       return;
     }
@@ -230,6 +231,7 @@ const POSController = (() => {
     cart.forEach((item) => {
       const row = `
             <tr>
+                <td></td>
                 <td><span class="badge badge-secondary">${item.code}</span></td>
                 <td class="font-weight-bold">${item.name}</td>
                 <td class="text-right">${formatCurrency(item.price)}</td>
@@ -263,19 +265,13 @@ const POSController = (() => {
   function updateCartCounter() {
     const totalItems = cart.length;
     const totalUnits = cart.reduce((sum, i) => sum + i.quantity, 0);
-    let $badge = $("#pos_cart_counter");
-    if ($badge.length === 0) {
-      $("#pos_cart_table thead tr").prepend(
-        `<th id="pos_cart_counter_th" class="text-center" style="font-size:0.8rem;"></th>`
-      );
-      $badge = $("#pos_cart_counter_th");
-    }
+    const $counter = $("#pos_cart_counter_th");
     if (totalItems > 0) {
-      $("#pos_cart_counter_th").html(
+      $counter.html(
         `<span class="badge badge-success">${totalItems} prod.</span><br><span class="badge badge-secondary">${totalUnits} uds.</span>`
       );
     } else {
-      $("#pos_cart_counter_th").html("");
+      $counter.html("");
     }
   }
 
@@ -293,7 +289,7 @@ const POSController = (() => {
 
     // Denominaciones COP disponibles (de menor a mayor)
     const denominations = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000];
-    
+
     // Calcular los 3 denominaciones más cercanas superiores al total
     const suggestions = [];
     for (const d of denominations) {
@@ -429,14 +425,14 @@ const POSController = (() => {
           saleResult.change_amount = changeAmount;
         }
 
-      lastSaleData = saleResult;
+        lastSaleData = saleResult;
 
         // Llenar desglose del modal de cobro
-        const saleSubtotal  = parseFloat(saleResult.subtotal || 0);
-        const saleDiscount  = parseFloat(saleResult.discount || saleData.discount || 0);
-        const saleTotal     = parseFloat(saleResult.total || 0);
-        const saleReceived  = pm === "CASH" ? received : null;
-        const saleChange    = pm === "CASH" ? Math.max(0, received - saleTotal) : 0;
+        const saleSubtotal = parseFloat(saleResult.subtotal || 0);
+        const saleDiscount = parseFloat(saleResult.discount || saleData.discount || 0);
+        const saleTotal = parseFloat(saleResult.total || 0);
+        const saleReceived = pm === "CASH" ? received : null;
+        const saleChange = pm === "CASH" ? Math.max(0, received - saleTotal) : 0;
 
         $("#modal_breakdown_subtotal").text(formatCurrency(saleSubtotal));
         $("#modal_breakdown_discount").text(formatCurrency(saleDiscount));
@@ -462,7 +458,7 @@ const POSController = (() => {
       if (error.response && error.response.data && error.response.data.errors) {
         NotificationService.toastError(
           error.response.data.errors[0].message ||
-            "Error al completar la venta",
+          "Error al completar la venta",
         );
       } else {
         NotificationService.toastError(
@@ -669,8 +665,9 @@ const POSController = (() => {
 
   return {
     init: async () => {
+      // Verificar permiso y redirigir si no lo tiene
       if (!SecurityManager.hasPermission("sales.create")) {
-        SecurityManager.redirectIfUnauthorized();
+        SecurityManager.redirectIfUnauthorized("sales.create");
         return;
       }
       initClock();
@@ -682,7 +679,4 @@ const POSController = (() => {
   };
 })();
 
-$(document).ready(() => {
-  POSController.init();
-});
 export default POSController;

@@ -11,6 +11,7 @@
  */
 
 import Storage from "../storage/storage.js";
+import Routes from "./routes.js";
 
 const SecurityManager = (() => {
 
@@ -102,11 +103,29 @@ const SecurityManager = (() => {
     });
   };
 
+  /**
+   * Redirige al dashboard si el usuario no tiene el permiso dado.
+   * Úsalo al inicio de las páginas que requieren permisos específicos.
+   * @param {string} [permissionCode] - Si se omite, solo verifica autenticación.
+   * @param {string} [redirectTo]     - Ruta destino. Por defecto el dashboard.
+   */
+  const redirectIfUnauthorized = (permissionCode = null, redirectTo = "/ventas/listar") => {
+    const isUnauthorized = permissionCode
+      ? !hasPermission(permissionCode)
+      : false;
+
+    if (isUnauthorized) {
+      console.warn(`[SecurityManager] Acceso denegado: permiso '${permissionCode}' requerido. Redirigiendo...`);
+      Routes.go(redirectTo);
+    }
+  };
+
   return Object.freeze({
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
     processDomPermissions,
+    redirectIfUnauthorized,
   });
 })();
 
