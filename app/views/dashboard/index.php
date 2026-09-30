@@ -36,13 +36,13 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                     </div>
 
-                    <!-- ═══════════════════════════════════════════════
+                    <!-- ═══════════════════════════════════════════════    
                          FILA 2 — Gráficos (4 columnas)
                          ═══════════════════════════════════════════════ -->
                     <div class="row mt-3" id="dashboard-chart-row">
 
                         <!-- Gráfico 1: Ventas vs Compras (Barras) -->
-                        <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="col-lg-6 col-md-4 mb-4">
                             <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
                                 <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
                                     <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A; font-size: 1rem;">
@@ -59,8 +59,30 @@ require_once __DIR__ . '/../layouts/head.php';
                             </div>
                         </div>
 
+                        
+
+                        <!-- Gráfico 3: Stock de inventario (Torta/Rosquilla) -->
+                        <div class="col-lg-6 col-md-4 mb-4">
+                            <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
+                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
+                                    <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A; font-size: 1rem;">
+                                        <i class="fas fa-chart-pie mr-2" style="color: #F59E0B;"></i>Stock de inventario
+                                    </h3>
+                                </div>
+                                <div class="card-body" id="chart-pie-container">
+                                    <canvas id="chart-sales-pie" style="min-height: 220px; height: 220px; max-height: 220px; max-width: 100%;"></canvas>
+                                    <div class="text-center text-muted py-4 d-none" id="chart-pie-empty">
+                                        <i class="fas fa-chart-pie fa-3x mb-3 text-light"></i>
+                                        <p class="mb-0">Sin datos suficientes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>      
+                    </div>
+
+                    <div class="row mt-3" id="dashboard-chart-row">
                         <!-- Gráfico 2: Ventas últimos 30 días (Línea) -->
-                        <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="col-lg-6 col-md-4 mb-4">
                             <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
                                 <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
                                     <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A; font-size: 1rem;">
@@ -77,26 +99,8 @@ require_once __DIR__ . '/../layouts/head.php';
                             </div>
                         </div>
 
-                        <!-- Gráfico 3: Stock de inventario (Torta/Rosquilla) -->
-                        <div class="col-lg-3 col-md-6 mb-4">
-                            <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
-                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
-                                    <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A; font-size: 1rem;">
-                                        <i class="fas fa-chart-pie mr-2" style="color: #F59E0B;"></i>Stock de inventario
-                                    </h3>
-                                </div>
-                                <div class="card-body" id="chart-pie-container">
-                                    <canvas id="chart-sales-pie" style="min-height: 220px; height: 220px; max-height: 220px; max-width: 100%;"></canvas>
-                                    <div class="text-center text-muted py-4 d-none" id="chart-pie-empty">
-                                        <i class="fas fa-chart-pie fa-3x mb-3 text-light"></i>
-                                        <p class="mb-0">Sin datos suficientes</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Gráfico 4: Métodos de Pago (Rosquilla) -->
-                        <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="col-lg-6 col-md-4 mb-4">
                             <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
                                 <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
                                     <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A; font-size: 1rem;">
@@ -112,9 +116,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 </div>
                             </div>
                         </div>
-
                     </div>
-
                     <!-- ═══════════════════════════════════════════════
                          FILA 3 — Listas / Cards informativas
                          ═══════════════════════════════════════════════ -->

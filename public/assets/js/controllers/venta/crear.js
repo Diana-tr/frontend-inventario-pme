@@ -19,6 +19,7 @@ const CrearVentaController = (() => {
   const BTN_ADD_PRODUCT = "#btn_add_product";
 
   let saleDetails = []; // Arreglo para almacenar los detalles de la venta en memoria
+  let isSubmitting = false;
 
   async function initClientSelect() {
     try {
@@ -262,6 +263,8 @@ const CrearVentaController = (() => {
     $(`#${FORM_ID}`).on("submit", async function (e) {
       e.preventDefault();
 
+      if (isSubmitting) return;
+
       const form = this;
       if (!form.checkValidity()) {
         e.stopPropagation();
@@ -313,36 +316,51 @@ const CrearVentaController = (() => {
         })),
       };
 
-      const submitBtn = $("#btn_guardar_venta");
+      isSubmitting = true;
 
-      try {
-        submitBtn
-          .prop("disabled", true)
-          .html('<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...');
-
-        const response = await VentaService.crearVenta(payload);
-
-        if (response && response.success) {
-          NotificationService.toastSuccess(
-            "Venta creada correctamente en estado PENDING.",
-          );
-          setTimeout(() => {
-            window.location.href = "/frontend-inventario-pme/ventas/listar.php";
-          }, 1500);
-        } else {
-          throw response;
-        }
-      } catch (error) {
-        console.error("[VENTAS] Error al registrar:", error);
-        const errorMsg = NotificationService.getApiErrorMessage(
-          error,
-          "Ocurrió un error al registrar la venta.",
+        NotificationService.loading(
+            "Guardando venta...",
         );
-        NotificationService.error(errorMsg);
-        submitBtn
-          .prop("disabled", false)
-          .html('<i class="fas fa-save mr-1"></i>Guardar Venta');
-      }
+
+        try {
+            const response = await VentaService.crearVenta(payload);
+
+            if (response && response.success) {
+                NotificationService.success(
+                    "La venta ha sido creado exitosamente.",
+                );
+
+                setTimeout(() => {
+                    const actualPath =
+                        window.location.pathname.substring(
+                            0,
+                            window.location.pathname.lastIndexOf("/") + 1,
+                        );
+
+                    window.location.href = actualPath;
+                }, 1500);
+
+                return;
+            }
+
+            NotificationService.error(
+                NotificationService.getApiErrorMessage(response),
+            );
+
+            isSubmitting = false;
+        } catch (error) {
+            console.error(
+                "[CREAR VENTA] Error al crear venta:",
+                error,
+            );
+
+            NotificationService.error(
+                "Ocurrió un error inesperado al guardar "
+                + "el producto.",
+            );
+
+            isSubmitting = false;
+        }
     });
   }
 
