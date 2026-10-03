@@ -157,7 +157,7 @@ const DashboardController = (() => {
       {
         title: "VENTAS",
         value: typeof salesSummary === "number" ? `$${salesSummary.toLocaleString("es-CO")}` : salesSummary,
-        subtext: "Últimos 30 días",
+        subtext: "Ventas Hoy",
         icon: "fas fa-cash-register",
         color: "#16A34A",
         bgIcon: "#F0FDF4",
@@ -377,8 +377,9 @@ const DashboardController = (() => {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: "60%",
         plugins: {
-          legend: { position: "right", labels: { boxWidth: 10, font: { size: 10 } } }
+          legend: { position: "left", labels: { boxWidth: 10, font: { size: 10 } } }
         }
       },
     });

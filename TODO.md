@@ -2,7 +2,11 @@
 
 ## ⏳ En Proceso / Pendientes
 
-- [] Implementar modulo de ventas se debe realizar el endpoint por que aun no esta creada la app en el backend. *(Asignado: )*
+- [] Realizar las tarjetas de "ventas ultimos 30 dias", "Ultimas Ventas". *(Asignado: )*
+- [] Se debe poner a funcionar con datos reales la tarjeta "Resumen de Niveles de Stock". *(Asignado: )*
+- [] En la tarjeta de ventas toca poner a funcionar la parte donde dice "Ventas Hoy". *(Asignado: )*
+- [] Mejora la grafica de "Ventas vs Compras". *(Asignado: )*
+
 
 ## ✅ Completado
 
@@ -31,3 +35,4 @@ Al hacer la prueba, la petición ya llega con éxito al backend, pero la API est
 - [x] Implementar modulo de inventario *(Asignado: Jhan)*
 - [x] Implementar modulo de compras se debe realizar el endpoint por que aun no esta creada la app en el backend. *(Asignado: Jhan)*
 - [x] Se realizo diseño del siderbar para usar colores personalizados *(Asignado: Diana)*
+- [x] Implementar modulo de ventas se debe realizar el endpoint por que aun no esta creada la app en el backend. *(Asignado: Jhan)*

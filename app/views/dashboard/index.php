@@ -37,7 +37,7 @@ require_once __DIR__ . '/../layouts/head.php';
                     </div>
 
                     <!-- ═══════════════════════════════════════════════    
-                         FILA 2 — Gráficos (4 columnas)
+                         FILA 2 — Gráficos (Ventas vs Compras & Ventas 30 días)
                          ═══════════════════════════════════════════════ -->
                     <div class="row mt-3" id="dashboard-chart-row">
 
@@ -57,30 +57,8 @@ require_once __DIR__ . '/../layouts/head.php';
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>          
 
-                        
-
-                        <!-- Gráfico 3: Stock de inventario (Torta/Rosquilla) -->
-                        <div class="col-lg-6 col-md-4 mb-4">
-                            <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
-                                <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
-                                    <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A; font-size: 1rem;">
-                                        <i class="fas fa-chart-pie mr-2" style="color: #F59E0B;"></i>Stock de inventario
-                                    </h3>
-                                </div>
-                                <div class="card-body" id="chart-pie-container">
-                                    <canvas id="chart-sales-pie" style="min-height: 220px; height: 220px; max-height: 220px; max-width: 100%;"></canvas>
-                                    <div class="text-center text-muted py-4 d-none" id="chart-pie-empty">
-                                        <i class="fas fa-chart-pie fa-3x mb-3 text-light"></i>
-                                        <p class="mb-0">Sin datos suficientes</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>      
-                    </div>
-
-                    <div class="row mt-3" id="dashboard-chart-row">
                         <!-- Gráfico 2: Ventas últimos 30 días (Línea) -->
                         <div class="col-lg-6 col-md-4 mb-4">
                             <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
@@ -97,26 +75,79 @@ require_once __DIR__ . '/../layouts/head.php';
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>     
+                    </div>
 
-                        <!-- Gráfico 4: Métodos de Pago (Rosquilla) -->
-                        <div class="col-lg-6 col-md-4 mb-4">
+                    <!-- ═══════════════════════════════════════════════    
+                         FILA 2.5 — Gráfico Torta con Información del Inventario
+                         ═══════════════════════════════════════════════ -->
+                    <div class="row mt-2">
+                        <!-- Gráfico 3: Stock de inventario (Torta/Rosquilla) -->
+                        <div class="col-12 mb-4">
                             <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
                                 <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
                                     <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A; font-size: 1rem;">
-                                        <i class="fas fa-credit-card mr-2" style="color: #0891B2;"></i>Métodos de Pago
+                                        <i class="fas fa-chart-pie mr-2" style="color: #F59E0B;"></i>Stock de inventario
                                     </h3>
                                 </div>
-                                <div class="card-body" id="chart-payment-container">
-                                    <canvas id="chart-payment-methods" style="min-height: 220px; height: 220px; max-height: 220px; max-width: 100%;"></canvas>
-                                    <div class="text-center text-muted py-4 d-none" id="chart-payment-empty">
-                                        <i class="fas fa-wallet fa-3x mb-3 text-light"></i>
-                                        <p class="mb-0">Sin datos suficientes</p>
+                                <div class="card-body" id="chart-pie-container">
+                                    <div class="row align-items-center">
+                                        <!-- Gráfico -->
+                                        <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
+                                            <canvas id="chart-sales-pie" style="min-height: 280px; height: 280px; max-height: 280px; max-width: 100%;"></canvas>
+                                            <div class="text-center text-muted py-4 d-none" id="chart-pie-empty">
+                                                <i class="fas fa-chart-pie fa-3x mb-3 text-light"></i>
+                                                <p class="mb-0">Sin datos suficientes</p>
+                                            </div>    
+                                        </div>
+                                        
+                                        <!-- Información de Estado de Stock (Normal, Bajo, Crítico) -->
+                                        <div class="col-lg-6 col-md-12" id="chart-pie-info">
+                                            <h6 class="font-weight-bold text-dark mb-3">
+                                                <i class="fas fa-boxes mr-1 text-muted"></i> Resumen de Niveles de Stock
+                                            </h6>
+                                            
+                                            <div class="d-flex flex-column gap-2">
+                                                <!-- Stock Normal -->
+                                                <div class="p-3 mb-2 rounded border-left" style="background-color: #F8FAFC; border-left: 5px solid #16A34A !important;">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span class="badge badge-success px-2 py-1 mb-1"><i class="fas fa-check-circle mr-1"></i> Stock Normal</span>
+                                                            <p class="text-muted small mb-0">Productos con cantidad suficiente para venta.</p>
+                                                        </div>
+                                                        <h4 class="font-weight-bold text-success mb-0" id="stock-normal-count">0</h4>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Stock Bajo -->
+                                                <div class="p-3 mb-2 rounded border-left" style="background-color: #FFFBEB; border-left: 5px solid #F59E0B !important;">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span class="badge badge-warning text-white px-2 py-1 mb-1" style="background-color: #F59E0B;"><i class="fas fa-exclamation-triangle mr-1"></i> Stock Bajo</span>
+                                                            <p class="text-muted small mb-0">Productos próximos a alcanzar el stock mínimo.</p>
+                                                        </div>
+                                                        <h4 class="font-weight-bold mb-0" style="color: #D97706;" id="stock-bajo-count">0</h4>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Stock Crítico -->
+                                                <div class="p-3 rounded border-left" style="background-color: #FEF2F2; border-left: 5px solid #DC2626 !important;">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span class="badge badge-danger px-2 py-1 mb-1"><i class="fas fa-times-circle mr-1"></i> Stock Crítico / Agotado</span>
+                                                            <p class="text-muted small mb-0">Productos agotados o que requieren reposición urgente.</p>
+                                                        </div>
+                                                        <h4 class="font-weight-bold text-danger mb-0" id="stock-critico-count">0</h4>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>                                            
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <!-- ═══════════════════════════════════════════════
                          FILA 3 — Listas / Cards informativas
                          ═══════════════════════════════════════════════ -->
@@ -138,19 +169,20 @@ require_once __DIR__ . '/../layouts/head.php';
                             </div>
                         </div>
 
+                        <!-- Gráfico 4: Métodos de Pago (Rosquilla) -->
                         <div class="col-lg-6 col-xl-4 mb-4">
-                            <div class="card h-100 shadow-sm border-0" style="border-radius: 0.75rem;">
+                            <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem; background-color: #FFFFFF;">
                                 <div class="card-header border-0 bg-white pt-4 pb-2" style="border-radius: 0.75rem 0.75rem 0 0;">
-                                    <h3 class="card-title font-weight-bold text-dark mb-0">
-                                        <i class="fas fa-exclamation-circle mr-2 text-danger"></i>Requiere atención
+                                    <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A; font-size: 1rem;">
+                                        <i class="fas fa-credit-card mr-2" style="color: #0891B2;"></i>Métodos de Pago
                                     </h3>
                                 </div>
-                                <div class="card-body pt-3 pb-4 px-4">
-                                    <ul class="list-unstyled mb-0" id="needs_attention_container">
-                                        <li class="text-center text-muted py-3">
-                                            <i class="fas fa-spinner fa-spin mr-1"></i> Cargando...
-                                        </li>
-                                    </ul>
+                                <div class="card-body" id="chart-payment-container">
+                                    <canvas id="chart-payment-methods" style="min-height: 220px; height: 220px; max-height: 220px; max-width: 100%;"></canvas>
+                                    <div class="text-center text-muted py-4 d-none" id="chart-payment-empty">
+                                        <i class="fas fa-wallet fa-3x mb-3 text-light"></i>
+                                        <p class="mb-0">Sin datos suficientes</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
