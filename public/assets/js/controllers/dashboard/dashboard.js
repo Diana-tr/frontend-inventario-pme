@@ -69,7 +69,7 @@ const DashboardController = (() => {
 
       // Renderizar 6 KPIs consolidados
       renderConsolidatedKPIs(rawData, widgets);
-      
+
       // Renderizar Gráficos, Listas y Tablas
       renderCharts(charts, rawData);
       renderLists(lists);
@@ -105,6 +105,7 @@ const DashboardController = (() => {
 
     const productsTotal = getValue("products_total", "products_total");
     const lowStock = getValue("products_low_stock", "products_low_stock");
+    const criticalStock = getValue("products_critical", "products_critical");
 
     const purchasesSummary = getValue("purchases_summary", "purchases_summary");
     const purchasesPending = getValue("purchases_pending", "purchases_pending");
@@ -137,11 +138,11 @@ const DashboardController = (() => {
       {
         title: "PRODUCTOS",
         value: productsTotal,
-        subtext: `${lowStock} bajo stock`,
+        subtext: `<span class="${Number(lowStock) > 0 ? 'text-warning' : 'text-muted'}">${lowStock} bajo stock</span> <span class="mx-1 text-muted" style="font-size: 0.85em;">|</span> <span class="${Number(criticalStock) > 0 ? 'text-danger' : 'text-muted'}">${criticalStock} crítico</span>`,
         icon: "fas fa-box",
         color: "#F59E0B",
         bgIcon: "#FFFBEB",
-        textColor: Number(lowStock) > 0 ? "text-warning" : "text-muted",
+        textColor: "",
         url: "productos?filter=alerts" // 👈 Redirige aplicando el filtro de alertas
       },
       {
@@ -156,8 +157,12 @@ const DashboardController = (() => {
       },
       {
         title: "VENTAS",
-        value: typeof salesSummary === "number" ? `$${salesSummary.toLocaleString("es-CO")}` : salesSummary,
-        subtext: "Ventas Hoy",
+        value: (typeof salesSummary === "object" && salesSummary !== null) 
+          ? `$${Number(salesSummary.total_month || 0).toLocaleString("es-CO")}`
+          : (typeof salesSummary === "number" ? `$${salesSummary.toLocaleString("es-CO")}` : salesSummary),
+        subtext: (typeof salesSummary === "object" && salesSummary !== null)
+          ? `${salesSummary.sales_today_count || 0} ventas hoy`
+          : "Ventas Hoy",
         icon: "fas fa-cash-register",
         color: "#16A34A",
         bgIcon: "#F0FDF4",
@@ -223,7 +228,7 @@ const DashboardController = (() => {
     }
   }
 
-  // 🎯 RENDERIZADO DE GRÁFICOS
+  // RENDERIZADO DE GRÁFICOS
   function renderCharts(charts, fullResponseData) {
     for (const { code, value, config } of charts) {
       const canvas = document.getElementById(config.canvasId);
@@ -260,20 +265,41 @@ const DashboardController = (() => {
       return Number(fullResponseData[fallbackKey]) || 0;
     };
 
-    const totalProd = extractWidgetVal("products_total", "products_total");
-    const lowStockProd = extractWidgetVal("products_low_stock", "products_low_stock");
-    const criticalStockProd = extractWidgetVal("inventory_alerts", "products_critical");
-    const normalStock = Math.max(0, totalProd - lowStockProd - criticalStockProd);
+    const stockDistributionWidget = Array.isArray(fullResponseData.widgets)
+      ? fullResponseData.widgets.find(w => w.code === "inventory_stock_distribution")
+      : null;
 
-    // Siempre estructuramos los 3 estados
+    let normalStock = 0, almostLowStockProd = 0, lowStockProd = 0, criticalStockProd = 0;
+
+    if (stockDistributionWidget && stockDistributionWidget.value) {
+      const dataArr = stockDistributionWidget.value;
+      const getVal = (label) => {
+        const item = dataArr.find(d => d.label === label || d.label.replace('í', 'i') === label.replace('í', 'i'));
+        return item ? (Number(item.value) || 0) : 0;
+      };
+      normalStock = getVal("Stock Normal");
+      almostLowStockProd = getVal("Casi Bajo Stock");
+      lowStockProd = getVal("Bajo Stock");
+      criticalStockProd = getVal("Stock Critico");
+    } else {
+      const totalProd = extractWidgetVal("products_total", "products_total");
+      lowStockProd = extractWidgetVal("products_low_stock", "products_low_stock");
+      criticalStockProd = extractWidgetVal("inventory_alerts", "products_critical");
+      normalStock = Math.max(0, totalProd - lowStockProd - criticalStockProd);
+    }
+
+    const totalCalculated = normalStock + almostLowStockProd + lowStockProd + criticalStockProd;
+
+    // Siempre estructuramos los estados
     const stockData = [
       { label: "Stock Normal", value: normalStock },
+      { label: "Casi Bajo Stock", value: almostLowStockProd },
       { label: "Bajo Stock", value: lowStockProd },
       { label: "Stock Crítico", value: criticalStockProd }
     ];
 
     if (pieCanvas) {
-      if (totalProd > 0) {
+      if (totalCalculated > 0) {
         if (pieEmpty) pieEmpty.classList.add("d-none");
         pieCanvas.classList.remove("d-none");
         renderPieChart(pieCanvas, stockData);
@@ -281,6 +307,15 @@ const DashboardController = (() => {
         pieCanvas.classList.add("d-none");
         if (pieEmpty) pieEmpty.classList.remove("d-none");
       }
+
+      const elNormal = document.getElementById("stock-normal-count");
+      const elCasiBajo = document.getElementById("stock-casi-bajo-count");
+      const elBajo = document.getElementById("stock-bajo-count");
+      const elCritico = document.getElementById("stock-critico-count");
+      if (elNormal) elNormal.textContent = normalStock;
+      if (elCasiBajo) elCasiBajo.textContent = almostLowStockProd;
+      if (elBajo) elBajo.textContent = lowStockProd;
+      if (elCritico) elCritico.textContent = criticalStockProd;
     }
   }
 
@@ -292,23 +327,45 @@ const DashboardController = (() => {
     const ventas = data.map((d) => d.ventas ?? d.sales ?? 0);
     const compras = data.map((d) => d.compras ?? d.purchases ?? 0);
 
-    window.myBarChartInstance = new Chart(canvas.getContext("2d"), {
+    const ctx = canvas.getContext("2d");
+    const gradientVentas = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientVentas.addColorStop(0, 'rgba(22, 163, 74, 1)');
+    gradientVentas.addColorStop(1, 'rgba(22, 163, 74, 0.5)');
+
+    const gradientCompras = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientCompras.addColorStop(0, 'rgba(37, 99, 235, 1)');
+    gradientCompras.addColorStop(1, 'rgba(37, 99, 235, 0.5)');
+
+    window.myBarChartInstance = new Chart(ctx, {
       type: "bar",
       data: {
         labels,
         datasets: [
-          { label: "Ventas", backgroundColor: "#16A34A", borderRadius: 4, data: ventas },
-          { label: "Compras", backgroundColor: "#2563EB", borderRadius: 4, data: compras },
+          { label: "Ventas", backgroundColor: gradientVentas, hoverBackgroundColor: "#15803D", borderRadius: 6, data: ventas, barPercentage: 0.7, categoryPercentage: 0.8 },
+          { label: "Compras", backgroundColor: gradientCompras, hoverBackgroundColor: "#1D4ED8", borderRadius: 6, data: compras, barPercentage: 0.7, categoryPercentage: 0.8 },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "top", labels: { usePointStyle: true, font: { size: 10 } } }
+          legend: { position: "top", labels: { usePointStyle: true, font: { size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString("es-CO")}`
+            },
+            backgroundColor: "rgba(15, 23, 42, 0.9)",
+            padding: 10,
+            cornerRadius: 8
+          }
         },
         scales: {
-          y: { beginAtZero: true, ticks: { callback: (val) => "$" + Number(val).toLocaleString("es-CO") } }
+          x: { grid: { display: false } },
+          y: { 
+            beginAtZero: true, 
+            grid: { borderDash: [4, 4], color: "#E2E8F0" },
+            ticks: { callback: (val) => "$" + Number(val).toLocaleString("es-CO") } 
+          }
         }
       },
     });
@@ -354,9 +411,10 @@ const DashboardController = (() => {
     const labels = data.map((d) => d.label);
     const values = data.map((d) => Number(d.value) || 0);
 
-    // Mapeo fijo de los 3 colores para los 3 estados obligatorios
+    // Mapeo fijo de los colores para los estados
     const colorMap = {
       "Stock Normal": "#16A34A",  // Verde
+      "Casi Bajo Stock": "#3B82F6", // Azul
       "Bajo Stock": "#F59E0B",    // Amarillo/Naranja
       "Stock Crítico": "#DC2626"  // Rojo
     };
@@ -377,9 +435,13 @@ const DashboardController = (() => {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "60%",
+        cutout: "70%",
+        layout: {
+          padding: { left: 0, right: 30 }
+        },
+        legend: { display: false },
         plugins: {
-          legend: { position: "left", labels: { boxWidth: 10, font: { size: 10 } } }
+          legend: { display: false }
         }
       },
     });
@@ -398,16 +460,27 @@ const DashboardController = (() => {
         labels,
         datasets: [{
           data: values,
-          backgroundColor: ["#2563EB", "#0891B2", "#8B5CF6", "#EC4899", "#10B981"],
-          borderWidth: 2,
-          borderColor: "#FFFFFF"
+          backgroundColor: ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899"],
+          hoverBackgroundColor: ["#2563EB", "#059669", "#D97706", "#7C3AED", "#DB2777"],
+          borderWidth: 3,
+          borderColor: "#FFFFFF",
+          hoverOffset: 6
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: "75%",
         plugins: {
-          legend: { position: "right", labels: { boxWidth: 10, font: { size: 10 } } }
+          legend: { position: "right", labels: { boxWidth: 12, padding: 15, usePointStyle: true, font: { size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.label}: $${Number(ctx.raw).toLocaleString("es-CO")}`
+            },
+            backgroundColor: "rgba(15, 23, 42, 0.9)",
+            padding: 10,
+            cornerRadius: 8
+          }
         }
       }
     });
@@ -427,23 +500,44 @@ const DashboardController = (() => {
 
       if (Array.isArray(value) && value.length > 0) {
         container.innerHTML = "";
+        let index = 0;
         for (const item of value) {
+          index++;
           const title = item.title || item.label || item.name || "";
           const subtitle = item.subtitle || item.date || "";
           const badgeVal = item.value ?? item.badge ?? "";
           const badgeColor = item.color || item.badgeClass || "secondary";
 
           const li = document.createElement("li");
-          li.className = "d-flex justify-content-between align-items-center py-2 px-1 mb-1 border-bottom";
+          
+          let iconHtml = `<i class="${item.icon || "fas fa-circle"} text-${badgeColor} mr-2" style="font-size: 0.75rem;"></i>`;
+          const badgeSuffix = code === "top_selling_products" ? " vend." : "";
+          
+          if (code === "top_selling_products") {
+             li.className = "d-flex justify-content-between align-items-center py-2 px-2 mb-2 rounded";
+             li.style.backgroundColor = "#F8FAFC";
+             li.style.border = "1px solid #E2E8F0";
+             
+             const medalColors = ["#F59E0B", "#94A3B8", "#D97706"];
+             const medalColor = index <= 3 ? medalColors[index - 1] : "#64748B";
+             const bgColor = index <= 3 ? "#FEF3C7" : "#F1F5F9";
+             
+             iconHtml = `<div class="rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 32px; height: 32px; background-color: ${bgColor}; border: 1px solid ${medalColor}; flex-shrink: 0;">
+                 <span style="color: ${medalColor}; font-weight: bold; font-size: 0.85rem;">${index}</span>
+             </div>`;
+          } else {
+             li.className = "d-flex justify-content-between align-items-center py-2 px-1 mb-1 border-bottom";
+          }
+
           li.innerHTML = `
             <div class="d-flex align-items-center">
-              <i class="${item.icon || "fas fa-circle"} text-${badgeColor} mr-2" style="font-size: 0.75rem;"></i>
+              ${iconHtml}
               <div>
                 <span class="font-weight-bold text-dark d-block" style="font-size: 0.88rem;">${title}</span>
                 ${subtitle ? `<small class="text-muted d-block" style="font-size: 0.75rem;">${subtitle}</small>` : ''}
               </div>
             </div>
-            ${badgeVal !== "" ? `<div><span class="badge badge-${badgeColor} px-2 py-1">${badgeVal}</span></div>` : ''}`;
+            ${badgeVal !== "" ? `<div><span class="badge badge-${badgeColor} px-2 py-1 shadow-sm">${badgeVal}${badgeSuffix}</span></div>` : ''}`;
           container.appendChild(li);
         }
       } else {
@@ -464,10 +558,15 @@ const DashboardController = (() => {
           const client = row.cliente ?? row.customer ?? row.client_name ?? "Cliente Ocasional";
           const amount = row.monto ?? row.amount ?? row.total ?? 0;
           const date = row.fecha ?? row.date ?? row.created_at ?? "";
+          const tipo = row.tipo || "";
+
+          const tipoBadge = tipo === "POS" 
+            ? `<span class="badge badge-info ml-2 px-2 py-1" style="font-size: 0.65rem;">POS</span>` 
+            : `<span class="badge badge-success ml-2 px-2 py-1" style="font-size: 0.65rem;">Factura</span>`;
 
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td class="font-weight-bold">${id}</td>
+            <td class="font-weight-bold">${id}${tipoBadge}</td>
             <td>${client}</td>
             <td class="text-success font-weight-bold">$${Number(amount).toLocaleString("es-CO")}</td>
             <td><small class="text-muted">${date}</small></td>`;

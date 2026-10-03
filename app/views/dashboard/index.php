@@ -93,51 +93,78 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card-body" id="chart-pie-container">
                                     <div class="row align-items-center">
                                         <!-- Gráfico -->
-                                        <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
-                                            <canvas id="chart-sales-pie" style="min-height: 280px; height: 280px; max-height: 280px; max-width: 100%;"></canvas>
-                                            <div class="text-center text-muted py-4 d-none" id="chart-pie-empty">
-                                                <i class="fas fa-chart-pie fa-3x mb-3 text-light"></i>
-                                                <p class="mb-0">Sin datos suficientes</p>
-                                            </div>    
+                                        <div class="col-lg-4 col-md-12 mb-3 mb-lg-0 d-flex justify-content-center">
+                                            <div style="width: 100%; max-width: 280px;">
+                                                <canvas id="chart-sales-pie" style="min-height: 260px; height: 260px; max-height: 260px; max-width: 100%;"></canvas>
+                                                <div class="text-center text-muted py-4 d-none" id="chart-pie-empty">
+                                                    <i class="fas fa-chart-pie fa-3x mb-3 text-light"></i>
+                                                    <p class="mb-0">Sin datos suficientes</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Productos con alertas (NUEVO) -->
+                                        <div class="col-lg-3 col-md-12 mb-3 mb-lg-0">
+                                            <h6 class="font-weight-bold text-dark mb-3">
+                                                <i class="fas fa-exclamation-circle mr-1 text-danger"></i> Atención Requerida
+                                            </h6>
+                                            <div class="alert-list-container" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                                                <ul class="list-unstyled mb-0" id="needs_attention_container">
+                                                    <li class="text-center text-muted py-3">
+                                                        <i class="fas fa-spinner fa-spin mr-1"></i> Cargando alertas...
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </div>
                                         
                                         <!-- Información de Estado de Stock (Normal, Bajo, Crítico) -->
-                                        <div class="col-lg-6 col-md-12" id="chart-pie-info">
+                                        <div class="col-lg-5 col-md-12" id="chart-pie-info">
                                             <h6 class="font-weight-bold text-dark mb-3">
                                                 <i class="fas fa-boxes mr-1 text-muted"></i> Resumen de Niveles de Stock
                                             </h6>
                                             
                                             <div class="d-flex flex-column gap-2">
                                                 <!-- Stock Normal -->
-                                                <div class="p-3 mb-2 rounded border-left" style="background-color: #F8FAFC; border-left: 5px solid #16A34A !important;">
+                                                <div class="p-2 mb-1 rounded border-left" style="background-color: #F8FAFC; border-left: 4px solid #16A34A !important;">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <span class="badge badge-success px-2 py-1 mb-1"><i class="fas fa-check-circle mr-1"></i> Stock Normal</span>
-                                                            <p class="text-muted small mb-0">Productos con cantidad suficiente para venta.</p>
+                                                            <span class="badge badge-success px-2 py-1 mb-1" style="font-size: 0.7rem;"><i class="fas fa-check-circle mr-1"></i> Stock Normal</span>
+                                                            <p class="text-muted small mb-0" style="font-size: 0.75rem;">Suficiente para venta.</p>
                                                         </div>
-                                                        <h4 class="font-weight-bold text-success mb-0" id="stock-normal-count">0</h4>
+                                                        <h5 class="font-weight-bold text-success mb-0" id="stock-normal-count">0</h5>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Casi Bajo Stock -->
+                                                <div class="p-2 mb-1 rounded border-left" style="background-color: #EFF6FF; border-left: 4px solid #3B82F6 !important;">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span class="badge badge-primary px-2 py-1 mb-1" style="background-color: #3B82F6; font-size: 0.7rem;"><i class="fas fa-info-circle mr-1"></i> Casi Bajo Stock</span>
+                                                            <p class="text-muted small mb-0" style="font-size: 0.75rem;">Cercanos al mínimo.</p>
+                                                        </div>
+                                                        <h5 class="font-weight-bold text-primary mb-0" id="stock-casi-bajo-count">0</h5>
                                                     </div>
                                                 </div>
 
                                                 <!-- Stock Bajo -->
-                                                <div class="p-3 mb-2 rounded border-left" style="background-color: #FFFBEB; border-left: 5px solid #F59E0B !important;">
+                                                <div class="p-2 mb-1 rounded border-left" style="background-color: #FFFBEB; border-left: 4px solid #F59E0B !important;">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <span class="badge badge-warning text-white px-2 py-1 mb-1" style="background-color: #F59E0B;"><i class="fas fa-exclamation-triangle mr-1"></i> Stock Bajo</span>
-                                                            <p class="text-muted small mb-0">Productos próximos a alcanzar el stock mínimo.</p>
+                                                            <span class="badge badge-warning text-white px-2 py-1 mb-1" style="background-color: #F59E0B; font-size: 0.7rem;"><i class="fas fa-exclamation-triangle mr-1"></i> Stock Bajo</span>
+                                                            <p class="text-muted small mb-0" style="font-size: 0.75rem;">En o por debajo del mínimo.</p>
                                                         </div>
-                                                        <h4 class="font-weight-bold mb-0" style="color: #D97706;" id="stock-bajo-count">0</h4>
+                                                        <h5 class="font-weight-bold mb-0" style="color: #D97706;" id="stock-bajo-count">0</h5>
                                                     </div>
                                                 </div>
 
                                                 <!-- Stock Crítico -->
-                                                <div class="p-3 rounded border-left" style="background-color: #FEF2F2; border-left: 5px solid #DC2626 !important;">
+                                                <div class="p-2 rounded border-left" style="background-color: #FEF2F2; border-left: 4px solid #DC2626 !important;">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <span class="badge badge-danger px-2 py-1 mb-1"><i class="fas fa-times-circle mr-1"></i> Stock Crítico / Agotado</span>
-                                                            <p class="text-muted small mb-0">Productos agotados o que requieren reposición urgente.</p>
+                                                            <span class="badge badge-danger px-2 py-1 mb-1" style="font-size: 0.7rem;"><i class="fas fa-times-circle mr-1"></i> Stock Crítico / Agotado</span>
+                                                            <p class="text-muted small mb-0" style="font-size: 0.75rem;">Requiere reposición urgente.</p>
                                                         </div>
-                                                        <h4 class="font-weight-bold text-danger mb-0" id="stock-critico-count">0</h4>
+                                                        <h5 class="font-weight-bold text-danger mb-0" id="stock-critico-count">0</h5>
                                                     </div>
                                                 </div>
                                             </div>
