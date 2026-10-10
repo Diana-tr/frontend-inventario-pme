@@ -8,6 +8,7 @@
 import VentaService from "../../services/venta_service.js";
 import ClienteService from "../../services/cliente_service.js";
 import ProductoService from "../../services/producto_service.js";
+import CajaService from "../../services/caja_service.js";
 import NotificationService from "../../core/notification.js";
 import SecurityManager from "../../core/security.js";
 
@@ -20,6 +21,7 @@ const CrearVentaController = (() => {
 
   let saleDetails = []; // Arreglo para almacenar los detalles de la venta en memoria
   let isSubmitting = false;
+  let isCajaAbierta = false;
 
   async function initClientSelect() {
     try {
@@ -265,6 +267,11 @@ const CrearVentaController = (() => {
 
       if (isSubmitting) return;
 
+      if (!isCajaAbierta) {
+        NotificationService.error("Debe abrir una sesión de caja antes de procesar una venta o recibir pagos.", "Caja Cerrada");
+        return;
+      }
+
       const form = this;
       if (!form.checkValidity()) {
         e.stopPropagation();
@@ -365,6 +372,19 @@ const CrearVentaController = (() => {
   }
 
   async function init() {
+    // Validar si la caja está abierta
+    try {
+      const response = await CajaService.obtenerSesionActual();
+      if (response && response.success && response.data) {
+        isCajaAbierta = true;
+      } else if (!response.success && response.status === 404) {
+        isCajaAbierta = false;
+        NotificationService.toastWarning("No tienes una sesión de caja abierta. Las ventas no se procesarán.", 8000);
+      }
+    } catch (err) {
+      console.error("Error validando caja", err);
+    }
+
     await initClientSelect();
     await initProductSelect();
 

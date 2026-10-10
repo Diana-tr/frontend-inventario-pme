@@ -7,5 +7,9 @@
 // Ruta para el Módulo de Categorías
 if (isset($router)) {
     $router->add('/categorias', 'app/views/categorias/index.php');
+    
+    // Módulo de Caja
+    $router->add('/caja', 'app/views/caja/index.php');
+    $router->add('/caja/historial', 'app/views/caja/historial.php');
 }
 

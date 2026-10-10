@@ -178,8 +178,8 @@ require_once __DIR__ . '/../layouts/head.php';
 
     <!-- Script de inicialización -->
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-        import CrearVentaController from "<?php echo $URL; ?>/public/assets/js/controllers/venta/crear.js";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=1.1";
+        import CrearVentaController from "<?php echo $URL; ?>/public/assets/js/controllers/venta/crear.js?v=1.1";
 
         document.addEventListener("DOMContentLoaded", async () => {
             await App.bootstrap();

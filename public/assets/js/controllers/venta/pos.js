@@ -10,6 +10,7 @@ import ClienteService from "../../services/cliente_service.js";
 import ProductoService from "../../services/producto_service.js";
 import CompanyInfoService from "../../services/company_info_service.js";
 import InvoiceTemplateService from "../../services/invoice_template_service.js";
+import CajaService from "../../services/caja_service.js";
 import NotificationService from "../../core/notification.js";
 import SecurityManager from "../../core/security.js";
 import DocumentTemplateRenderer from "../../utils/DocumentTemplateRenderer.js";
@@ -24,6 +25,7 @@ const POSController = (() => {
   let currentCompanyInfo = null;
   let lastSaleData = null; // Guardar data de la última venta para imprimir
   let isSubmitting = false;
+  let isCajaAbierta = false;
 
   // Formato Moneda COP
   function formatCurrency(amount) {
@@ -451,6 +453,11 @@ const POSController = (() => {
 
     if (isSubmitting) return; // Si ya está enviando, no hacer nada
 
+    if (!isCajaAbierta) {
+      NotificationService.error("Debe abrir una sesión de caja antes de procesar una venta o recibir pagos.", "Caja Cerrada");
+      return;
+    }
+
     if (cart.length === 0) {
       NotificationService.toastWarning("El carrito está vacío.");
       return;
@@ -777,6 +784,20 @@ const POSController = (() => {
         SecurityManager.redirectIfUnauthorized("sales.create");
         return;
       }
+
+      // Validar si la caja está abierta
+      try {
+        const response = await CajaService.obtenerSesionActual();
+        if (response && response.success && response.data) {
+          isCajaAbierta = true;
+        } else if (!response.success && response.status === 404) {
+          isCajaAbierta = false;
+          NotificationService.toastWarning("No tienes una sesión de caja abierta. Las ventas no se procesarán.", 8000);
+        }
+      } catch (err) {
+        console.error("Error validando caja", err);
+      }
+
       initClock();
       await loadCompanyInfo();
       await initCustomerSelect();

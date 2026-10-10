@@ -297,6 +297,35 @@ require_once __DIR__ . '/../../config/app.php';
                                 </li>
                             </ul>
                         </li>
+                        <li class="nav-item" data-permission-any="cash.view,cash.open,cash.create">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cash-register"></i>
+                                <p>
+                                    Caja Registradora
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item" data-permission="cash.view">
+                                    <a href="<?php echo $URL; ?>/caja" class="nav-link" data-sidebar-path="/caja">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Estado Actual</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-permission="cash.view">
+                                    <a href="<?php echo $URL; ?>/caja/historial" class="nav-link" data-sidebar-path="/caja/historial">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Historial de Cajas</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-permission="cash.create">
+                                    <a href="<?php echo $URL; ?>/caja/crear" class="nav-link" data-sidebar-path="/caja/crear">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Crear Caja</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
 

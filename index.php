@@ -137,6 +137,19 @@ switch ($path) {
         require_once __DIR__ . '/app/views/ventas/facturas.php';
         break;
 
+    //RUTA DEL MODULO DE CAJA
+    case 'caja':
+        require_once __DIR__ . '/app/views/caja/index.php';
+        break;
+
+    case 'caja/historial':
+        require_once __DIR__ . '/app/views/caja/historial.php';
+        break;
+
+    case 'caja/crear':
+        require_once __DIR__ . '/app/views/caja/crear.php';
+        break;
+
 
     default:
         // Evitar procesar archivos estáticos o directos por error
