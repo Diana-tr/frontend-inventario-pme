@@ -3,31 +3,21 @@
  * Inventario PME
  * Navbar Controller
  * ============================================================
- *
- * Responsabilidades:
- * - Consultar la información del usuario autenticado actual.
- * - Renderizar el nombre, rol e iniciales en el Navbar y Sidebar (AdminLTE).
- * ============================================================
  */
 
 import AuthService from "../../services/auth_service.js";
 import Storage from "../../storage/storage.js";
 
 const NavbarController = (() => {
-  /**
-   * Inicializa el controlador cargando los datos del usuario.
-   * @returns {Promise<void>}
-   */
   async function init() {
-    // 1. Obtener usuario desde el Storage (fuente principal de verdad tras el login)
     let user = Storage.getUser();
 
-    // 2. Fallback: Si el Storage está vacío pero el usuario está logueado, intentamos recuperar por API
     if (!user) {
       try {
         const result = await AuthService.getCurrentUser();
         if (result && result.ok && result.data?.user) {
           user = result.data.user;
+          Storage.setUser(user);
         }
       } catch (error) {
         console.warn("[NAVBAR] Error obteniendo usuario por API fallback:", error);
@@ -35,27 +25,65 @@ const NavbarController = (() => {
     }
 
     if (!user) {
-      console.warn(
-        "[NAVBAR] No se encontró información del usuario en ninguna fuente.",
-      );
-      return;
+      user = { 
+        first_name: "Administrador", 
+        last_name: "Usuario", 
+        roles: [{ role_name: "Administrador" }] 
+      };
     }
 
     renderUserData(user);
+    await checkNavbarCajaStatus();
   }
 
-  /**
-   * Procesa y pinta los datos del usuario en los elementos del DOM.
-   * @param {Object} user
-   */
+  async function checkNavbarCajaStatus() {
+    const navbarNombre = document.querySelector("#navbar_caja_nombre");
+    const badgeEstado = document.querySelector("#navbar_caja_estado_badge");
+
+    if (!navbarNombre || !badgeEstado) return;
+
+    try {
+      const response = await fetch(`${window.APP_URL || ''}/api/cash/current`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Storage.getToken() || ''}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result && result.success && result.data) {
+          const session = result.data;
+          const registerName = session.cash_register_name || "Principal";
+
+          navbarNombre.innerHTML = `Caja: <span class="text-dark font-weight-bold">${registerName}</span>`;
+          badgeEstado.textContent = "Abierta";
+          badgeEstado.style.backgroundColor = "#DCFCE7";
+          badgeEstado.style.color = "#16A34A";
+          return;
+        }
+      }
+
+      navbarNombre.innerHTML = `Caja: <span class="text-muted">Sin sesión activa</span>`;
+      badgeEstado.textContent = "Cerrada";
+      badgeEstado.style.backgroundColor = "#FEE2E2";
+      badgeEstado.style.color = "#DC2626";
+
+    } catch (error) {
+      navbarNombre.innerHTML = `Caja: <span class="text-muted">Sin sesión activa</span>`;
+      badgeEstado.textContent = "Cerrada";
+      badgeEstado.style.backgroundColor = "#FEE2E2";
+      badgeEstado.style.color = "#DC2626";
+    }
+  }
+
   function renderUserData(user) {
-    // 1. Nombre completo o visible
     const displayName =
       user.first_name && user.last_name
         ? `${user.first_name} ${user.last_name}`
         : user.first_name || user.name || user.username || "Usuario";
 
-    // 2. Extraer el rol
     let roleText = "Usuario";
     if (Array.isArray(user.roles) && user.roles.length > 0) {
       roleText =
@@ -66,7 +94,6 @@ const NavbarController = (() => {
       roleText = "Administrador";
     }
 
-    // 3. Calcular iniciales
     let initials = "U";
     if (user.first_name && user.last_name) {
       initials = (
@@ -80,7 +107,6 @@ const NavbarController = (() => {
       initials = user.name.substring(0, 2).toUpperCase();
     }
 
-    // 4. Inyectar en el DOM (Soportando tanto prefijo navbar- como sidebar-)
     const selectorsName = ["navbar-username", "sidebar-username"];
     selectorsName.forEach((id) => {
       const el = document.getElementById(id);
@@ -99,7 +125,6 @@ const NavbarController = (() => {
       if (el) el.textContent = roleText;
     });
 
-    // Avatares pequeños y grandes
     const avatarSmallIds = ["navbar-avatar-small", "sidebar-avatar-small"];
     avatarSmallIds.forEach((id) => {
       const avatarSmall = document.getElementById(id);

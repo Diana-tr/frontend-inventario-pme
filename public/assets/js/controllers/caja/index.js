@@ -20,6 +20,26 @@ const CajaIndexController = (() => {
     return d.toLocaleString("es-CO");
   }
 
+  // Función para actualizar el Navbar globalmente con el estado de la caja
+  function actualizarNavbarCaja(isOpen, registerName = "") {
+    const navbarNombre = document.querySelector("#navbar_caja_nombre");
+    const badgeEstado = document.querySelector("#navbar_caja_estado_badge");
+
+    if (!navbarNombre || !badgeEstado) return;
+
+    if (isOpen) {
+      navbarNombre.innerHTML = `Caja: <span class="text-dark font-weight-bold">${registerName}</span>`;
+      badgeEstado.textContent = "Abierta";
+      badgeEstado.style.backgroundColor = "#DCFCE7"; // Verde suave
+      badgeEstado.style.color = "#16A34A";         // Texto verde
+    } else {
+      navbarNombre.innerHTML = `Caja: <span class="text-muted">Sin sesión activa</span>`;
+      badgeEstado.textContent = "Cerrada";
+      badgeEstado.style.backgroundColor = "#FEE2E2"; // Rojo suave
+      badgeEstado.style.color = "#DC2626";         // Texto rojo
+    }
+  }
+
   async function checkCurrentSession() {
     $("#caja_loader").show();
     $("#caja_cerrada_view").hide();
@@ -30,7 +50,6 @@ const CajaIndexController = (() => {
       if (response && response.success && response.data) {
         renderAbierta(response.data);
       } else {
-        // If not successful, usually means 404 NO_OPEN_SESSION
         if (response && response.status === 404) {
           renderCerrada();
         } else {
@@ -39,7 +58,8 @@ const CajaIndexController = (() => {
       }
     } catch (error) {
       console.error(error);
-      NotificationService.toastError("Error al verificar estado de caja.");
+      // Si da error o 404 por excepción, asumimos caja cerrada y actualizamos navbar
+      renderCerrada();
     } finally {
       $("#caja_loader").hide();
     }
@@ -47,19 +67,24 @@ const CajaIndexController = (() => {
 
   function renderCerrada() {
     $("#caja_cerrada_view").show();
+    actualizarNavbarCaja(false);
     cargarCajasRegistradoras();
   }
 
   function renderAbierta(session) {
     currentSessionId = session.id_cash_session;
     currentExpectedBalance = parseFloat(session.expected_balance || 0);
+    const registerName = session.cash_register_name || "Principal";
 
-    $("#current_cash_register").text(session.cash_register_name || "Principal");
+    $("#current_cash_register").text(registerName);
     $("#current_user").text(session.user_name || "Usuario Actual");
     $("#current_start_time").text(formatDate(session.start_time));
     $("#current_opening_balance").text(formatCurrency(session.opening_balance));
     $("#current_expected_balance").text(formatCurrency(session.expected_balance));
     
+    // Actualizar Navbar con caja abierta
+    actualizarNavbarCaja(true, registerName);
+
     // Preparar modal de cierre
     $("#close_expected_balance").text(formatCurrency(session.expected_balance));
 
@@ -172,7 +197,6 @@ const CajaIndexController = (() => {
         if (resp && resp.success) {
           NotificationService.toastSuccess("Movimiento registrado.");
           $("#modalMovimientoCaja").modal("hide");
-          // Refresh session to get updated expected balance
           checkCurrentSession(); 
         }
       } catch (err) {
@@ -221,7 +245,6 @@ const CajaIndexController = (() => {
           NotificationService.toastSuccess("Caja cerrada correctamente.");
           $("#modalCerrarCaja").modal("hide");
           
-          // Mostrar resultado real que viene del backend
           const difference = resp.data.difference;
           let diffMsg = `Diferencia reportada: ${formatCurrency(difference)}`;
           NotificationService.info(diffMsg, "Resultado del Cierre");

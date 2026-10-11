@@ -2,44 +2,31 @@
 require_once __DIR__ . '/../../config/app.php';
 ?>
 
-
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
-    <ul class="navbar-nav">
+    <ul class="navbar-nav align-items-center">
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="index3.html" class="nav-link">Home</a>
+            <a href="<?php echo $URL; ?>/dashboard" class="nav-link">Inicio</a>
+        </li>
+    </ul>
+
+    <!-- Indicador Global de Caja Centrado en el Navbar -->
+    <ul class="navbar-nav mx-auto align-items-center d-none d-md-flex">
+        <li class="nav-item">
+            <div class="px-3 py-1 d-flex align-items-center shadow-sm" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 0.8rem;">
+                <i class="fas fa-cash-register mr-2" style="color: #2563EB;"></i>
+                <span id="navbar_caja_nombre" class="font-weight-bold text-dark mr-2">Caja: <span class="text-muted font-weight-normal">Cargando...</span></span>
+                <span id="navbar_caja_estado_badge" class="badge px-2 py-1" style="background-color: #E2E8F0; color: #64748B; font-size: 0.65rem; border-radius: 10px;">Verificando</span>
+            </div>
         </li>
     </ul>
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
-        <!-- Navbar Search -->
-        <li class="nav-item">
-            <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-                <i class="fas fa-search"></i>
-            </a>
-            <div class="navbar-search-block">
-                <form class="form-inline">
-                    <div class="input-group input-group-sm">
-                        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-navbar" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                            <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </li>
-
-
         <!-- Notifications Dropdown Menu -->
         <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
@@ -52,6 +39,7 @@ require_once __DIR__ . '/../../config/app.php';
                 <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
             </div>
         </li>
+
         <!-- User Dropdown Menu -->
         <li class="nav-item dropdown user-menu">
             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -80,6 +68,7 @@ require_once __DIR__ . '/../../config/app.php';
                 </li>
             </ul>
         </li>
+
         <li class="nav-item">
             <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                 <i class="fas fa-expand-arrows-alt"></i>
@@ -90,16 +79,14 @@ require_once __DIR__ . '/../../config/app.php';
                 <i class="fas fa-th-large"></i>
             </a>
         </li>
-
-
     </ul>
 </nav>
 <!-- /.navbar -->
 
 <!-- Inicialización limpia mediante el controlador -->
 <script type="module">
-    import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js';
-    import LogoutController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js';
+    import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js?v=2026';
+    import LogoutController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js?v=2026';
 
     document.addEventListener('DOMContentLoaded', () => {
         NavbarController.init();
