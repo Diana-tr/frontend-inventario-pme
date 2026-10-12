@@ -27,8 +27,8 @@ require_once __DIR__ . '/../layouts/head.php';
                 <div class="container mx-auto" style="max-width: 1050px;">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            <h2 class="m-0 font-weight-bold text-dark">Caja Actual - Sucursal Principal</h2>
-                            <p class="text-muted small mb-0 mt-1">Gestión y control del turno actual de caja</p>
+                            <h2 class="m-0 font-weight-bold" style="color: #0F172A;">Caja Actual - Sucursal Principal</h2>
+                            <p class="small mb-0 mt-1" style="color: #64748B;">Gestión y control del turno actual de caja</p>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right bg-transparent mb-0">
@@ -53,37 +53,48 @@ require_once __DIR__ . '/../layouts/head.php';
 
                     <!-- Vista cuando la caja está CERRADA -->
                     <div id="caja_cerrada_view" style="display: none;">
-                        <div class="alert text-center border-0 shadow-sm mb-4" style="background-color: #FEF3C7; color: #92400E; border-radius: 12px;">
-                            <h5><i class="icon fas fa-exclamation-triangle mr-2"></i> ¡No hay una sesión de caja abierta!</h5>
-                            <p class="mb-0">Debe abrir la caja para poder registrar movimientos y realizar ventas.</p>
+                        <div class="alert text-center border-0 shadow-sm mb-4 py-3" style="background-color: #EFF6FF; color: #1E40AF; border-radius: 12px; border-left: 5px solid #2563EB !important;">
+                            <h5 class="font-weight-bold mb-1" style="font-size: 1.1rem;"><i class="icon fas fa-info-circle mr-2" style="color: #2563EB;"></i> ¡No hay una sesión de caja abierta!</h5>
+                            <p class="mb-0 small" style="color: #3B82F6;">Debe abrir la caja para poder registrar movimientos y realizar ventas en el sistema.</p>
                         </div>
-                        <div class="card border-0 shadow-sm mx-auto" style="max-width: 500px; background-color: #FFFFFF; border-radius: 12px; border-top: 4px solid #16A34A !important;">
+
+                        <div class="card border-0 shadow-sm mx-auto" style="max-width: 500px; background-color: #FFFFFF; border-radius: 12px; border-top: 4px solid #10B981 !important;">
                             <div class="card-header bg-white border-0 py-3">
-                                <h3 class="card-title font-weight-bold text-dark mb-0">Apertura de Caja</h3>
+                                <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A;">Apertura de Caja</h3>
                             </div>
                             <div class="card-body p-4">
                                 <form id="form_abrir_caja">
-                                    <div class="form-group">
-                                        <label for="cash_register_id" class="font-weight-bold small text-uppercase text-muted">Caja Registradora</label>
-                                        <select class="form-control" id="cash_register_id" style="border-radius: 8px; border: 1px solid #E2E8F0;" required>
-                                            <option value="">Seleccione una caja...</option>
-                                            <!-- Se llena por JS -->
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="opening_balance" class="font-weight-bold small text-uppercase text-muted">Efectivo Inicial (Base)</label>
+                                    <div class="form-group mb-3">
+                                        <label for="cash_register_id" class="font-weight-bold small text-uppercase" style="color: #1E293B; letter-spacing: 0.3px;">Caja Registradora</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text bg-light border-right-0" style="border-color: #E2E8F0; border-radius: 8px 0 0 8px;">$</span>
+                                                <span class="input-group-text bg-light border-right-0" style="border-color: #CBD5E1; border-radius: 8px 0 0 8px;"><i class="fas fa-cash-register" style="color: #475569;"></i></span>
                                             </div>
-                                            <input type="number" class="form-control border-left-0" id="opening_balance" min="0" step="0.01" value="0" style="border-color: #E2E8F0; border-radius: 0 8px 8px 0;" required>
+                                            <select class="form-control border-left-0 shadow-none" id="cash_register_id" style="border-radius: 0 8px 8px 0; border: 1px solid #CBD5E1; color: #0F172A;" required>
+                                                <option value="">Seleccione una caja...</option>
+                                                <!-- Se llena por JS -->
+                                            </select>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="opening_notes" class="font-weight-bold small text-uppercase text-muted">Observaciones (Opcional)</label>
-                                        <textarea class="form-control" id="opening_notes" rows="2" style="border-radius: 8px; border: 1px solid #E2E8F0;"></textarea>
+                                    <div class="form-group mb-3">
+                                        <label for="opening_balance" class="font-weight-bold small text-uppercase" style="color: #1E293B; letter-spacing: 0.3px;">Efectivo Inicial (Base)</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-light border-right-0" style="border-color: #CBD5E1; border-radius: 8px 0 0 8px; color: #475569; font-weight: bold;">$</span>
+                                            </div>
+                                            <input type="number" class="form-control border-left-0 shadow-none" id="opening_balance" min="0" step="0.01" value="0" style="border-color: #CBD5E1; border-radius: 0 8px 8px 0; color: #0F172A;" required>
+                                        </div>
                                     </div>
-                                    <button type="submit" class="btn btn-success btn-block font-weight-bold py-2 shadow-sm text-white" style="background-color: #16A34A; border: none; border-radius: 8px;" data-permission="cash.open">
+                                    <div class="form-group mb-4">
+                                        <label for="opening_notes" class="font-weight-bold small text-uppercase" style="color: #1E293B; letter-spacing: 0.3px;">Observaciones (Opcional)</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-light border-right-0" style="border-color: #CBD5E1; border-radius: 8px 0 0 8px;"><i class="fas fa-align-left" style="color: #475569;"></i></span>
+                                            </div>
+                                            <textarea class="form-control border-left-0 shadow-none" id="opening_notes" rows="2" placeholder="Observaciones adicionales..." style="border-radius: 0 8px 8px 0; border: 1px solid #CBD5E1; color: #0F172A;"></textarea>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-block font-weight-bold py-2 shadow-sm text-white" style="background-color: #059669; border: none; border-radius: 8px;" data-permission="cash.open">
                                         <i class="fas fa-lock-open mr-1"></i> Abrir Caja
                                     </button>
                                 </form>
@@ -100,7 +111,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card border-0 shadow-sm h-100" style="background-color: #FFFFFF; border-radius: 12px;">
                                     <div class="card-body p-3 d-flex justify-content-between align-items-center">
                                         <div>
-                                            <span class="text-uppercase text-muted font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Caja Registradora</span>
+                                            <span class="text-uppercase font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; color: #475569;">Caja Registradora</span>
                                             <h5 class="font-weight-bold text-dark mt-1 mb-0" id="current_cash_register">---</h5>
                                         </div>
                                         <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; background-color: #EFF6FF;">
@@ -114,7 +125,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card border-0 shadow-sm h-100" style="background-color: #FFFFFF; border-radius: 12px;">
                                     <div class="card-body p-3 d-flex justify-content-between align-items-center">
                                         <div style="min-width: 0;">
-                                            <span class="text-uppercase text-muted font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Usuario Activo</span>
+                                            <span class="text-uppercase font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; color: #475569;">Usuario Activo</span>
                                             <h6 class="font-weight-bold text-dark mt-1 mb-0" id="current_user" style="font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">---</h6>
                                         </div>
                                         <div class="rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0 ml-2" style="width: 46px; height: 46px; background-color: #F0FDF4;">
@@ -128,7 +139,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card border-0 shadow-sm h-100" style="background-color: #FFFFFF; border-radius: 12px;">
                                     <div class="card-body p-3 d-flex justify-content-between align-items-center">
                                         <div>
-                                            <span class="text-uppercase text-muted font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Saldo Inicial</span>
+                                            <span class="text-uppercase font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; color: #475569;">Saldo Inicial</span>
                                             <h5 class="font-weight-bold text-dark mt-1 mb-0" id="current_opening_balance">---</h5>
                                         </div>
                                         <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; background-color: #FFFBEB;">
@@ -142,7 +153,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card border-0 shadow-sm h-100" style="background-color: #FFFFFF; border-radius: 12px; border-left: 4px solid #2563EB;">
                                     <div class="card-body p-3 d-flex justify-content-between align-items-center">
                                         <div>
-                                            <span class="text-uppercase text-primary font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Efectivo Esperado</span>
+                                            <span class="text-uppercase font-weight-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; color: #2563EB;">Efectivo Esperado</span>
                                             <h5 class="font-weight-bold text-primary mt-1 mb-0" id="current_expected_balance">---</h5>
                                         </div>
                                         <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; background-color: #EFF6FF;">
@@ -163,8 +174,8 @@ require_once __DIR__ . '/../layouts/head.php';
                                     </div>
                                     <div class="card-body d-flex flex-column justify-content-between">
                                         <div>
-                                            <div class="p-3 mb-3 rounded-lg" style="background-color: #F8FAFC; border: 1px dashed #E2E8F0;">
-                                                <span class="text-muted small d-block mb-1 font-weight-bold">DETALLES DE APERTURA</span>
+                                            <div class="p-3 mb-3 rounded-lg" style="background-color: #F8FAFC; border: 1px dashed #CBD5E1;">
+                                                <span class="small d-block mb-1 font-weight-bold" style="color: #475569;">DETALLES DE APERTURA</span>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <span class="small text-muted">Hora:</span>
                                                     <span id="current_start_time" class="font-weight-bold text-dark small">---</span>
@@ -237,22 +248,22 @@ require_once __DIR__ . '/../layouts/head.php';
                     </div>
                     <div class="modal-body p-4">
                         <div class="form-group">
-                            <label class="font-weight-bold small text-uppercase text-muted">Tipo de Movimiento</label>
-                            <select class="form-control" id="mov_type" style="border-radius: 8px; border: 1px solid #E2E8F0;" required>
+                            <label class="font-weight-bold small text-uppercase" style="color: #1E293B;">Tipo de Movimiento</label>
+                            <select class="form-control" id="mov_type" style="border-radius: 8px; border: 1px solid #CBD5E1;" required>
                                 <option value="IN">Ingreso (Entrada)</option>
                                 <option value="OUT">Retiro (Salida)</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="font-weight-bold small text-uppercase text-muted">Monto (Efectivo)</label>
+                            <label class="font-weight-bold small text-uppercase" style="color: #1E293B;">Monto (Efectivo)</label>
                             <div class="input-group">
-                                <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0" style="border-color: #E2E8F0; border-radius: 8px 0 0 8px;">$</span></div>
-                                <input type="number" class="form-control border-left-0" id="mov_amount" min="0.01" step="0.01" style="border-color: #E2E8F0; border-radius: 0 8px 8px 0;" required>
+                                <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0" style="border-color: #CBD5E1; border-radius: 8px 0 0 8px; font-weight: bold;">$</span></div>
+                                <input type="number" class="form-control border-left-0" id="mov_amount" min="0.01" step="0.01" style="border-color: #CBD5E1; border-radius: 0 8px 8px 0;" required>
                             </div>
                         </div>
                         <div class="form-group mb-0">
-                            <label class="font-weight-bold small text-uppercase text-muted">Descripción / Concepto</label>
-                            <input type="text" class="form-control" id="mov_description" required placeholder="Ej: Pago de insumos, Aporte inicial..." style="border-radius: 8px; border: 1px solid #E2E8F0;">
+                            <label class="font-weight-bold small text-uppercase" style="color: #1E293B;">Descripción / Concepto</label>
+                            <input type="text" class="form-control" id="mov_description" required placeholder="Ej: Pago de insumos, Aporte inicial..." style="border-radius: 8px; border: 1px solid #CBD5E1;">
                         </div>
                     </div>
                     <div class="modal-footer border-0 bg-light py-3" style="border-radius: 0 0 12px 12px;">
@@ -278,30 +289,30 @@ require_once __DIR__ . '/../layouts/head.php';
                     <div class="modal-body p-4">
                         <div class="alert p-3 mb-4 border-0 shadow-sm" style="background-color: #EFF6FF; border-radius: 8px;">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="font-weight-bold small text-uppercase text-primary">Efectivo Esperado en Sistema:</span>
+                                <span class="font-weight-bold small text-uppercase" style="color: #2563EB;">Efectivo Esperado en Sistema:</span>
                                 <strong id="close_expected_balance" class="h5 mb-0 text-primary">---</strong>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="font-weight-bold small text-uppercase text-muted">Efectivo Físico Contado</label>
+                            <label class="font-weight-bold small text-uppercase" style="color: #1E293B;">Efectivo Físico Contado</label>
                             <div class="input-group input-group-lg">
-                                <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0" style="border-color: #E2E8F0; border-radius: 8px 0 0 8px;">$</span></div>
-                                <input type="number" class="form-control border-left-0 font-weight-bold" id="close_counted_balance" min="0" step="0.01" style="border-color: #E2E8F0; border-radius: 0 8px 8px 0; color: #0F172A;" required>
+                                <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0" style="border-color: #CBD5E1; border-radius: 8px 0 0 8px; font-weight: bold;">$</span></div>
+                                <input type="number" class="form-control border-left-0 font-weight-bold" id="close_counted_balance" min="0" step="0.01" style="border-color: #CBD5E1; border-radius: 0 8px 8px 0; color: #0F172A;" required>
                             </div>
                             <small class="form-text text-muted mt-2">Ingrese el total de dinero en efectivo que hay en la gaveta.</small>
                         </div>
                         
-                        <div class="form-group p-3 mb-3" style="background-color: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0;">
+                        <div class="form-group p-3 mb-3" style="background-color: #F8FAFC; border-radius: 8px; border: 1px solid #CBD5E1;">
                             <div class="d-flex justify-content-between font-weight-bold align-items-center">
-                                <span class="small text-uppercase text-muted">Diferencia (Vista Previa):</span>
+                                <span class="small text-uppercase" style="color: #1E293B;">Diferencia (Vista Previa):</span>
                                 <span id="close_difference" class="h5 mb-0 text-dark">$ 0.00</span>
                             </div>
                         </div>
                         
                         <div class="form-group mb-0">
-                            <label class="font-weight-bold small text-uppercase text-muted">Observaciones de Cierre</label>
-                            <textarea class="form-control" id="close_notes" rows="2" placeholder="Opcional. Justifique diferencias si las hay..." style="border-radius: 8px; border: 1px solid #E2E8F0;"></textarea>
+                            <label class="font-weight-bold small text-uppercase" style="color: #1E293B;">Observaciones de Cierre</label>
+                            <textarea class="form-control" id="close_notes" rows="2" placeholder="Opcional. Justifique diferencias si las hay..." style="border-radius: 8px; border: 1px solid #CBD5E1;"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer border-0 bg-light py-3" style="border-radius: 0 0 12px 12px;">
