@@ -267,8 +267,15 @@ const CrearVentaController = (() => {
 
       if (isSubmitting) return;
 
-      if (!isCajaAbierta) {
-        NotificationService.error("Debe abrir una sesión de caja antes de procesar una venta o recibir pagos.", "Caja Cerrada");
+      // Solo bloquear ventas en EFECTIVO si la caja está cerrada.
+      // Ventas a crédito, transferencia o tarjeta se permiten sin sesión abierta.
+      const paymentMethodCheck = $("#payment_method").val() || "CASH";
+      if (!isCajaAbierta && paymentMethodCheck === "CASH") {
+        NotificationService.error(
+          "Debe abrir una sesión de caja antes de procesar una venta en efectivo. " +
+          "Si desea registrar la venta sin caja, seleccione otro método de pago (Crédito, Transferencia o Tarjeta).",
+          "Caja Cerrada"
+        );
         return;
       }
 
@@ -375,13 +382,17 @@ const CrearVentaController = (() => {
     // Validar si la caja está abierta
     try {
       const response = await CajaService.obtenerSesionActual();
-      if (response && response.success && response.data) {
+      if (response && (response.ok || response.success) && response.data) {
         isCajaAbierta = true;
-      } else if (!response.success && response.status === 404) {
+      } else {
         isCajaAbierta = false;
-        NotificationService.toastWarning("No tienes una sesión de caja abierta. Las ventas no se procesarán.", 8000);
+        NotificationService.toastWarning(
+          "No tienes una sesión de caja abierta. Solo podrás registrar ventas a crédito, transferencia o tarjeta.",
+          8000
+        );
       }
     } catch (err) {
+      isCajaAbierta = false;
       console.error("Error validando caja", err);
     }
 

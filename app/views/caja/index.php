@@ -197,6 +197,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                                     <th class="border-0 font-weight-bold" style="font-size: 0.725rem; text-transform: uppercase;">Hora</th>
                                                     <th class="border-0 font-weight-bold" style="font-size: 0.725rem; text-transform: uppercase;">Tipo</th>
                                                     <th class="border-0 font-weight-bold" style="font-size: 0.725rem; text-transform: uppercase;">Descripción</th>
+                                                    <th class="border-0 font-weight-bold" style="font-size: 0.725rem; text-transform: uppercase;">Canal</th>
                                                     <th class="border-0 font-weight-bold" style="font-size: 0.725rem; text-transform: uppercase;">Método</th>
                                                     <th class="border-0 font-weight-bold text-right" style="font-size: 0.725rem; text-transform: uppercase;">Monto</th>
                                                 </tr>

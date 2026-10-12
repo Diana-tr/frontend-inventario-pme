@@ -6,6 +6,7 @@
  */
 
 import AuthService from "../../services/auth_service.js";
+import CajaService from "../../services/caja_service.js";
 import Storage from "../../storage/storage.js";
 
 const NavbarController = (() => {
@@ -34,6 +35,11 @@ const NavbarController = (() => {
 
     renderUserData(user);
     await checkNavbarCajaStatus();
+
+    // Escuchar eventos globales de apertura/cierre de caja para sincronizar en tiempo real
+    window.addEventListener("cash_session_updated", async () => {
+      await checkNavbarCajaStatus();
+    });
   }
 
   async function checkNavbarCajaStatus() {
@@ -43,26 +49,17 @@ const NavbarController = (() => {
     if (!navbarNombre || !badgeEstado) return;
 
     try {
-      const response = await fetch(`${window.APP_URL || ''}/api/cash/current`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Storage.getToken() || ''}`
-        }
-      });
+      const result = await CajaService.obtenerSesionActual();
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result && result.success && result.data) {
-          const session = result.data;
-          const registerName = session.cash_register_name || "Principal";
+      if (result && (result.ok || result.success) && result.data) {
+        const session = result.data;
+        const registerName = session.cash_register_name || (session.cash_register && session.cash_register.name) || "Principal";
 
-          navbarNombre.innerHTML = `Caja: <span class="text-dark font-weight-bold">${registerName}</span>`;
-          badgeEstado.textContent = "Abierta";
-          badgeEstado.style.backgroundColor = "#DCFCE7";
-          badgeEstado.style.color = "#16A34A";
-          return;
-        }
+        navbarNombre.innerHTML = `Caja: <span class="text-dark font-weight-bold">${registerName}</span>`;
+        badgeEstado.textContent = "Abierta";
+        badgeEstado.style.backgroundColor = "#DCFCE7";
+        badgeEstado.style.color = "#16A34A";
+        return;
       }
 
       navbarNombre.innerHTML = `Caja: <span class="text-muted">Sin sesión activa</span>`;

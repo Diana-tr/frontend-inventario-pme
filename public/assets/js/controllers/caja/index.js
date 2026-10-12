@@ -113,7 +113,7 @@ const CajaIndexController = (() => {
 
   async function cargarMovimientos(sessionId) {
     const tbody = $("#tabla_movimientos tbody");
-    tbody.html('<tr><td colspan="5" class="text-center">Cargando movimientos...</td></tr>');
+    tbody.html('<tr><td colspan="6" class="text-center">Cargando movimientos...</td></tr>');
     
     try {
       const resp = await CajaService.listarMovimientos(sessionId);
@@ -122,7 +122,7 @@ const CajaIndexController = (() => {
       if (resp && resp.success && resp.data) {
         const movs = resp.data;
         if (movs.length === 0) {
-          tbody.html('<tr><td colspan="5" class="text-center text-muted">No hay movimientos en esta sesión.</td></tr>');
+          tbody.html('<tr><td colspan="6" class="text-center text-muted">No hay movimientos en esta sesión.</td></tr>');
           return;
         }
 
@@ -131,13 +131,26 @@ const CajaIndexController = (() => {
           const colorClass = isOut ? "text-danger" : "text-success";
           const sign = isOut ? "-" : "+";
           const typeLabel = isOut ? "Retiro" : "Ingreso";
+
+          // Determinar si afecta caja física (efectivo) o es electrónico
+          const isCash = m.is_cash !== false; // por defecto true si no viene el campo
+          const channelIcon = isCash
+            ? '<i class="fas fa-money-bill-wave mr-1 text-success"></i>Efectivo'
+            : '<i class="fas fa-credit-card mr-1 text-info"></i>Electrónico';
+          const channelBadgeClass = isCash ? "badge-success" : "badge-info";
+          const paymentLabel = m.payment_method || (isCash ? "Efectivo" : "Electrónico");
           
           tbody.append(`
             <tr>
               <td>${formatDate(m.created_at)}</td>
               <td><span class="badge ${isOut ? 'badge-danger' : 'badge-success'}">${typeLabel}</span></td>
-              <td>${m.description || "---"}</td>
-              <td>${m.payment_method || "Efectivo"}</td>
+              <td>${m.description || m.reference || "---"}</td>
+              <td>
+                <span class="badge ${channelBadgeClass} px-2 py-1" style="font-size: 0.75rem;">
+                  ${channelIcon}
+                </span>
+              </td>
+              <td class="small text-muted">${paymentLabel}</td>
               <td class="text-right font-weight-bold ${colorClass}">${sign}${formatCurrency(m.amount)}</td>
             </tr>
           `);
@@ -145,7 +158,7 @@ const CajaIndexController = (() => {
       }
     } catch (e) {
       console.error(e);
-      tbody.html('<tr><td colspan="5" class="text-center text-danger">Error al cargar movimientos.</td></tr>');
+      tbody.html('<tr><td colspan="6" class="text-center text-danger">Error al cargar movimientos.</td></tr>');
     }
   }
 
@@ -165,6 +178,7 @@ const CajaIndexController = (() => {
         NotificationService.close();
         if (resp && resp.success) {
           NotificationService.toastSuccess("Caja abierta correctamente.");
+          window.dispatchEvent(new CustomEvent("cash_session_updated"));
           checkCurrentSession();
         }
       } catch (err) {
@@ -249,6 +263,7 @@ const CajaIndexController = (() => {
           let diffMsg = `Diferencia reportada: ${formatCurrency(difference)}`;
           NotificationService.info(diffMsg, "Resultado del Cierre");
 
+          window.dispatchEvent(new CustomEvent("cash_session_updated"));
           checkCurrentSession();
         }
       } catch (err) {

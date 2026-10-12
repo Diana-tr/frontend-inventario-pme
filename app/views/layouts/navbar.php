@@ -17,11 +17,11 @@ require_once __DIR__ . '/../../config/app.php';
     <!-- Indicador Global de Caja Centrado en el Navbar -->
     <ul class="navbar-nav mx-auto align-items-center d-none d-md-flex">
         <li class="nav-item">
-            <div class="px-3 py-1 d-flex align-items-center shadow-sm" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 0.8rem;">
+            <a href="<?php echo $URL; ?>/caja" class="px-3 py-1 d-flex align-items-center shadow-sm text-decoration-none" title="Ir al módulo de Caja" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease;">
                 <i class="fas fa-cash-register mr-2" style="color: #2563EB;"></i>
                 <span id="navbar_caja_nombre" class="font-weight-bold text-dark mr-2">Caja: <span class="text-muted font-weight-normal">Cargando...</span></span>
                 <span id="navbar_caja_estado_badge" class="badge px-2 py-1" style="background-color: #E2E8F0; color: #64748B; font-size: 0.65rem; border-radius: 10px;">Verificando</span>
-            </div>
+            </a>
         </li>
     </ul>
 

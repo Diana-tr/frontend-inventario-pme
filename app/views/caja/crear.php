@@ -90,7 +90,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                     <!-- /.card-body -->
 
                                     <div class="card-footer border-0 bg-light py-3 px-4 d-flex justify-content-end" style="border-radius: 0 0 12px 12px;">
-                                        <a href="index.php" class="btn font-weight-bold px-4 py-2 mr-2 text-white shadow-sm" style="background-color: #64748B; border: none; border-radius: 8px;">
+                                        <a href="<?php echo $URL; ?>/caja" class="btn font-weight-bold px-4 py-2 mr-2 text-white shadow-sm" style="background-color: #64748B; border: none; border-radius: 8px;">
                                             <i class="fas fa-times-circle mr-1"></i> Cancelar
                                         </a>
                                         <button type="submit" class="btn font-weight-bold px-4 py-2 text-white shadow-sm" style="background-color: #2563EB; border: none; border-radius: 8px;">
