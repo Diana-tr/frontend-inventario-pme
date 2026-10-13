@@ -53,9 +53,10 @@ require_once __DIR__ . '/../layouts/head.php';
 
                     <!-- Vista cuando la caja está CERRADA -->
                     <div id="caja_cerrada_view" style="display: none;">
-                        <div class="alert text-center border-0 shadow-sm mb-4 py-3" style="background-color: #EFF6FF; color: #1E40AF; border-radius: 12px; border-left: 5px solid #2563EB !important;">
-                            <h5 class="font-weight-bold mb-1" style="font-size: 1.1rem;"><i class="icon fas fa-info-circle mr-2" style="color: #2563EB;"></i> ¡No hay una sesión de caja abierta!</h5>
-                            <p class="mb-0 small" style="color: #3B82F6;">Debe abrir la caja para poder registrar movimientos y realizar ventas en el sistema.</p>
+                        <!-- Alerta Estilo Ámbar Suave (Corregido) -->
+                        <div class="alert text-center border-0 shadow-sm mb-4 py-3" style="background-color: #FEFCE8; color: #854D0E; border-radius: 12px; border-left: 5px solid #EAB308 !important;">
+                            <h5 class="font-weight-bold mb-1" style="font-size: 1.1rem;"><i class="icon fas fa-exclamation-triangle mr-2" style="color: #CA8A04;"></i> ¡No hay una sesión de caja abierta!</h5>
+                            <p class="mb-0 small" style="color: #A16207;">Debe abrir la caja para poder registrar movimientos y realizar ventas en el sistema.</p>
                         </div>
 
                         <div class="card border-0 shadow-sm mx-auto" style="max-width: 500px; background-color: #FFFFFF; border-radius: 12px; border-top: 4px solid #10B981 !important;">
