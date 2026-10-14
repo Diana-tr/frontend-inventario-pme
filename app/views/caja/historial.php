@@ -81,22 +81,108 @@ require_once __DIR__ . '/../layouts/head.php';
         ?>
     </div>
 
-    <!-- Modal Detalles de Sesión (Opcional) -->
+    <!-- Modal Detalles de Sesión (Auditoría) -->
     <div class="modal fade" id="modalDetalleCaja" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title"><i class="fas fa-info-circle mr-2"></i>Detalle de la Sesión de Caja</h5>
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+                <div class="modal-header border-0 py-3" style="background-color: #172033; color: #FFFFFF; border-radius: 12px 12px 0 0;">
+                    <h5 class="modal-title font-weight-bold" id="detalle_caja_title">
+                        <i class="fas fa-file-invoice-dollar mr-2 text-warning"></i>Detalle de la Sesión de Caja
+                    </h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                     <p>Notas: <span id="detalle_caja_notas"></span></p>
-                     <p>Diferencia calculada: <span id="detalle_caja_diff" class="font-weight-bold"></span></p>
+                <div class="modal-body p-4">
+                    <!-- Resumen General -->
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-sm-6 mb-2">
+                            <div class="p-3 border rounded" style="background-color: #F8FAFC; border-color: #E2E8F0 !important;">
+                                <small class="text-uppercase text-muted font-weight-bold d-block mb-1">Caja Registradora</small>
+                                <span class="h6 font-weight-bold text-dark mb-0" id="det_caja_nombre">-</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-2">
+                            <div class="p-3 border rounded" style="background-color: #F8FAFC; border-color: #E2E8F0 !important;">
+                                <small class="text-uppercase text-muted font-weight-bold d-block mb-1">Cajero / Usuario</small>
+                                <span class="h6 font-weight-bold text-dark mb-0" id="det_caja_usuario">-</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-2">
+                            <div class="p-3 border rounded" style="background-color: #F8FAFC; border-color: #E2E8F0 !important;">
+                                <small class="text-uppercase text-muted font-weight-bold d-block mb-1">Apertura</small>
+                                <span class="small font-weight-bold text-dark mb-0" id="det_caja_apertura">-</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-2">
+                            <div class="p-3 border rounded" style="background-color: #F8FAFC; border-color: #E2E8F0 !important;">
+                                <small class="text-uppercase text-muted font-weight-bold d-block mb-1">Cierre</small>
+                                <span class="small font-weight-bold text-dark mb-0" id="det_caja_cierre">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métricas Financieras -->
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="p-3 text-center rounded border" style="background-color: #EFF6FF; border-color: #BFDBFE !important;">
+                                <small class="text-primary font-weight-bold text-uppercase d-block mb-1">Base Inicial</small>
+                                <h5 class="font-weight-bold text-primary mb-0" id="det_caja_inicial">$0.00</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="p-3 text-center rounded border" style="background-color: #F0FDF4; border-color: #BBF7D0 !important;">
+                                <small class="text-success font-weight-bold text-uppercase d-block mb-1">Esperado Efectivo</small>
+                                <h5 class="font-weight-bold text-success mb-0" id="det_caja_esperado">$0.00</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="p-3 text-center rounded border" style="background-color: #FAF5FF; border-color: #E9D5FF !important;">
+                                <small class="font-weight-bold text-uppercase d-block mb-1" style="color: #7E22CE;">Arqueo Físico</small>
+                                <h5 class="font-weight-bold mb-0" style="color: #7E22CE;" id="det_caja_contado">$0.00</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="p-3 text-center rounded border" id="det_caja_diff_box" style="background-color: #F8FAFC; border-color: #E2E8F0 !important;">
+                                <small class="font-weight-bold text-uppercase d-block mb-1" id="det_caja_diff_label">Diferencia</small>
+                                <h5 class="font-weight-bold mb-0" id="det_caja_diff">$0.00</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="p-3 mb-3 rounded border" style="background-color: #FFFBEB; border-color: #FDE68A !important;">
+                        <span class="font-weight-bold small text-uppercase text-warning mr-2"><i class="fas fa-comment-alt mr-1"></i>Observaciones / Notas:</span>
+                        <span class="text-dark small" id="detalle_caja_notas">Sin observaciones.</span>
+                    </div>
+
+                    <!-- Tabla de Movimientos de la Sesión -->
+                    <div class="card border-0 shadow-none">
+                        <div class="card-header bg-light border-0 py-2 px-0 d-flex justify-content-between align-items-center">
+                            <h6 class="font-weight-bold text-dark mb-0"><i class="fas fa-receipt mr-1 text-secondary"></i> Movimientos Registrados en la Sesión</h6>
+                            <span class="badge badge-secondary" id="det_mov_count">0 movimientos</span>
+                        </div>
+                        <div class="table-responsive" style="max-height: 250px;">
+                            <table class="table table-sm table-hover align-items-center mb-0" id="tabla_det_movimientos">
+                                <thead style="background-color: #1E293B; color: #FFFFFF;">
+                                    <tr>
+                                        <th style="font-size: 0.725rem;">HORA</th>
+                                        <th style="font-size: 0.725rem;">TIPO</th>
+                                        <th style="font-size: 0.725rem;">DESCRIPCIÓN</th>
+                                        <th style="font-size: 0.725rem;">CANAL</th>
+                                        <th style="font-size: 0.725rem;">MÉTODO</th>
+                                        <th class="text-right" style="font-size: 0.725rem;">MONTO</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="font-size: 0.825rem;" id="tbody_det_movimientos">
+                                    <tr><td colspan="6" class="text-center text-muted py-3">Cargando movimientos...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <div class="modal-footer border-0 bg-light py-2" style="border-radius: 0 0 12px 12px;">
+                    <button type="button" class="btn btn-secondary font-weight-bold px-4" data-dismiss="modal" style="border-radius: 8px;">Cerrar</button>
                 </div>
             </div>
         </div>

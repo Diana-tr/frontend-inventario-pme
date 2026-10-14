@@ -244,11 +244,23 @@ require_once __DIR__ . '/../layouts/head.php';
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="font-weight-bold small text-uppercase text-muted">Monto (Efectivo)</label>
+                            <label class="font-weight-bold small text-uppercase text-muted">Canal / Medio</label>
+                            <select class="form-control" id="mov_is_cash" style="border-radius: 8px; border: 1px solid #E2E8F0;" required>
+                                <option value="true" selected>Efectivo (Afecta Arqueo Físico de Caja)</option>
+                                <option value="false">Electrónico / No Efectivo (Transferencia, etc.)</option>
+                            </select>
+                            <small class="form-text text-muted">Los movimientos electrónicos quedan registrados en la auditoría de la sesión sin alterar el saldo físico de billetes/monedas.</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold small text-uppercase text-muted">Monto</label>
                             <div class="input-group">
                                 <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0" style="border-color: #E2E8F0; border-radius: 8px 0 0 8px;">$</span></div>
                                 <input type="number" class="form-control border-left-0" id="mov_amount" min="0.01" step="0.01" style="border-color: #E2E8F0; border-radius: 0 8px 8px 0;" required>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold small text-uppercase text-muted">Referencia (Opcional)</label>
+                            <input type="text" class="form-control" id="mov_reference" placeholder="Ej: REC-001, GASTO-05, TRANSF-889" style="border-radius: 8px; border: 1px solid #E2E8F0;">
                         </div>
                         <div class="form-group mb-0">
                             <label class="font-weight-bold small text-uppercase text-muted">Descripción / Concepto</label>

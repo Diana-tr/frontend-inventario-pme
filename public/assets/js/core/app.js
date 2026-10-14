@@ -23,6 +23,9 @@ const App = (() => {
     "/clientes":          "customers.view",
     "/clientes/listar":   "customers.view",
     "/clientes/crear":    "customers.create",
+    "/caja":              "cash.view",
+    "/caja/historial":    "cash.view",
+    "/caja/crear":        "cash.create",
   });
 
   async function bootstrap() {
