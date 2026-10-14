@@ -11,5 +11,6 @@ if (isset($router)) {
     // Módulo de Caja
     $router->add('/caja', 'app/views/caja/index.php');
     $router->add('/caja/historial', 'app/views/caja/historial.php');
+    $router->add('/caja/crear', 'app/views/caja/crear.php');
 }
 

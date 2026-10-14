@@ -197,11 +197,15 @@ const CajaIndexController = (() => {
       e.preventDefault();
       if (!currentSessionId) return;
 
+      const isCash = $("#mov_is_cash").val() === "true";
+      const reference = $("#mov_reference").val() ? $("#mov_reference").val().trim() : "";
+
       const data = {
         movement_type: $("#mov_type").val(),
         amount: $("#mov_amount").val(),
-        description: $("#mov_description").val(),
-        is_cash: true
+        description: $("#mov_description").val().trim(),
+        reference: reference,
+        is_cash: isCash
       };
 
       try {
