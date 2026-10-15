@@ -41,8 +41,12 @@ const CrearCajaController = (() => {
         if (response && response.success) {
           NotificationService.success("Caja creada exitosamente.");
 
+          const actualPath = window.location.pathname.substring(
+            0,
+            window.location.pathname.lastIndexOf("/"),
+          );
           setTimeout(() => {
-            window.location.href = "/frontend-inventario-pme/caja";
+            window.location.href = actualPath;
           }, 1500);
 
           return;

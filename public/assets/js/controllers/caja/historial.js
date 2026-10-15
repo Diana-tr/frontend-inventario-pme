@@ -63,7 +63,7 @@ const CajaHistorialController = (() => {
         },
       ],
       language: {
-        url: "/frontend-inventario-pme/public/assets/vendor/AdminLTE-3.2.0/plugins/datatables/i18n/es-ES.json",
+        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
       },
       ajax: async function (data, callback, settings) {
         try {

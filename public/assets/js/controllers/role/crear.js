@@ -66,8 +66,12 @@ const RoleCreateController = (() => {
         const response = await RoleService.crearRol(payload);
 
         if (response && response.success) {
-          // Redirigir al listado de roles
-          window.location.href = "/frontend-inventario-pme/roles";
+          // Redirigir al listado de roles de forma dinámica
+          const actualPath = window.location.pathname.substring(
+            0,
+            window.location.pathname.lastIndexOf("/"),
+          );
+          window.location.href = actualPath;
         } else {
           throw new Error(response?.message || "No se pudo crear el rol.");
         }

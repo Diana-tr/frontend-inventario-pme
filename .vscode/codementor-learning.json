@@ -1,10 +1,10 @@
 {
   "CC-004": {
-    "occurrences": 3558,
+    "occurrences": 3568,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-23T21:48:38.836Z",
-    "last_seen": "2026-10-12T16:50:07.834Z"
+    "last_seen": "2026-10-15T23:11:23.335Z"
   },
   "CSS-002": {
     "occurrences": 177,
@@ -21,18 +21,18 @@
     "last_seen": "2026-09-19T16:52:55.362Z"
   },
   "ASYNC-001": {
-    "occurrences": 5229,
+    "occurrences": 5246,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:42:23.631Z",
-    "last_seen": "2026-10-12T16:50:07.816Z"
+    "last_seen": "2026-10-15T23:11:23.334Z"
   },
   "CC-001": {
-    "occurrences": 101,
+    "occurrences": 103,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:42:23.752Z",
-    "last_seen": "2026-10-12T16:49:31.115Z"
+    "last_seen": "2026-10-15T23:11:23.343Z"
   },
   "SEC-002": {
     "occurrences": 44,
@@ -42,11 +42,11 @@
     "last_seen": "2026-09-14T17:41:36.158Z"
   },
   "JS-001": {
-    "occurrences": 6322,
+    "occurrences": 6325,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-24T22:51:04.053Z",
-    "last_seen": "2026-10-12T16:50:07.825Z"
+    "last_seen": "2026-10-15T22:55:49.099Z"
   },
   "SEC-004": {
     "occurrences": 629,
@@ -56,25 +56,25 @@
     "last_seen": "2026-10-12T16:50:07.817Z"
   },
   "CC-002": {
-    "occurrences": 4,
+    "occurrences": 5,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-27T19:31:26.548Z",
-    "last_seen": "2026-09-30T18:03:10.391Z"
+    "last_seen": "2026-10-15T23:11:23.343Z"
   },
   "REACT-003": {
-    "occurrences": 441,
+    "occurrences": 442,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-08-28T16:53:52.496Z",
-    "last_seen": "2026-09-29T22:23:57.691Z"
+    "last_seen": "2026-10-15T22:55:49.053Z"
   },
   "JS-002": {
-    "occurrences": 19,
+    "occurrences": 20,
     "confidence": 1,
     "mastered_explicitly": false,
     "first_seen": "2026-09-22T22:03:07.256Z",
-    "last_seen": "2026-09-22T22:52:22.520Z"
+    "last_seen": "2026-10-15T22:55:49.037Z"
   },
   "PERF-002": {
     "occurrences": 68,

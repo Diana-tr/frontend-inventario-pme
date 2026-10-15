@@ -4,9 +4,10 @@
  */
 
 import Storage from "../storage/storage.js";
+import Config from "../config/config.js";
 
 const ApiClient = (() => {
-  const BASE_URL = "http://127.0.0.1:8000";
+  const BASE_URL = Config.API_BASE_URL || "http://127.0.0.1:8000";
 
   let refreshPromise = null;
 
@@ -117,7 +118,7 @@ const ApiClient = (() => {
           // Si falló el refresh (el refresh token expiró o es inválido)
           // debemos destruir la sesión y mandar al login de inmediato.
           Storage.clear();
-          window.location.replace("/frontend-inventario-pme/login");
+          window.location.replace(`${Config.BASE_PATH || ""}/login`);
           return { ok: false, status: 401, success: false };
         }
       }

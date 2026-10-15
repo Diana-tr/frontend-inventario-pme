@@ -1,11 +1,17 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /frontend-inventario-pme/
 
     # Ignorar reescritura para archivos y directorios reales (assets)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 
-    # Redirigir todas las demás rutas a index.php para el enrutador
+    # 1. Regla para entorno local XAMPP (cuando se accede vía localhost o 127.0.0.1 con subdirectorio)
+    RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^(.*)$ /frontend-inventario-pme/index.php [QSA,L]
+
+    # 2. Regla para entorno de producción (Hosting remoto como InfinityFree en la raíz del dominio)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php [QSA,L]
 </IfModule>
+

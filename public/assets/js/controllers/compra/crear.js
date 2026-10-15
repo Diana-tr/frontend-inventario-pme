@@ -253,8 +253,12 @@ const CrearCompraController = (() => {
         
         if (response && response.success) {
           NotificationService.toastSuccess("Compra registrada correctamente en estado Borrador.");
+          const actualPath = window.location.pathname.substring(
+            0,
+            window.location.pathname.lastIndexOf("/"),
+          );
           setTimeout(() => {
-            window.location.href = "/frontend-inventario-pme/compras";
+            window.location.href = actualPath;
           }, 1500);
         } else {
           throw response;
