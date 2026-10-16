@@ -136,6 +136,12 @@ const AuthService = (() => {
         if (cachedContext) {
           const parsedContext = JSON.parse(cachedContext);
           Storage.savePermissions(parsedContext.permissions);
+          if (parsedContext.actions) {
+            Storage.saveActions(parsedContext.actions);
+          }
+          if (parsedContext.roles) {
+            Storage.saveRoles(parsedContext.roles);
+          }
           return;
         }
       }
@@ -144,6 +150,8 @@ const AuthService = (() => {
       if (response.ok && response.success && response.data) {
         sessionStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
         Storage.savePermissions(response.data.permissions);
+        Storage.saveActions(response.data.actions || {});
+        Storage.saveRoles(response.data.roles || []);
       } else {
         console.warn("[AUTH] No se pudo obtener el contexto de seguridad.");
       }

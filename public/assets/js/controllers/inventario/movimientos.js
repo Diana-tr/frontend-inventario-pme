@@ -9,6 +9,7 @@ import InventarioService from "../../services/inventario_service.js";
 import ProveedorService from "../../services/proveedor_service.js";
 import NotificationService from "../../core/notification.js";
 import SecurityManager from "../../core/security.js";
+import DataTableHelper from "../../utils/DataTableHelper.js";
 
 const MovimientosController = (() => {
     const TABLE_BODY_ID = "tablaMovimientosBody";
@@ -85,25 +86,9 @@ const MovimientosController = (() => {
             searchDelay: 500,
             order: [[0, 'desc']], // Por defecto ordenar por fecha descendente
 
-            dom:
-                "<'row mb-2'"
-                + "<'col-sm-12 col-md-6 d-flex align-items-center'lB>"
-                + "<'col-sm-12 col-md-6 d-flex justify-content-end'f>"
-                + ">"
-                + "<'row'<'col-sm-12'tr>>"
-                + "<'row mt-2'"
-                + "<'col-sm-12 col-md-5'i>"
-                + "<'col-sm-12 col-md-7 d-flex justify-content-end'p>"
-                + ">",
-
-            buttons: [
-                { extend: "excel", className: "btn btn-success btn-sm", text: '<i class="fas fa-file-excel mr-1"></i>Excel' },
-                { extend: "pdf", className: "btn btn-danger btn-sm", text: '<i class="fas fa-file-pdf mr-1"></i>PDF' },
-            ],
-
-            language: {
-                url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-            },
+            dom: DataTableHelper.DEFAULT_DOM,
+            buttons: DataTableHelper.getExportButtons("inventory", [0, 1, 2, 3, 4, 5, 6]),
+            language: DataTableHelper.LANGUAGE_ES,
 
             columnDefs: [
                 { orderable: false, targets: [7] },

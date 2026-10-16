@@ -1,6 +1,7 @@
 import CajaService from "../../services/caja_service.js";
 import NotificationService from "../../core/notification.js";
 import SecurityManager from "../../core/security.js";
+import DataTableHelper from "../../utils/DataTableHelper.js";
 
 const CajaHistorialController = (() => {
   let table = null;
@@ -32,39 +33,9 @@ const CajaHistorialController = (() => {
       pageLength: 10,
       processing: true,
       serverSide: false, // Usando client-side temporalmente a menos que se implemente server-side en el backend
-      dom:
-        "<'row mb-2'" +
-        "<'col-sm-12 col-md-6 d-flex align-items-center'lB>" +
-        "<'col-sm-12 col-md-6 d-flex justify-content-end'f>" +
-        ">" +
-        "<'row'<'col-sm-12'tr>>" +
-        "<'row mt-2'" +
-        "<'col-sm-12 col-md-5'i>" +
-        "<'col-sm-12 col-md-7 d-flex justify-content-end'p>" +
-        ">",
-      buttons: [
-        {
-          extend: "excel",
-          className: "btn btn-success btn-sm",
-          text: '<i class="fas fa-file-excel mr-1"></i>Excel',
-          exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] },
-        },
-        {
-          extend: "pdf",
-          className: "btn btn-danger btn-sm",
-          text: '<i class="fas fa-file-pdf mr-1"></i>PDF',
-          exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] },
-        },
-        {
-          extend: "print",
-          className: "btn btn-info btn-sm",
-          text: '<i class="fas fa-print mr-1"></i>Imprimir',
-          exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7] },
-        },
-      ],
-      language: {
-        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-      },
+      dom: DataTableHelper.DEFAULT_DOM,
+      buttons: DataTableHelper.getExportButtons("cash", [0, 1, 2, 3, 4, 5, 6, 7]),
+      language: DataTableHelper.LANGUAGE_ES,
       ajax: async function (data, callback, settings) {
         try {
           const resp = await CajaService.listarSesiones();
@@ -130,9 +101,6 @@ const CajaHistorialController = (() => {
       order: [[2, "desc"]], // Ordenar por fecha de apertura desc
       drawCallback: function () {
         $(".dataTables_paginate > .pagination").addClass("pagination-sm");
-      },
-      initComplete: function () {
-        $(".dt-buttons").addClass("ml-4");
       },
     });
   }

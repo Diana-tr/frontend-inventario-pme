@@ -11,6 +11,7 @@ import NotificationService from "../../core/notification.js";
 import DocumentTemplateRenderer from "../../utils/DocumentTemplateRenderer.js";
 import { formatCurrency, renderInvoiceItems } from "../../utils/invoice_utils.js";
 import { viewInvoice, printInvoice } from "../../utils/InvoiceActions.js";
+import DataTableHelper from "../../utils/DataTableHelper.js";
 
 const VentaListController = (() => {
   const TABLE_BODY_ID = "tablaVentasBody";
@@ -313,39 +314,9 @@ const VentaListController = (() => {
       processing: true,
       serverSide: true,
       searchDelay: 500,
-      dom:
-        "<'row mb-2'" +
-        "<'col-sm-12 col-md-6 d-flex align-items-center'lB>" +
-        "<'col-sm-12 col-md-6 d-flex justify-content-end'f>" +
-        ">" +
-        "<'row'<'col-sm-12'tr>>" +
-        "<'row mt-2'" +
-        "<'col-sm-12 col-md-5'i>" +
-        "<'col-sm-12 col-md-7 d-flex justify-content-end'p>" +
-        ">",
-      buttons: [
-        {
-          extend: "excel",
-          className: "btn btn-success btn-sm",
-          text: '<i class="fas fa-file-excel mr-1"></i>Excel',
-          exportOptions: { columns: [1, 2, 3, 4, 5, 6] },
-        },
-        {
-          extend: "pdf",
-          className: "btn btn-danger btn-sm",
-          text: '<i class="fas fa-file-pdf mr-1"></i>PDF',
-          exportOptions: { columns: [1, 2, 3, 4, 5, 6] },
-        },
-        {
-          extend: "print",
-          className: "btn btn-info btn-sm",
-          text: '<i class="fas fa-print mr-1"></i>Imprimir',
-          exportOptions: { columns: [1, 2, 3, 4, 5, 6] },
-        },
-      ],
-      language: {
-        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-      },
+      dom: DataTableHelper.DEFAULT_DOM,
+      buttons: DataTableHelper.getExportButtons("sales", [1, 2, 3, 4, 5, 6]),
+      language: DataTableHelper.LANGUAGE_ES,
       columnDefs: [
         { orderable: false, targets: [0, 7] },
         { className: "text-center", targets: [0, 6, 7] },
@@ -421,9 +392,6 @@ const VentaListController = (() => {
       },
       drawCallback: function () {
         $(".dataTables_paginate > .pagination").addClass("pagination-sm");
-      },
-      initComplete: function () {
-        $(".dt-buttons").addClass("ml-4");
       },
     });
   }
