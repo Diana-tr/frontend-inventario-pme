@@ -1,0 +1,129 @@
+/**
+ * ============================================================
+ * DataTables Custom Styling - Inventario PME
+ * Botonera de exportación y barra de herramientas profesional
+ * ============================================================
+ */
+
+/* Contenedor de botones de exportación DataTables */
+div.dt-buttons {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-right: 0.75rem !important;
+    margin-bottom: 0 !important;
+}
+
+/* Botón principal de exportación (Desplegable) */
+div.dt-buttons .btn.dropdown-toggle,
+div.dt-buttons .dt-export-btn {
+    border-color: #ced4da !important;
+    background-color: #ffffff !important;
+    color: #495057 !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    padding: 0.35rem 0.75rem !important;
+    border-radius: 0.25rem !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+div.dt-buttons .btn.dropdown-toggle:hover,
+div.dt-buttons .dt-export-btn:hover {
+    background-color: #f8f9fa !important;
+    border-color: #adb5bd !important;
+    color: #212529 !important;
+}
+
+div.dt-buttons .btn.dropdown-toggle:focus,
+div.dt-buttons .dt-export-btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.15) !important;
+}
+
+/* Menú flotante del desplegable DataTables */
+div.dt-button-collection {
+    position: absolute !important;
+    z-index: 1055 !important;
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    padding: 0.35rem 0 !important;
+    min-width: 230px !important;
+    width: auto !important;
+}
+
+div.dt-button-collection .dt-button,
+div.dt-button-collection a.dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 0.5rem 1rem !important;
+    clear: both !important;
+    font-weight: 400 !important;
+    font-size: 0.875rem !important;
+    color: #212529 !important;
+    text-align: inherit !important;
+    white-space: nowrap !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
+    cursor: pointer !important;
+}
+
+div.dt-button-collection .dt-button:hover,
+div.dt-button-collection .dt-button:focus,
+div.dt-button-collection a.dropdown-item:hover,
+div.dt-button-collection a.dropdown-item:focus {
+    background-color: #f1f5f9 !important;
+    color: #0d6efd !important;
+    text-decoration: none !important;
+}
+
+div.dt-button-collection .dt-button i,
+div.dt-button-collection a.dropdown-item i {
+    width: 1.25rem !important;
+    text-align: center !important;
+    font-size: 1rem !important;
+}
+
+/* Fondo transparente para cerrar el menú */
+div.dt-button-background {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1050 !important;
+    background: transparent !important;
+}
+
+/* Alineación fina del buscador DataTables */
+div.dataTables_filter {
+    margin-bottom: 0 !important;
+}
+
+div.dataTables_filter label {
+    margin-bottom: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    font-weight: 500 !important;
+    color: #495057 !important;
+}
+
+div.dataTables_filter input {
+    margin-left: 0.5rem !important;
+    height: calc(1.8125rem + 2px) !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    border-radius: 0.25rem !important;
+    border: 1px solid #ced4da !important;
+    outline: none !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+div.dataTables_filter input:focus {
+    border-color: #80bdff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}

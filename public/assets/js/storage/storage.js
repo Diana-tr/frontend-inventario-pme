@@ -12,6 +12,8 @@ const Storage = (() => {
     REFRESH_TOKEN: "inventariopme_refresh_token",
     USER: "inventariopme_user",
     PERMISSIONS: "inventariopme_permissions",
+    ACTIONS: "inventariopme_actions",
+    ROLES: "inventariopme_roles",
   });
 
   /* ===========================
@@ -70,7 +72,7 @@ const Storage = (() => {
   };
 
   /* ===========================
-       Permisos
+       Permisos y Acciones
     =========================== */
 
   const savePermissions = (permissions) => {
@@ -79,6 +81,22 @@ const Storage = (() => {
 
   const getPermissions = () => {
     return read(KEYS.PERMISSIONS) || {};
+  };
+
+  const saveActions = (actions) => {
+    save(KEYS.ACTIONS, actions);
+  };
+
+  const getActions = () => {
+    return read(KEYS.ACTIONS) || {};
+  };
+
+  const saveRoles = (roles) => {
+    save(KEYS.ROLES, roles);
+  };
+
+  const getRoles = () => {
+    return read(KEYS.ROLES) || [];
   };
 
   /* ===========================
@@ -100,6 +118,12 @@ const Storage = (() => {
 
     savePermissions,
     getPermissions,
+
+    saveActions,
+    getActions,
+
+    saveRoles,
+    getRoles,
 
     clear,
   });

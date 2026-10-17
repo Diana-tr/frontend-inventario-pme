@@ -17,36 +17,86 @@ const SecurityManager = (() => {
 
   /**
    * Obtiene los permisos efectivos desde el Storage.
-   * @returns {Object} Diccionario { "module.action": true }
+   * @returns {Object} Diccionario { "module.action": true } o anidado
    */
   const getPermissions = () => {
     return Storage.getPermissions() || {};
   };
 
   /**
-   * Verifica si el usuario tiene un permiso específico.
-   * Soporta sintaxis plana o anidada, ej. "users.view".
+   * Obtiene las acciones efectivas desde el Storage.
+   * @returns {Object} Diccionario anidado { module: { action: true } }
+   */
+  const getActions = () => {
+    return Storage.getActions() || {};
+  };
+
+  /**
+   * Verifica si el usuario tiene una acción granular específica.
+   * Soporta sintaxis (module, action) o ("module.action").
+   * @param {string} module
+   * @param {string} [action]
+   * @returns {boolean}
+   */
+  const hasAction = (module, action = null) => {
+    const actions = getActions();
+    if (!actions) return false;
+
+    if (!action && module.includes(".")) {
+      const parts = module.split(".");
+      module = parts[0];
+      action = parts[1];
+    }
+
+    if (!action) return false;
+
+    // Buscar si existe directamente como llave plana
+    if (actions[`${module}.${action}`] === true) return true;
+
+    // Buscar jerárquicamente
+    return actions[module]?.[action] === true;
+  };
+
+  /**
+   * Verifica si el usuario tiene un permiso específico o acción granular.
+   * Soporta sintaxis plana o anidada, ej. "users.view", "users.export".
    * @param {string} permissionCode
    * @returns {boolean}
    */
   const hasPermission = (permissionCode) => {
+    if (!permissionCode) return false;
+
+    // 1. Buscar en permisos CRUD
     const permissions = getPermissions();
-    if (!permissions) return false;
+    if (permissions) {
+      if (permissions[permissionCode] === true) return true;
 
-    // Buscar si existe directamente como llave plana
-    if (permissions[permissionCode] === true) return true;
-
-    // Buscar jerárquicamente
-    const parts = permissionCode.split(".");
-    let current = permissions;
-    for (const part of parts) {
-      if (!current || typeof current !== "object" || !(part in current)) {
-        return false;
+      const parts = permissionCode.split(".");
+      let current = permissions;
+      for (const part of parts) {
+        if (!current || typeof current !== "object" || !(part in current)) {
+          current = null;
+          break;
+        }
+        current = current[part];
       }
-      current = current[part];
+      if (current === true) return true;
     }
-    
-    return current === true;
+
+    // 2. Buscar en acciones granulares (ej: "users.export")
+    if (hasAction(permissionCode)) return true;
+
+    return false;
+  };
+
+  /**
+   * Verifica si el usuario tiene autorización para exportar datos en un módulo.
+   * @param {string} moduleName - Identificador del módulo (ej. "users", "roles", "products", etc.)
+   * @returns {boolean}
+   */
+  const canExport = (moduleName) => {
+    if (!moduleName) return false;
+    return hasPermission(`${moduleName}.export`) || hasAction(moduleName, "export");
   };
 
   /**
@@ -121,7 +171,11 @@ const SecurityManager = (() => {
   };
 
   return Object.freeze({
+    getPermissions,
+    getActions,
     hasPermission,
+    hasAction,
+    canExport,
     hasAnyPermission,
     hasAllPermissions,
     processDomPermissions,
