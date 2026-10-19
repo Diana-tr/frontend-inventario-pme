@@ -1,8 +1,8 @@
 import ApiClient from "../core/apiClient.js";
 
 const CajaService = (() => {
-  const CASH_ENDPOINT = "/api/v1/cash/sessions/";
-  const REGISTER_ENDPOINT = "/api/v1/cash/registers/";
+  const CASH_ENDPOINT = "/api/v1/cash-sessions/";
+  const REGISTER_ENDPOINT = "/api/v1/cash-registers/";
 
   // Listar sesiones de caja (historial)
   async function listarSesiones(params = {}) {
