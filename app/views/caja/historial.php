@@ -150,6 +150,41 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                     </div>
 
+                    <!-- Desglose Operativo del Turno -->
+                    <div class="row mb-3" id="det_breakdown_row">
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="p-2 border rounded bg-white text-center">
+                                <small class="text-muted d-block">Ventas Efectivo</small>
+                                <strong class="text-success small" id="det_sales_cash">$0.00</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="p-2 border rounded bg-white text-center">
+                                <small class="text-muted d-block">Ventas Electrónicas</small>
+                                <strong class="text-primary small" id="det_sales_elec">$0.00</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="p-2 border rounded bg-white text-center">
+                                <small class="text-muted d-block">Compras Pagadas</small>
+                                <strong class="text-danger small" id="det_purchases_paid">$0.00</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="p-2 border rounded bg-white text-center">
+                                <small class="text-muted d-block">Gastos Manuales</small>
+                                <strong class="text-warning small" id="det_expenses_manual">$0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desglose de Denominaciones Registrado -->
+                    <div class="p-3 mb-3 rounded border d-none" id="det_denominations_box" style="background-color: #F8FAFC; border-color: #CBD5E1 !important;">
+                        <small class="text-uppercase font-weight-bold text-primary d-block mb-2"><i class="fas fa-coins mr-1"></i> Desglose de Billetes y Monedas del Arqueo:</small>
+                        <div class="d-flex flex-wrap gap-2" id="det_denominations_badges">
+                        </div>
+                    </div>
+
                     <!-- Observaciones -->
                     <div class="p-3 mb-3 rounded border" style="background-color: #FFFBEB; border-color: #FDE68A !important;">
                         <span class="font-weight-bold small text-uppercase text-warning mr-2"><i class="fas fa-comment-alt mr-1"></i>Observaciones / Notas:</span>

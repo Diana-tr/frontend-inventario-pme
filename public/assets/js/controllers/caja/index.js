@@ -91,7 +91,6 @@ const CajaIndexController = (() => {
     $("#caja_abierta_view").show();
     cargarMovimientos(currentSessionId);
   }
-
   async function cargarCajasRegistradoras() {
     try {
       const resp = await CajaService.listarCajasRegistradoras();
@@ -109,6 +108,33 @@ const CajaIndexController = (() => {
     } catch (e) {
       console.warn("No se pudieron cargar las cajas registradoras", e);
     }
+  }
+
+  // Manejo de la Calculadora de Denominaciones
+  function recalcularDenominaciones() {
+    let total = 0;
+    const denominationsDict = {};
+
+    $(".denom-input").each(function () {
+      const input = $(this);
+      const val = parseFloat(input.data("value")) || 0;
+      const qty = parseInt(input.val(), 10) || 0;
+      const subtotal = val * qty;
+
+      if (qty > 0) {
+        denominationsDict[val.toString()] = qty;
+      }
+
+      input.closest("tr").find(".denom-subtotal").text(formatCurrency(subtotal));
+      total += subtotal;
+    });
+
+    $("#badge_denom_total").text(formatCurrency(total));
+    if (total > 0) {
+      $("#close_counted_balance").val(total.toFixed(2)).trigger("input");
+    }
+
+    return denominationsDict;
   }
 
   async function cargarMovimientos(sessionId) {
@@ -132,8 +158,7 @@ const CajaIndexController = (() => {
           const sign = isOut ? "-" : "+";
           const typeLabel = isOut ? "Retiro" : "Ingreso";
 
-          // Determinar si afecta caja física (efectivo) o es electrónico
-          const isCash = m.is_cash !== false; // por defecto true si no viene el campo
+          const isCash = m.is_cash !== false;
           const channelIcon = isCash
             ? '<i class="fas fa-money-bill-wave mr-1 text-success"></i>Efectivo'
             : '<i class="fas fa-credit-card mr-1 text-info"></i>Electrónico';
@@ -163,6 +188,44 @@ const CajaIndexController = (() => {
   }
 
   function setupEvents() {
+    // Arrastre de saldo de cierre anterior (Carry-over) al cambiar de caja
+    $("#cash_register_id").on("change", async function () {
+      const regId = $(this).val();
+      const container = $("#carry_over_container");
+
+      if (!regId) {
+        container.addClass("d-none");
+        return;
+      }
+
+      try {
+        const resp = await CajaService.obtenerUltimoSaldoCierre(regId);
+        if (resp && resp.success && resp.data) {
+          const lastBal = parseFloat(resp.data.last_closing_balance || 0);
+          if (lastBal > 0) {
+            $("#carry_over_amount").text(formatCurrency(lastBal));
+            $("#btn_apply_carry_over").data("balance", lastBal);
+            container.removeClass("d-none");
+          } else {
+            container.addClass("d-none");
+          }
+        } else {
+          container.addClass("d-none");
+        }
+      } catch (err) {
+        console.warn("No se pudo consultar el saldo anterior", err);
+        container.addClass("d-none");
+      }
+    });
+
+    $("#btn_apply_carry_over").on("click", function () {
+      const bal = $(this).data("balance");
+      if (bal !== undefined) {
+        $("#opening_balance").val(bal);
+        NotificationService.toastSuccess("Saldo anterior aplicado como base.");
+      }
+    });
+
     // Abrir Caja
     $("#form_abrir_caja").on("submit", async function (e) {
       e.preventDefault();
@@ -187,6 +250,35 @@ const CajaIndexController = (() => {
       }
     });
 
+    // Resumen Financiero del Turno Actual
+    $("#btn_modal_resumen_turno").on("click", async function () {
+      if (!currentSessionId) return;
+
+      $("#modalResumenTurno").modal("show");
+      $("#resumen_turno_loader").show();
+      $("#resumen_turno_content").hide();
+
+      try {
+        const resp = await CajaService.obtenerResumenAuditoria(currentSessionId);
+        if (resp && resp.success && resp.data) {
+          const d = resp.data;
+          $("#res_opening_balance").text(formatCurrency(d.opening_balance));
+          $("#res_sales_cash").text(formatCurrency(d.sales_cash));
+          $("#res_sales_elec").text(formatCurrency(d.sales_electronic));
+          $("#res_purchases_cash").text(formatCurrency(d.purchases_cash));
+          $("#res_expenses_manual").text(formatCurrency(d.manual_expenses));
+          $("#res_expected_cash").text(formatCurrency(d.recalculated_expected_balance));
+          $("#res_total_movs").text(`${d.movements_count} movimientos`);
+
+          $("#resumen_turno_loader").hide();
+          $("#resumen_turno_content").show();
+        }
+      } catch (err) {
+        $("#resumen_turno_loader").hide();
+        NotificationService.toastError("Error al cargar la auditoría del turno.");
+      }
+    });
+
     // Modal Movimiento
     $("#btn_modal_movimiento").on("click", function () {
       $("#form_movimiento_caja")[0].reset();
@@ -199,11 +291,14 @@ const CajaIndexController = (() => {
 
       const isCash = $("#mov_is_cash").val() === "true";
       const reference = $("#mov_reference").val() ? $("#mov_reference").val().trim() : "";
+      const category = $("#mov_category").val() || "GASTO_OPERATIVO";
+      const descInput = $("#mov_description").val().trim();
+      const description = `[${category}] ${descInput}`;
 
       const data = {
         movement_type: $("#mov_type").val(),
         amount: $("#mov_amount").val(),
-        description: $("#mov_description").val().trim(),
+        description: description,
         reference: reference,
         is_cash: isCash
       };
@@ -221,6 +316,25 @@ const CajaIndexController = (() => {
         NotificationService.close();
         NotificationService.toastError(err.response?.data?.errors?.[0]?.message || "Error al registrar movimiento");
       }
+    });
+
+    // Control de Arqueo Ciego vs Supervisado
+    $("#switch_arqueo_ciego").on("change", function () {
+      const isBlind = $(this).is(":checked");
+      if (isBlind) {
+        $("#close_expected_container").addClass("d-none");
+        $("#close_diff_container").addClass("d-none");
+        $("#lbl_arqueo_mode").text("Arqueo Ciego (Ocultar Esperado)");
+      } else {
+        $("#close_expected_container").removeClass("d-none");
+        $("#close_diff_container").removeClass("d-none");
+        $("#lbl_arqueo_mode").text("Arqueo Supervisado (Mostrar Esperado)");
+      }
+    });
+
+    // Calculadora de Denominaciones: inputs
+    $(document).on("input keyup", ".denom-input", function () {
+      recalcularDenominaciones();
     });
 
     // Diferencia dinámica en cierre
@@ -242,6 +356,13 @@ const CajaIndexController = (() => {
     // Modal Cerrar
     $("#btn_modal_cerrar").on("click", function () {
       $("#form_cerrar_caja")[0].reset();
+      $(".denom-input").val("");
+      $(".denom-subtotal").text("$0");
+      $("#badge_denom_total").text("$ 0.00");
+
+      // Por defecto arqueo ciego activado
+      $("#switch_arqueo_ciego").prop("checked", true).trigger("change");
+
       $("#close_difference").text("$ 0.00").removeClass("text-danger text-success").addClass("text-dark");
       $("#modalCerrarCaja").modal("show");
     });
@@ -250,9 +371,12 @@ const CajaIndexController = (() => {
       e.preventDefault();
       if (!currentSessionId) return;
 
+      const denominations = recalcularDenominaciones();
+
       const data = {
         counted_balance: $("#close_counted_balance").val(),
-        notes: $("#close_notes").val()
+        notes: $("#close_notes").val(),
+        denominations: Object.keys(denominations).length > 0 ? denominations : null,
       };
 
       try {
@@ -263,9 +387,16 @@ const CajaIndexController = (() => {
           NotificationService.toastSuccess("Caja cerrada correctamente.");
           $("#modalCerrarCaja").modal("hide");
           
-          const difference = resp.data.difference;
-          let diffMsg = `Diferencia reportada: ${formatCurrency(difference)}`;
-          NotificationService.info(diffMsg, "Resultado del Cierre");
+          const difference = parseFloat(resp.data.difference || 0);
+          let diffMsg = `Diferencia auditada: ${formatCurrency(difference)}`;
+          if (difference === 0) {
+            diffMsg += " (Cuadre Exacto)";
+          } else if (difference > 0) {
+            diffMsg += " (Sobrante)";
+          } else {
+            diffMsg += " (Faltante)";
+          }
+          NotificationService.info(diffMsg, "Resultado del Arqueo y Cierre");
 
           window.dispatchEvent(new CustomEvent("cash_session_updated"));
           checkCurrentSession();

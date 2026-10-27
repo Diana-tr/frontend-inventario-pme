@@ -149,6 +149,39 @@ const CajaHistorialController = (() => {
 
        $("#detalle_caja_notas").text(rowData.notes || "Sin observaciones registradas.");
 
+       // Cargar resumen de auditoría detallado (ventas, compras, gastos, denominaciones)
+       try {
+         const auditResp = await CajaService.obtenerResumenAuditoria(rowData.id_cash_session);
+         if (auditResp && auditResp.success && auditResp.data) {
+           const ad = auditResp.data;
+           $("#det_sales_cash").text(formatCurrency(ad.sales_cash));
+           $("#det_sales_elec").text(formatCurrency(ad.sales_electronic));
+           $("#det_purchases_paid").text(formatCurrency(ad.total_purchases_paid));
+           $("#det_expenses_manual").text(formatCurrency(ad.manual_expenses));
+
+           const denomBox = $("#det_denominations_box");
+           const denomBadges = $("#det_denominations_badges");
+           denomBadges.empty();
+
+           if (ad.denominations && Object.keys(ad.denominations).length > 0) {
+             denomBox.removeClass("d-none");
+             Object.entries(ad.denominations).forEach(([val, qty]) => {
+               const sub = parseFloat(val) * qty;
+               denomBadges.append(`
+                 <span class="badge badge-light border p-2 mr-2 mb-1" style="font-size: 0.8rem;">
+                   <strong>$` + parseInt(val).toLocaleString("es-CO") + `</strong> &times; ` + qty + ` = <span class="text-primary font-weight-bold">` + formatCurrency(sub) + `</span>
+                 </span>
+               `);
+             });
+           } else {
+             denomBox.addClass("d-none");
+           }
+         }
+       } catch (auditErr) {
+         console.warn("No se pudo cargar el resumen de auditoría extendido:", auditErr);
+         $("#det_denominations_box").addClass("d-none");
+       }
+
        // Load movements
        const tbody = $("#tbody_det_movimientos");
        const movCount = $("#det_mov_count");

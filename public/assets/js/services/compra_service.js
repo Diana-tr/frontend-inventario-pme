@@ -127,6 +127,26 @@ const CompraService = (() => {
     }
   }
 
+  // Pagar compra a proveedor (afecta caja chica o banco)
+  async function pagarCompra(id, data) {
+    try {
+      return await ApiClient.post(`${PURCHASES_ENDPOINT}${id}/pay/`, data);
+    } catch (error) {
+      console.error(`[COMPRA SERVICE] Error al registrar pago para compra ${id}:`, error);
+      throw error;
+    }
+  }
+
+  // Obtener estado y lista de pagos de una compra
+  async function obtenerPagosCompra(id) {
+    try {
+      return await ApiClient.get(`${PURCHASES_ENDPOINT}${id}/payments/`);
+    } catch (error) {
+      console.error(`[COMPRA SERVICE] Error al obtener pagos de compra ${id}:`, error);
+      throw error;
+    }
+  }
+
   return Object.freeze({
     listarComprasPaginadas,
     obtenerCompraPorId,
@@ -137,7 +157,9 @@ const CompraService = (() => {
     cancelarCompra,
     obtenerFacturasPorCompra,
     obtenerFacturaPorId,
-    listarFacturasPaginadas
+    listarFacturasPaginadas,
+    pagarCompra,
+    obtenerPagosCompra,
   });
 })();
 

@@ -6,6 +6,7 @@
  */
 
 import CompraService from "../../services/compra_service.js";
+import CajaService from "../../services/caja_service.js";
 import SecurityManager from "../../core/security.js";
 import NotificationService from "../../core/notification.js";
 import DocumentTemplateRenderer from "../../utils/DocumentTemplateRenderer.js";
@@ -16,6 +17,33 @@ const CompraListController = (() => {
   const TABLE_BODY_ID = "tablaComprasBody";
   const TABLE_ID = "tbl_Compras";
   const DETAIL_MODAL_ID = "modalDetalleCompra";
+
+  let isCajaAbierta = false;
+  let currentCashBalance = 0;
+
+  async function checkCajaEstado(silent = false) {
+    try {
+      const response = await CajaService.obtenerSesionActual();
+      if (response && (response.ok || response.success) && response.data) {
+        isCajaAbierta = true;
+        currentCashBalance = parseFloat(response.data.expected_balance || 0);
+      } else {
+        isCajaAbierta = false;
+        currentCashBalance = 0;
+      }
+    } catch (err) {
+      isCajaAbierta = false;
+      currentCashBalance = 0;
+    }
+
+    if (!isCajaAbierta && !silent) {
+      NotificationService.toastWarning(
+        "No tienes una sesión de caja abierta. Solo podrás registrar pagos mediante Transferencia o Tarjeta.",
+        7000
+      );
+    }
+    return { isCajaAbierta, currentCashBalance };
+  }
 
   function getTableBody() {
     const tbody = document.getElementById(TABLE_BODY_ID);
@@ -45,6 +73,15 @@ const CompraListController = (() => {
       CANCELLED: '<span class="badge badge-danger px-3 py-2" style="border-radius:20px;font-size:0.75rem">Cancelada</span>'
     };
     return badges[status] || `<span class="badge badge-dark px-3 py-2" style="border-radius:20px;font-size:0.75rem">${status}</span>`;
+  }
+
+  function getPaymentStatusBadge(status) {
+    const badges = {
+      PAID: '<span class="badge badge-success px-3 py-1 font-weight-bold" style="border-radius:20px;font-size:0.75rem"><i class="fas fa-check-circle mr-1"></i>Pagada</span>',
+      PARTIAL: '<span class="badge badge-warning px-3 py-1 font-weight-bold" style="border-radius:20px;font-size:0.75rem"><i class="fas fa-adjust mr-1"></i>Pago Parcial</span>',
+      UNPAID: '<span class="badge badge-danger px-3 py-1 font-weight-bold" style="border-radius:20px;font-size:0.75rem"><i class="fas fa-clock mr-1"></i>Por Pagar</span>'
+    };
+    return badges[status] || `<span class="badge badge-secondary px-3 py-1 font-weight-bold" style="border-radius:20px;font-size:0.75rem">${status || 'Por Pagar'}</span>`;
   }
 
   // ───────────────────────────────────────────
@@ -83,6 +120,9 @@ const CompraListController = (() => {
 
             $("#detail_subtotal").text(formatCurrency(compra.subtotal));
             $("#detail_total").text(formatCurrency(compra.total));
+            $("#detail_total_paid").text(formatCurrency(compra.total_paid || 0));
+            $("#detail_pending_balance").text(formatCurrency(compra.pending_balance || 0));
+            $("#detail_payment_badge").html(getPaymentStatusBadge(compra.payment_status || (compra.is_fully_paid ? 'PAID' : 'UNPAID')));
 
             // Cargar productos
             const tbody = $("#detail_products_body");
@@ -182,9 +222,273 @@ const CompraListController = (() => {
         </button>
       `);
     }
+
+    if (compra.status !== "DRAFT" && compra.status !== "CANCELLED") {
+      const isFullyPaid = compra.is_fully_paid || parseFloat(compra.pending_balance || 0) <= 0;
+      const hasPayments = parseFloat(compra.total_paid || 0) > 0 || (compra.payments_summary && compra.payments_summary.length > 0);
+
+      if (isFullyPaid) {
+        container.append(`
+          <span class="badge badge-success px-3 py-2 font-weight-bold ml-2 shadow-sm" style="font-size: 0.88rem; border-radius: 8px;">
+            <i class="fas fa-check-double mr-1"></i> Pagado Totalmente
+          </span>
+        `);
+        if (hasPayments) {
+          container.append(`
+            <button type="button" class="btn btn-outline-info btn-sm btn-view-purchase-payments font-weight-bold ml-2" 
+              data-id="${compra.id_purchase}">
+              <i class="fas fa-receipt mr-1"></i> Ver Pagos (${compra.payments_summary?.length || ''})
+            </button>
+          `);
+        }
+      } else {
+        const pendingAmount = parseFloat(compra.pending_balance || compra.total || 0);
+        const buttonLabel = parseFloat(compra.total_paid || 0) > 0 
+          ? `Pagar Saldo ($${formatCurrency(pendingAmount)})` 
+          : "Pagar a Proveedor";
+
+        container.append(`
+          <button type="button" class="btn btn-outline-success btn-sm btn-pay-purchase font-weight-bold ml-2" 
+            data-id="${compra.id_purchase}" data-total="${compra.total}" data-pending="${compra.pending_balance}" data-permission="purchases.update">
+            <i class="fas fa-hand-holding-usd mr-1"></i> ${buttonLabel}
+          </button>
+        `);
+
+        if (hasPayments) {
+          container.append(`
+            <button type="button" class="btn btn-outline-info btn-sm btn-view-purchase-payments font-weight-bold ml-2" 
+              data-id="${compra.id_purchase}">
+              <i class="fas fa-receipt mr-1"></i> Historial Pagos
+            </button>
+          `);
+        }
+      }
+    }
+  }
+
+  function updateCashDrawerValidation() {
+    const method = $("#pay_method").val();
+    const amount = parseFloat($("#pay_amount").val()) || 0;
+
+    if (method === "CASH") {
+      if (!isCajaAbierta) {
+        $("#pay_cash_warning").slideDown(200);
+        $("#pay_cash_drawer_box").hide();
+        $("#pay_insufficient_cash_alert").hide();
+      } else {
+        $("#pay_cash_warning").hide();
+        $("#pay_cash_drawer_box").show();
+        $("#pay_drawer_cash_display").text(formatCurrency(currentCashBalance));
+
+        if (amount > currentCashBalance) {
+          $("#insufficient_cash_amount").text(formatCurrency(currentCashBalance));
+          $("#pay_insufficient_cash_alert").slideDown(200);
+        } else {
+          $("#pay_insufficient_cash_alert").slideUp(200);
+        }
+      }
+    } else {
+      $("#pay_cash_warning").hide();
+      $("#pay_cash_drawer_box").hide();
+      $("#pay_insufficient_cash_alert").hide();
+    }
   }
 
   function setupActionButtonsListener() {
+    $(document).off("click", ".btn-pay-purchase").on("click", ".btn-pay-purchase", async function () {
+      const compraId = $(this).data("id");
+
+      try {
+        NotificationService.loading("Consultando estado de pagos...");
+        const [paymentsResp] = await Promise.all([
+          CompraService.obtenerPagosCompra(compraId),
+          checkCajaEstado(true),
+        ]);
+        NotificationService.close();
+
+        if (paymentsResp && paymentsResp.success && paymentsResp.data) {
+          const d = paymentsResp.data;
+          const pending = parseFloat(d.pending_balance || 0);
+
+          if (pending <= 0) {
+            NotificationService.toastInfo("Esta compra ya se encuentra pagada en su totalidad.");
+            return;
+          }
+
+          $("#pay_purchase_id").val(compraId);
+          $("#pay_total_display").text(formatCurrency(d.total_purchase));
+          $("#pay_paid_display").text(formatCurrency(d.total_paid));
+          $("#pay_pending_display").text(formatCurrency(d.pending_balance));
+          $("#pay_amount").val(pending > 0 ? pending.toFixed(2) : "0.00");
+          $("#pay_reference").val("");
+          $("#pay_notes").val("");
+
+          // Control visual y preventivo de estado de caja
+          if (!isCajaAbierta) {
+            $("#pay_method").val("TRANSFER");
+            updateCashDrawerValidation();
+            NotificationService.toastWarning(
+              "La caja física se encuentra cerrada. Solo podrás registrar pagos mediante Transferencia o Tarjeta.",
+              6000
+            );
+          } else {
+            $("#pay_method").val("CASH");
+            updateCashDrawerValidation();
+          }
+
+          $("#modalPagarCompra").modal("show");
+        }
+      } catch (err) {
+        NotificationService.close();
+        NotificationService.toastError("No se pudo cargar el estado de pagos de la compra.");
+      }
+    });
+
+    $("#pay_method").off("change").on("change", updateCashDrawerValidation);
+    $("#pay_amount").off("input change").on("input change", updateCashDrawerValidation);
+
+    // Modal Historial de Pagos
+    $(document).off("click", ".btn-view-purchase-payments").on("click", ".btn-view-purchase-payments", async function () {
+      const compraId = $(this).data("id");
+      if (!compraId) return;
+
+      try {
+        NotificationService.loading("Consultando historial de pagos...");
+        const resp = await CompraService.obtenerPagosCompra(compraId);
+        NotificationService.close();
+
+        if (resp && resp.success && resp.data) {
+          const d = resp.data;
+          $("#historial_compra_id").text(compraId);
+          $("#historial_total_compra").text(formatCurrency(d.total_purchase));
+          $("#historial_total_pagado").text(formatCurrency(d.total_paid));
+          $("#historial_saldo_pendiente").text(formatCurrency(d.pending_balance));
+
+          const tbody = $("#historial_pagos_body");
+          tbody.empty();
+
+          if (d.payments && d.payments.length > 0) {
+            d.payments.forEach(p => {
+              const methodLabel = p.payment_method_display || p.payment_method;
+              const isCash = p.payment_method === "CASH";
+              const methodBadge = isCash 
+                ? `<span class="badge badge-success"><i class="fas fa-money-bill-wave mr-1"></i>${methodLabel}</span>`
+                : `<span class="badge badge-primary"><i class="fas fa-university mr-1"></i>${methodLabel}</span>`;
+              const statusBadge = p.status === "COMPLETED" 
+                ? `<span class="badge badge-success">Completado</span>`
+                : `<span class="badge badge-warning">${p.status}</span>`;
+
+              const tr = `
+                <tr>
+                  <td>${formatDate(p.created_at)}</td>
+                  <td>${methodBadge}</td>
+                  <td class="font-weight-bold text-success">${formatCurrency(p.amount)}</td>
+                  <td>${p.reference || '<span class="text-muted">N/A</span>'}</td>
+                  <td>${statusBadge}</td>
+                  <td><small class="text-muted">${p.notes || '---'}</small></td>
+                </tr>
+              `;
+              tbody.append(tr);
+            });
+          } else {
+            tbody.append(`<tr><td colspan="6" class="text-center text-muted py-3">No hay pagos registrados para esta compra.</td></tr>`);
+          }
+
+          $("#modalHistorialPagosCompra").modal("show");
+        }
+      } catch (err) {
+        NotificationService.close();
+        NotificationService.toastError("No se pudo cargar el historial de pagos.");
+      }
+    });
+
+    $("#form_pagar_compra").off("submit").on("submit", async function (e) {
+      e.preventDefault();
+      const compraId = $("#pay_purchase_id").val();
+      const amount = parseFloat($("#pay_amount").val()) || 0;
+      const method = $("#pay_method").val();
+      const reference = $("#pay_reference").val().trim();
+      const notes = $("#pay_notes").val().trim();
+
+      if (amount <= 0) {
+        NotificationService.toastError("El monto a pagar debe ser mayor a cero.");
+        return;
+      }
+
+      // Validar preventivamente en frontend si intenta pagar en efectivo con caja cerrada
+      if (method === "CASH") {
+        if (!isCajaAbierta) {
+          $("#pay_cash_warning").slideDown(200);
+          NotificationService.warning(
+            "Debe abrir una sesión de caja antes de registrar un pago a proveedor en efectivo. " +
+            "Si desea registrar el pago sin caja, seleccione Transferencia Bancaria o Tarjeta.",
+            "Caja Cerrada"
+          );
+          NotificationService.toastWarning("No puedes pagar en efectivo porque la caja se encuentra cerrada.", 6000);
+          return;
+        }
+
+        if (amount > currentCashBalance) {
+          $("#insufficient_cash_amount").text(formatCurrency(currentCashBalance));
+          $("#pay_insufficient_cash_alert").slideDown(200);
+          NotificationService.warning(
+            `El monto a pagar ($${formatCurrency(amount)}) supera el efectivo disponible en caja ($${formatCurrency(currentCashBalance)}).\n\nSeleccione Transferencia Bancaria o Tarjeta, o pague un monto parcial de hasta $${formatCurrency(currentCashBalance)}.`,
+            "Efectivo Insuficiente en Caja"
+          );
+          NotificationService.toastWarning(
+            `Efectivo insuficiente. Solo dispones de $${formatCurrency(currentCashBalance)} en caja.`,
+            6000
+          );
+          return;
+        }
+      }
+
+      try {
+        NotificationService.loading("Procesando pago a proveedor...");
+        const resp = await CompraService.pagarCompra(compraId, {
+          amount: amount,
+          payment_method: method,
+          reference: reference,
+          notes: notes,
+        });
+        NotificationService.close();
+
+        if (resp && (resp.success || resp.ok)) {
+          NotificationService.toastSuccess("Pago a proveedor registrado correctamente.");
+          $("#modalPagarCompra").modal("hide");
+          $(`#${DETAIL_MODAL_ID}`).modal("hide");
+          loadCompras();
+          window.dispatchEvent(new CustomEvent("cash_session_updated"));
+        } else {
+          const errorMsg = NotificationService.getApiErrorMessage(
+            resp,
+            "Error al registrar el pago de la compra."
+          );
+
+          if (resp?.code === "CASH_SESSION_CLOSED" || errorMsg.toLowerCase().includes("caja cerrada") || errorMsg.toLowerCase().includes("debe tener una sesión de caja")) {
+            isCajaAbierta = false;
+            $("#pay_cash_warning").slideDown(200);
+            NotificationService.warning(errorMsg, "Caja Cerrada");
+            NotificationService.toastWarning(errorMsg);
+          } else if (resp?.code === "INSUFFICIENT_CASH" || errorMsg.toLowerCase().includes("supera el efectivo") || errorMsg.toLowerCase().includes("disponible en caja")) {
+            $("#insufficient_cash_amount").text(formatCurrency(currentCashBalance));
+            $("#pay_insufficient_cash_alert").slideDown(200);
+            NotificationService.warning(errorMsg, "Efectivo Insuficiente en Caja");
+            NotificationService.toastWarning(errorMsg);
+          } else {
+            NotificationService.toastError(errorMsg);
+          }
+        }
+      } catch (err) {
+        NotificationService.close();
+        const errorMsg = NotificationService.getApiErrorMessage(
+          err,
+          "Error inesperado al registrar el pago de la compra."
+        );
+        NotificationService.toastError(errorMsg);
+      }
+    });
+
     $(document).off("click", ".btn-action-purchase").on("click", ".btn-action-purchase", async function () {
       const action = $(this).data("action");
       const compraId = $(this).data("id");
@@ -338,11 +642,23 @@ const CompraListController = (() => {
           else if(statusLabel === "CANCELLED") { badgeClass = "badge-danger"; statusLabel = "Anulada"; }
           
           $("#factura_modal_status").html(`<span class="badge ${badgeClass}">${statusLabel}</span>`);
+          const paymentStatus = factura.payment_status || (parseFloat(factura.total_paid || 0) >= parseFloat(factura.total || 0) && parseFloat(factura.total || 0) > 0 ? "PAID" : (parseFloat(factura.total_paid || 0) > 0 ? "PARTIAL" : "UNPAID"));
+          $("#factura_modal_payment_status").html(getPaymentStatusBadge(paymentStatus));
           $("#factura_modal_purchase").text(factura.purchase || "N/A");
           $("#factura_modal_notes").text(factura.notes || "Sin observaciones");
           
           $("#factura_modal_subtotal").text(formatCurrency(factura.subtotal));
           $("#factura_modal_total").text(formatCurrency(factura.total));
+
+          if (factura.total_paid !== undefined && factura.total_paid !== null) {
+            $("#factura_modal_row_paid").show();
+            $("#factura_modal_total_paid").text(formatCurrency(factura.total_paid));
+            $("#factura_modal_row_pending").show();
+            $("#factura_modal_pending_balance").text(formatCurrency(factura.pending_balance));
+          } else {
+            $("#factura_modal_row_paid").hide();
+            $("#factura_modal_row_pending").hide();
+          }
           
           if (typeof DocumentTemplateRenderer !== 'undefined') {
             const normalizedCompanyData = {
@@ -476,7 +792,7 @@ const CompraListController = (() => {
                 compra.issue_date || "N/A",
                 formatCurrency(compra.subtotal),
                 formatCurrency(compra.total),
-                getStatusBadge(compra.status),
+                `${getStatusBadge(compra.status)}<br><div class="mt-1">${getPaymentStatusBadge(compra.payment_status || (compra.is_fully_paid ? 'PAID' : 'UNPAID'))}</div>`,
                 actions,
               ];
             });
@@ -538,6 +854,7 @@ const CompraListController = (() => {
     const tbody = document.getElementById(TABLE_BODY_ID);
     if (!tbody) return;
 
+    await checkCajaEstado(true);
     initDataTable();
     setupViewDetailsListener();
     setupActionButtonsListener();

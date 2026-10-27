@@ -118,6 +118,36 @@ const CajaService = (() => {
     }
   }
 
+  // Obtener último saldo de cierre para arrastre de saldo (carry-over)
+  async function obtenerUltimoSaldoCierre(cashRegisterId) {
+    try {
+      return await ApiClient.get(`${CASH_ENDPOINT}last-closing-balance/?cash_register_id=${cashRegisterId}`);
+    } catch (error) {
+      console.error("[CAJA SERVICE] Error al obtener último saldo de cierre:", error);
+      throw error;
+    }
+  }
+
+  // Obtener resumen detallado de auditoría de una sesión
+  async function obtenerResumenAuditoria(sessionId) {
+    try {
+      return await ApiClient.get(`${CASH_ENDPOINT}${sessionId}/audit-summary/`);
+    } catch (error) {
+      console.error("[CAJA SERVICE] Error al obtener resumen de auditoría:", error);
+      throw error;
+    }
+  }
+
+  // Obtener resumen financiero global
+  async function obtenerResumenFinanciero() {
+    try {
+      return await ApiClient.get(`${CASH_ENDPOINT}financial-summary/`);
+    } catch (error) {
+      console.error("[CAJA SERVICE] Error al obtener resumen financiero:", error);
+      throw error;
+    }
+  }
+
   return Object.freeze({
     listarSesiones,
     obtenerSesionActual,
@@ -128,6 +158,9 @@ const CajaService = (() => {
     listarMovimientos,
     listarCajasRegistradoras,
     crearCajaRegistradora,
+    obtenerUltimoSaldoCierre,
+    obtenerResumenAuditoria,
+    obtenerResumenFinanciero,
   });
 })();
 

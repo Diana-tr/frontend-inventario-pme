@@ -126,23 +126,21 @@ const NotificationService = (() => {
       return fallback;
     }
 
-    if (response.message) {
-      return response.message;
-    }
+    const payload = response.response?.data || response.data || response;
 
-    if (response.errors) {
-      if (typeof response.errors === "string") {
-        return response.errors;
+    if (payload.errors) {
+      if (typeof payload.errors === "string" && payload.errors.trim()) {
+        return payload.errors;
       }
 
-      if (Array.isArray(response.errors)) {
-        return response.errors.join(" ");
+      if (Array.isArray(payload.errors) && payload.errors.length > 0) {
+        return payload.errors.join(" ");
       }
 
-      if (typeof response.errors === "object") {
+      if (typeof payload.errors === "object" && payload.errors !== null) {
         const messages = [];
 
-        Object.values(response.errors).forEach((value) => {
+        Object.values(payload.errors).forEach((value) => {
           if (Array.isArray(value)) {
             messages.push(...value);
           } else if (typeof value === "string") {
@@ -154,6 +152,10 @@ const NotificationService = (() => {
           return messages.join(" ");
         }
       }
+    }
+
+    if (payload.message) {
+      return payload.message;
     }
 
     return fallback;
