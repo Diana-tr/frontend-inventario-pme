@@ -28,17 +28,6 @@ require_once __DIR__ . '/../../config/app.php';
             </div>
         </div>
 
-        <!-- Inicialización limpia mediante el controlador -->
-        <script type="module">
-            import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js';
-            import LogoutController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js';
-
-            document.addEventListener('DOMContentLoaded', () => {
-                NavbarController.init();
-                LogoutController.init();
-            });
-        </script>
-
         <!-- ============================================================
              Sidebar Menu — Navegación Jerárquica
              Nivel 1: MÓDULO        → nav-header-module + nav-item-module

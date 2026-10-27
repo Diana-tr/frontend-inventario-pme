@@ -105,6 +105,11 @@ const Storage = (() => {
 
   const clear = () => {
     Object.values(KEYS).forEach(localStorage.removeItem.bind(localStorage));
+    try {
+      sessionStorage.clear();
+    } catch {
+      // Entornos donde sessionStorage no esté disponible
+    }
   };
 
   return Object.freeze({

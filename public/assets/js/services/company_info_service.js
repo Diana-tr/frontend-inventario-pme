@@ -8,11 +8,23 @@ import ApiClient from "../core/apiClient.js";
  */
 const CompanyInfoService = (() => {
   const ENDPOINT = "/api/v1/company-info/";
+  let _empresaActualCache = null;
 
-  // Obtener la empresa activa actual (singleton).
-  async function obtenerEmpresaActual() {
+  function invalidarCache() {
+    _empresaActualCache = null;
+  }
+
+  // Obtener la empresa activa actual (singleton) con soporte de caché.
+  async function obtenerEmpresaActual(forceRefresh = false) {
     try {
-      return await ApiClient.get(`${ENDPOINT}current/`);
+      if (!forceRefresh && _empresaActualCache) {
+        return _empresaActualCache;
+      }
+      const response = await ApiClient.get(`${ENDPOINT}current/`);
+      if (response && response.ok && response.success) {
+        _empresaActualCache = response;
+      }
+      return response;
     } catch (error) {
       console.error(
         "[COMPANY INFO SERVICE] Error al obtener empresa actual:",
@@ -48,7 +60,9 @@ const CompanyInfoService = (() => {
   // Crear empresa (primera configuración).
   async function crearEmpresa(data) {
     try {
-      return await ApiClient.post(ENDPOINT, data);
+      const response = await ApiClient.post(ENDPOINT, data);
+      invalidarCache();
+      return response;
     } catch (error) {
       console.error("[COMPANY INFO SERVICE] Error al crear empresa:", error);
       throw error;
@@ -58,7 +72,9 @@ const CompanyInfoService = (() => {
   // Actualizar empresa (PATCH parcial).
   async function actualizarEmpresa(id, data) {
     try {
-      return await ApiClient.patch(`${ENDPOINT}${id}/`, data);
+      const response = await ApiClient.patch(`${ENDPOINT}${id}/`, data);
+      invalidarCache();
+      return response;
     } catch (error) {
       console.error(
         `[COMPANY INFO SERVICE] Error al actualizar empresa ${id}:`,
@@ -73,7 +89,9 @@ const CompanyInfoService = (() => {
     try {
       const formData = new FormData();
       formData.append("logo", logoFile);
-      return await ApiClient.postForm(`${ENDPOINT}${id}/upload-logo/`, formData);
+      const response = await ApiClient.postForm(`${ENDPOINT}${id}/upload-logo/`, formData);
+      invalidarCache();
+      return response;
     } catch (error) {
       console.error(
         `[COMPANY INFO SERVICE] Error al subir logo empresa ${id}:`,
@@ -90,6 +108,7 @@ const CompanyInfoService = (() => {
     crearEmpresa,
     actualizarEmpresa,
     subirLogo,
+    invalidarCache,
   });
 })();
 

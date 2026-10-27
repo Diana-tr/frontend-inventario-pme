@@ -72,23 +72,24 @@ const LogoutController = (() => {
     }
   }
 
+  let isInitialized = false;
+
   /**
    * Inicializa el controlador.
    *
    * @returns {void}
    */
   function init() {
+    if (isInitialized) return;
+
     const logoutButton = document.querySelector("#logout-btn");
 
     if (!logoutButton) {
-      console.warn("[LOGOUT] No se encontró #logout-btn.");
-
       return;
     }
 
+    isInitialized = true;
     logoutButton.addEventListener("click", handleLogout);
-
-    console.log("[LOGOUT] Controlador inicializado.");
   }
 
   return Object.freeze({

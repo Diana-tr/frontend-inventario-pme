@@ -71,9 +71,13 @@ const ApiClient = (() => {
     const token = Storage.getAccessToken();
 
     const headers = {
-      "Content-Type": "application/json",
       Accept: "application/json",
     };
+
+    // Si el cuerpo es FormData, omitir Content-Type para que el navegador configure automáticamente multipart/form-data con boundary
+    if (!(options.body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
 
     // Únicamente son públicos el login y el refresh de tokens.
     // Todo lo demás (incluyendo crear usuarios desde el panel) exige el Token del admin.
@@ -85,8 +89,21 @@ const ApiClient = (() => {
       headers.Authorization = `Bearer ${token}`;
     }
 
+    // Configuración de timeout mediante AbortController si no se proveyó un signal
+    let timeoutId = null;
+    let effectiveSignal = options.signal;
+    if (!effectiveSignal && typeof AbortController !== "undefined") {
+      const timeoutMs = Config.REQUEST_TIMEOUT || 30000;
+      const controller = new AbortController();
+      effectiveSignal = controller.signal;
+      timeoutId = setTimeout(() => {
+        controller.abort(new Error(`Petición abortada por timeout (${timeoutMs}ms)`));
+      }, timeoutMs);
+    }
+
     const config = {
       ...options,
+      signal: effectiveSignal,
       headers: {
         ...headers,
         ...(options.headers || {}),
@@ -133,32 +150,95 @@ const ApiClient = (() => {
       return {
         ok: response.ok,
         status: response.status,
+        success: result.success !== undefined ? result.success : response.ok,
         ...result,
       };
     } catch (error) {
+      const isAbort = error.name === "AbortError" || (effectiveSignal && effectiveSignal.aborted);
       return {
         ok: false,
-        status: 0,
+        status: isAbort ? 408 : 0,
         success: false,
-        code: "NETWORK_ERROR",
-        message: error.message,
+        code: isAbort ? "TIMEOUT_ERROR" : "NETWORK_ERROR",
+        message: error.message || "Error en la petición de red",
         data: null,
         errors: error,
       };
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   };
 
-  const get = (endpoint) => request(endpoint, { method: "GET" });
-  const post = (endpoint, body = {}) => request(endpoint, { method: "POST", body: JSON.stringify(body) });
-  const put = (endpoint, body = {}) => request(endpoint, { method: "PUT", body: JSON.stringify(body) });
-  const patch = (endpoint, body = {}) => request(endpoint, { method: "PATCH", body: JSON.stringify(body) });
-  const remove = (endpoint) => request(endpoint, { method: "DELETE" });
+  const get = (endpoint, paramsOrOptions = null, options = {}) => {
+    let url = endpoint;
+    let queryParams = paramsOrOptions;
+    let requestOptions = options;
+
+    if (paramsOrOptions && typeof paramsOrOptions === "object") {
+      if (paramsOrOptions.params && typeof paramsOrOptions.params === "object") {
+        queryParams = paramsOrOptions.params;
+        requestOptions = { ...paramsOrOptions, ...options };
+        delete requestOptions.params;
+      } else if (paramsOrOptions.headers || paramsOrOptions.signal) {
+        queryParams = null;
+        requestOptions = { ...paramsOrOptions, ...options };
+      }
+    }
+
+    if (queryParams && typeof queryParams === "object") {
+      const searchParams = new URLSearchParams();
+      for (const [key, val] of Object.entries(queryParams)) {
+        if (val !== undefined && val !== null && val !== "") {
+          if (Array.isArray(val)) {
+            val.forEach((item) => {
+              if (item !== undefined && item !== null && item !== "") {
+                searchParams.append(key, String(item));
+              }
+            });
+          } else {
+            searchParams.append(key, String(val));
+          }
+        }
+      }
+      const queryString = searchParams.toString();
+      if (queryString) {
+        url += (url.includes("?") ? "&" : "?") + queryString;
+      }
+    }
+    return request(url, { method: "GET", ...requestOptions });
+  };
+
+  const post = (endpoint, body = {}, options = {}) =>
+    request(endpoint, { method: "POST", body: JSON.stringify(body), ...options });
+
+  const postForm = (endpoint, formData, options = {}) =>
+    request(endpoint, { method: "POST", body: formData, ...options });
+
+  const put = (endpoint, body = {}, options = {}) =>
+    request(endpoint, { method: "PUT", body: JSON.stringify(body), ...options });
+
+  const putForm = (endpoint, formData, options = {}) =>
+    request(endpoint, { method: "PUT", body: formData, ...options });
+
+  const patch = (endpoint, body = {}, options = {}) =>
+    request(endpoint, { method: "PATCH", body: JSON.stringify(body), ...options });
+
+  const patchForm = (endpoint, formData, options = {}) =>
+    request(endpoint, { method: "PATCH", body: formData, ...options });
+
+  const remove = (endpoint, options = {}) =>
+    request(endpoint, { method: "DELETE", ...options });
 
   return Object.freeze({
     get,
     post,
+    postForm,
     put,
+    putForm,
     patch,
+    patchForm,
     delete: remove,
   });
 })();

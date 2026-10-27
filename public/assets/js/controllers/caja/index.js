@@ -46,7 +46,7 @@ const CajaIndexController = (() => {
     $("#caja_abierta_view").hide();
 
     try {
-      const response = await CajaService.obtenerSesionActual();
+      const response = await CajaService.obtenerSesionActual(true);
       if (response && response.success && response.data) {
         renderAbierta(response.data);
       } else {

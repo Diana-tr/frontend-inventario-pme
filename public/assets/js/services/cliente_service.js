@@ -2,11 +2,23 @@ import ApiClient from "../core/apiClient.js";
 
 const ClienteService = (() => {
   const CLIENTES_ENDPOINT = "/api/v1/customers/";
+  let _clientesCache = null;
 
-  // Listar todas los clientes.
-  async function listarClientes() {
+  function invalidarCache() {
+    _clientesCache = null;
+  }
+
+  // Listar todos los clientes (con caché en memoria para POS y formularios de ventas).
+  async function listarClientes(forceRefresh = false) {
     try {
-      return await ApiClient.get(CLIENTES_ENDPOINT);
+      if (!forceRefresh && _clientesCache) {
+        return _clientesCache;
+      }
+      const response = await ApiClient.get(CLIENTES_ENDPOINT);
+      if (response && response.ok && response.success) {
+        _clientesCache = response;
+      }
+      return response;
     } catch (error) {
       console.error("[CLIENTE SERVICE] Error al listar clientes:", error);
       throw error;
@@ -51,7 +63,9 @@ const ClienteService = (() => {
   // Crear un cliente.
   async function crearCliente(clienteData) {
     try {
-      return await ApiClient.post(CLIENTES_ENDPOINT, clienteData);
+      const response = await ApiClient.post(CLIENTES_ENDPOINT, clienteData);
+      invalidarCache();
+      return response;
     } catch (error) {
       console.error("[CLIENTE SERVICE] Error al crear cliente:", error);
       throw error;
@@ -61,7 +75,9 @@ const ClienteService = (() => {
   // Actualizar parcialmente un cliente (PATCH).
   async function actualizarCliente(id, clienteData) {
     try {
-      return await ApiClient.patch(`${CLIENTES_ENDPOINT}${id}/`, clienteData);
+      const response = await ApiClient.patch(`${CLIENTES_ENDPOINT}${id}/`, clienteData);
+      invalidarCache();
+      return response;
     } catch (error) {
       console.error(
         `[CLIENTE SERVICE] Error al actualizar (PATCH) cliente ${id}:`,
@@ -74,9 +90,11 @@ const ClienteService = (() => {
   // Alternar estado activo/inactivo (DELETE lógico)
   async function cambiarEstadoCliente(id, is_active) {
     try {
-      return await ApiClient.patch(`${CLIENTES_ENDPOINT}${id}/`, {
+      const response = await ApiClient.patch(`${CLIENTES_ENDPOINT}${id}/`, {
         is_active: is_active,
       });
+      invalidarCache();
+      return response;
     } catch (error) {
       console.error(
         `[CLIENTE SERVICE] Error al cambiar estado del cliente ${id}:`,
@@ -93,6 +111,7 @@ const ClienteService = (() => {
     crearCliente,
     actualizarCliente,
     cambiarEstadoCliente,
+    invalidarCache,
   });
 })();
 

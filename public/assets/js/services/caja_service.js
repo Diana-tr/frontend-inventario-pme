@@ -21,10 +21,31 @@ const CajaService = (() => {
     }
   }
 
-  // Obtener sesión actual
-  async function obtenerSesionActual() {
+  let cachedCurrentSession = null;
+  let lastFetchTime = 0;
+  const CACHE_TTL_MS = 30000; // 30 segundos de micro-cache para navegación fluida
+
+  function invalidarSesionActual() {
+    cachedCurrentSession = null;
+    lastFetchTime = 0;
+  }
+
+  // Obtener sesión actual con micro-cache para evitar ráfagas al navegar
+  async function obtenerSesionActual(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && cachedCurrentSession !== null && (now - lastFetchTime) < CACHE_TTL_MS) {
+      return cachedCurrentSession;
+    }
+
     try {
-      return await ApiClient.get(`${CASH_ENDPOINT}current/`);
+      const response = await ApiClient.get(`${CASH_ENDPOINT}current/`);
+      // Guardar en cache únicamente estados legítimos de negocio: 200 (abierta) o 404 (cerrada)
+      // Evita almacenar en caché fallos de red (0), timeouts (408) o errores del servidor (500)
+      if (response && (response.status === 200 || response.status === 404)) {
+        cachedCurrentSession = response;
+        lastFetchTime = now;
+      }
+      return response;
     } catch (error) {
       console.error("[CAJA SERVICE] Error al obtener sesión actual:", error);
       throw error;
@@ -34,7 +55,10 @@ const CajaService = (() => {
   // Abrir sesión de caja
   async function abrirCaja(data) {
     try {
-      return await ApiClient.post(`${CASH_ENDPOINT}open/`, data);
+      const res = await ApiClient.post(`${CASH_ENDPOINT}open/`, data);
+      invalidarSesionActual();
+      window.dispatchEvent(new CustomEvent("cash_session_updated"));
+      return res;
     } catch (error) {
       console.error("[CAJA SERVICE] Error al abrir caja:", error);
       throw error;
@@ -44,7 +68,10 @@ const CajaService = (() => {
   // Cerrar sesión de caja
   async function cerrarCaja(id, data) {
     try {
-      return await ApiClient.post(`${CASH_ENDPOINT}${id}/close/`, data);
+      const res = await ApiClient.post(`${CASH_ENDPOINT}${id}/close/`, data);
+      invalidarSesionActual();
+      window.dispatchEvent(new CustomEvent("cash_session_updated"));
+      return res;
     } catch (error) {
       console.error("[CAJA SERVICE] Error al cerrar caja:", error);
       throw error;
@@ -94,6 +121,7 @@ const CajaService = (() => {
   return Object.freeze({
     listarSesiones,
     obtenerSesionActual,
+    invalidarSesionActual,
     abrirCaja,
     cerrarCaja,
     agregarMovimiento,

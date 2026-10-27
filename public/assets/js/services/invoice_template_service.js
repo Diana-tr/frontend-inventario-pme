@@ -2,24 +2,41 @@ import ApiClient from "../core/apiClient.js";
 
 const InvoiceTemplateService = (function () {
   const API_URL = "/api/v1/invoice-templates/";
+  const _templateCache = new Map();
+
+  /**
+   * Invalida la caché de plantillas (global o por documentType)
+   * @param {string|null} documentType
+   */
+  function invalidarCache(documentType = null) {
+    if (documentType) {
+      _templateCache.delete(documentType);
+    } else {
+      _templateCache.clear();
+    }
+  }
 
   /**
    * Obtiene una plantilla activa por tipo de documento.
    *
-   * El endpoint de listado devuelve únicamente información resumida.
-   * Por eso, después de encontrar la plantilla, se consulta su endpoint
-   * de detalle para obtener header_content, body_content y footer_content.
+   * Utiliza caché en memoria para evitar múltiples consultas HTTP idénticas
+   * en la impresión y previsualización de facturas o tickets POS.
    *
    * @param {string} documentType
+   * @param {boolean} forceRefresh
    * @returns {Promise<Object|null>}
    */
-  async function getActiveTemplate(documentType) {
+  async function getActiveTemplate(documentType, forceRefresh = false) {
     if (!documentType) {
       console.error(
         "[InvoiceTemplateService] documentType es obligatorio.",
       );
 
       return null;
+    }
+
+    if (!forceRefresh && _templateCache.has(documentType)) {
+      return _templateCache.get(documentType);
     }
 
     try {
@@ -108,10 +125,8 @@ const InvoiceTemplateService = (function () {
         return null;
       }
 
-      console.log(
-        "[InvoiceTemplateService] Plantilla completa obtenida:",
-        template,
-      );
+      // Guardar en caché en memoria
+      _templateCache.set(documentType, template);
 
       return template;
     } catch (error) {
@@ -126,6 +141,7 @@ const InvoiceTemplateService = (function () {
 
   return Object.freeze({
     getActiveTemplate,
+    invalidarCache,
   });
 })();
 

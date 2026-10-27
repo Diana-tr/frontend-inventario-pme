@@ -10,7 +10,12 @@ import CajaService from "../../services/caja_service.js";
 import Storage from "../../storage/storage.js";
 
 const NavbarController = (() => {
+  let isInitialized = false;
+
   async function init() {
+    if (isInitialized) return;
+    isInitialized = true;
+
     let user = Storage.getUser();
 
     if (!user) {
@@ -38,18 +43,18 @@ const NavbarController = (() => {
 
     // Escuchar eventos globales de apertura/cierre de caja para sincronizar en tiempo real
     window.addEventListener("cash_session_updated", async () => {
-      await checkNavbarCajaStatus();
+      await checkNavbarCajaStatus(true);
     });
   }
 
-  async function checkNavbarCajaStatus() {
+  async function checkNavbarCajaStatus(forceRefresh = false) {
     const navbarNombre = document.querySelector("#navbar_caja_nombre");
     const badgeEstado = document.querySelector("#navbar_caja_estado_badge");
 
     if (!navbarNombre || !badgeEstado) return;
 
     try {
-      const result = await CajaService.obtenerSesionActual();
+      const result = await CajaService.obtenerSesionActual(forceRefresh);
 
       if (result && (result.ok || result.success) && result.data) {
         const session = result.data;

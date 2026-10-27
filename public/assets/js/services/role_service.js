@@ -4,6 +4,12 @@ const RoleService = (() => {
   const ROLES_ENDPOINT = "/api/v1/roles/";
 
   const ROLES_CACHE_KEY = "inventariopme_roles_cache";
+  const PERMISOS_CACHE_KEY = "inventariopme_permisos_catalog_cache";
+
+  function invalidarCache() {
+    sessionStorage.removeItem(ROLES_CACHE_KEY);
+    sessionStorage.removeItem(PERMISOS_CACHE_KEY);
+  }
 
   // Listar todos los roles (con caché de sesión para evitar peticiones repetidas)
   async function listarRoles(forceRefresh = false) {
@@ -103,10 +109,19 @@ const RoleService = (() => {
     }
   }
 
-  // Obtener catálogo de permisos dinámicos desde backend
-  async function obtenerCatalogoPermisos() {
+  // Obtener catálogo de permisos dinámicos desde backend (con caché de sesión)
+  async function obtenerCatalogoPermisos(forceRefresh = false) {
     try {
-      return await ApiClient.get("/api/v1/security/permissions/");
+      if (!forceRefresh) {
+        const cached = sessionStorage.getItem(PERMISOS_CACHE_KEY);
+        if (cached) return JSON.parse(cached);
+      }
+
+      const response = await ApiClient.get("/api/v1/security/permissions/");
+      if (response && response.ok && response.success) {
+        sessionStorage.setItem(PERMISOS_CACHE_KEY, JSON.stringify(response));
+      }
+      return response;
     } catch (error) {
       console.error(
         "[ROLE SERVICE] Error al obtener catálogo de permisos:",
@@ -124,6 +139,7 @@ const RoleService = (() => {
     actualizarRol,
     cambiarEstadoRol,
     obtenerCatalogoPermisos,
+    invalidarCache,
   });
 })();
 

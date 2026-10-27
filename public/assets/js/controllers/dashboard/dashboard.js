@@ -500,6 +500,7 @@ const DashboardController = (() => {
 
       if (Array.isArray(value) && value.length > 0) {
         container.innerHTML = "";
+        const fragment = document.createDocumentFragment();
         let index = 0;
         for (const item of value) {
           index++;
@@ -538,8 +539,9 @@ const DashboardController = (() => {
               </div>
             </div>
             ${badgeVal !== "" ? `<div><span class="badge badge-${badgeColor} px-2 py-1 shadow-sm">${badgeVal}${badgeSuffix}</span></div>` : ''}`;
-          container.appendChild(li);
+          fragment.appendChild(li);
         }
+        container.appendChild(fragment);
       } else {
         container.innerHTML = `<li class="text-center text-muted py-3 list-unstyled">Sin datos registrados</li>`;
       }
@@ -553,6 +555,7 @@ const DashboardController = (() => {
 
       if (Array.isArray(value) && value.length > 0) {
         tbody.innerHTML = "";
+        const fragment = document.createDocumentFragment();
         for (const row of value) {
           const id = row.id ?? "#";
           const client = row.cliente ?? row.customer ?? row.client_name ?? "Cliente Ocasional";
@@ -570,8 +573,9 @@ const DashboardController = (() => {
             <td>${client}</td>
             <td class="text-success font-weight-bold">$${Number(amount).toLocaleString("es-CO")}</td>
             <td><small class="text-muted">${date}</small></td>`;
-          tbody.appendChild(tr);
+          fragment.appendChild(tr);
         }
+        tbody.appendChild(fragment);
       } else {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No hay datos disponibles</td></tr>`;
       }

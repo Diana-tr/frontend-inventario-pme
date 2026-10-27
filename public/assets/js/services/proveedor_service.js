@@ -3,14 +3,27 @@ import ApiClient from "../core/apiClient.js";
 const ProveedorService = (() => {
   const SUPPLIERS_ENDPOINT = "/api/v1/suppliers/";
 
-  // Listar todos los Proveedores.
-  async function listarProveedores() {
+  let cachedProveedores = null;
+
+  // Listar todos los Proveedores con cache en memoria cliente para evitar peticiones repetidas.
+  async function listarProveedores(forceRefresh = false) {
+    if (cachedProveedores && !forceRefresh) {
+      return cachedProveedores;
+    }
     try {
-      return await ApiClient.get(SUPPLIERS_ENDPOINT);
+      const response = await ApiClient.get(SUPPLIERS_ENDPOINT);
+      if (response && response.success) {
+        cachedProveedores = response;
+      }
+      return response;
     } catch (error) {
       console.error("[SUPPLIER SERVICE] Error al listar proveedores:", error);
       throw error;
     }
+  }
+
+  function invalidarCache() {
+    cachedProveedores = null;
   }
 
   /**
@@ -57,7 +70,9 @@ const ProveedorService = (() => {
   // Crear una categoria.
   async function crearProveedor(proveedorData) {
     try {
-      return await ApiClient.post(SUPPLIERS_ENDPOINT, proveedorData);
+      const res = await ApiClient.post(SUPPLIERS_ENDPOINT, proveedorData);
+      invalidarCache();
+      return res;
     } catch (error) {
       console.error("[SUPPLIER SERVICE] Error al crear proveedor:", error);
       throw error;
@@ -67,7 +82,9 @@ const ProveedorService = (() => {
   // Actualizar parcialmente un proveedor (PATCH).
   async function actualizarProveedor(id, supplierData) {
     try {
-      return await ApiClient.patch(`${SUPPLIERS_ENDPOINT}${id}/`, supplierData);
+      const res = await ApiClient.patch(`${SUPPLIERS_ENDPOINT}${id}/`, supplierData);
+      invalidarCache();
+      return res;
     } catch (error) {
       console.error(
         `[SUPPLIER SERVICE] Error al actualizar (PATCH) supplier ${id}:`,
@@ -80,9 +97,11 @@ const ProveedorService = (() => {
   // Alternar estado activo/inactivo (DELETE lógico)
   async function cambiarEstadoProveedor(id, is_active) {
     try {
-      return await ApiClient.patch(`${SUPPLIERS_ENDPOINT}${id}/`, {
+      const res = await ApiClient.patch(`${SUPPLIERS_ENDPOINT}${id}/`, {
         is_active: is_active,
       });
+      invalidarCache();
+      return res;
     } catch (error) {
       console.error(
         `[SUPPLIER SERVICE] Error al cambiar estado del proveedor ${id}:`,
@@ -99,6 +118,7 @@ const ProveedorService = (() => {
     crearProveedor,
     actualizarProveedor,
     cambiarEstadoProveedor,
+    invalidarCache,
   });
 })();
 

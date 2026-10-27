@@ -3,14 +3,27 @@ import ApiClient from "../core/apiClient.js";
 const CategoriaService = (() => {
   const CATEGORIES_ENDPOINT = "/api/v1/categories/";
 
-  // Listar todas las categorias.
-  async function listarCategorias() {
+  let cachedCategorias = null;
+
+  // Listar todas las categorias con cache en memoria cliente para evitar peticiones repetidas
+  async function listarCategorias(forceRefresh = false) {
+    if (cachedCategorias && !forceRefresh) {
+      return cachedCategorias;
+    }
     try {
-      return await ApiClient.get(CATEGORIES_ENDPOINT);
+      const response = await ApiClient.get(CATEGORIES_ENDPOINT);
+      if (response && response.success) {
+        cachedCategorias = response;
+      }
+      return response;
     } catch (error) {
       console.error("[CATEGORIE SERVICE] Error al listar categorias:", error);
       throw error;
     }
+  }
+
+  function invalidarCache() {
+    cachedCategorias = null;
   }
 
   /**
@@ -51,7 +64,9 @@ const CategoriaService = (() => {
   // Crear una categoria.
   async function crearCategoria(categoriaData) {
     try {
-      return await ApiClient.post(CATEGORIES_ENDPOINT, categoriaData);
+      const res = await ApiClient.post(CATEGORIES_ENDPOINT, categoriaData);
+      invalidarCache();
+      return res;
     } catch (error) {
       console.error("[CATEGORIE SERVICE] Error al crear categoria:", error);
       throw error;
@@ -61,7 +76,9 @@ const CategoriaService = (() => {
   // Actualizar parcialmente una categoria (PATCH).
   async function actualizarCategoria(id, categorieData) {
     try {
-      return await ApiClient.patch(`${CATEGORIES_ENDPOINT}${id}/`, categorieData);
+      const res = await ApiClient.patch(`${CATEGORIES_ENDPOINT}${id}/`, categorieData);
+      invalidarCache();
+      return res;
     } catch (error) {
       console.error(
         `[CATEGORIE SERVICE] Error al actualizar (PATCH) categorie ${id}:`,
@@ -74,9 +91,11 @@ const CategoriaService = (() => {
   // Alternar estado activo/inactivo (DELETE lógico)
   async function cambiarEstadoCategoria(id, is_active) {
     try {
-      return await ApiClient.patch(`${CATEGORIES_ENDPOINT}${id}/`, {
+      const res = await ApiClient.patch(`${CATEGORIES_ENDPOINT}${id}/`, {
         is_active: is_active,
       });
+      invalidarCache();
+      return res;
     } catch (error) {
       console.error(
         `[CATEGORIE SERVICE] Error al cambiar estado de la categoria ${id}:`,
@@ -93,6 +112,7 @@ const CategoriaService = (() => {
     crearCategoria,
     actualizarCategoria,
     cambiarEstadoCategoria,
+    invalidarCache,
   });
 })();
 

@@ -787,7 +787,7 @@ const POSController = (() => {
 
       // Validar si la caja está abierta
       try {
-        const response = await CajaService.obtenerSesionActual();
+        const response = await CajaService.obtenerSesionActual(true);
         if (response && response.success && response.data) {
           isCajaAbierta = true;
         } else if (!response.success && response.status === 404) {
