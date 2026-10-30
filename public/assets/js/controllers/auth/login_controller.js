@@ -198,6 +198,21 @@ const LoginController = (() => {
       "No fue posible iniciar sesión.",
     );
 
+    if (result.code === "ACCOUNT_LOCKED") {
+      const remainingMinutes =
+        result.meta?.remaining_minutes ??
+        result.errors?.remaining_minutes ??
+        15;
+      const lockoutMsg =
+        `Tu cuenta ha sido bloqueada temporalmente por exceso de intentos fallidos. ` +
+        `Por favor, intenta nuevamente en aproximadamente ${remainingMinutes} minuto${remainingMinutes === 1 ? "" : "s"}.`;
+      await NotificationService.error(
+        lockoutMsg,
+        "Cuenta bloqueada temporalmente",
+      );
+      return;
+    }
+
     switch (result.status) {
       case 400:
         await NotificationService.warning(message, "Datos inválidos");

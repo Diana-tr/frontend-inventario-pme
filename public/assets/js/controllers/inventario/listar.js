@@ -1070,14 +1070,10 @@ const InventarioListController = (() => {
                     ? "desactivar"
                     : "activar";
 
-                const confirmResult = await Swal.fire({
-                    icon: "warning",
-                    title: "Confirmar acción",
-                    text: `¿Estás seguro de que deseas ${actionText} el inventario de "${productName}"?`,
-                    showCancelButton: true,
-                    confirmButtonText: "Sí, continuar",
-                    cancelButtonText: "Cancelar",
-                });
+                const confirmResult = await NotificationService.confirm(
+                    `¿Estás seguro de que deseas ${actionText} el inventario de "${productName}"?`,
+                    "Confirmar acción",
+                );
 
                 if (!confirmResult.isConfirmed) {
                     return;

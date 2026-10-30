@@ -47,6 +47,7 @@ const AuthService = (() => {
           message: response.message ?? "No fue posible iniciar sesión.",
           data: response.data ?? null,
           errors: response.errors ?? null,
+          meta: response.meta ?? response.errors ?? null,
         };
       }
 

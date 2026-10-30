@@ -70,6 +70,19 @@ const NotificationService = (() => {
     });
   }
 
+  function confirm(message, title = "Confirmar acción", customOptions = {}) {
+    return Swal.fire({
+      icon: "warning",
+      title,
+      text: message,
+      showCancelButton: true,
+      confirmButtonText: "Sí, continuar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+      ...customOptions,
+    });
+  }
+
   function toastSuccess(message) {
     return Toast.fire({
       icon: "success",
@@ -163,6 +176,7 @@ const NotificationService = (() => {
 
   return Object.freeze({
     close,
+    confirm,
     error,
     getApiErrorMessage,
     info,

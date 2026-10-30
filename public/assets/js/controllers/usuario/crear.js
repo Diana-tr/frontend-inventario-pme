@@ -1,5 +1,6 @@
 import usuarioService from "../../services/usuario_service.js";
 import RoleService from "../../services/role_service.js";
+import NotificationService from "../../core/notification.js";
 
 const CrearUsuarioController = (() => {
   function init() {
@@ -82,15 +83,10 @@ const CrearUsuarioController = (() => {
       passwordRepeatInput &&
       passwordInput.value !== passwordRepeatInput.value
     ) {
-      if (typeof Swal !== "undefined") {
-        Swal.fire(
-          "Atención",
-          "Las contraseñas no coinciden. Por favor verifique.",
-          "warning",
-        );
-      } else {
-        alert("Las contraseñas no coinciden. Por favor verifique.");
-      }
+      await NotificationService.warning(
+        "Las contraseñas no coinciden. Por favor verifique.",
+        "Atención",
+      );
       return;
     }
 
@@ -120,39 +116,19 @@ const CrearUsuarioController = (() => {
       console.log("[CREAR USUARIO] Respuesta del servidor:", response);
 
       if (response && (response.ok === false || response.success === false)) {
-        let detalleError = "Error desconocido al registrar usuario";
-
-        if (response.errors) {
-          if (typeof response.errors === "object") {
-            // Formatear respuestas de error típicas de Django DRF
-            detalleError = Object.entries(response.errors)
-              .map(
-                ([campo, msgs]) =>
-                  `${campo}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`,
-              )
-              .join("\n");
-          } else {
-            detalleError = response.errors;
-          }
-        } else if (response.message) {
-          detalleError = response.message;
-        }
-
-        throw new Error(detalleError);
+        const errorMsg = NotificationService.getApiErrorMessage(
+          response,
+          "No fue posible crear el usuario.",
+        );
+        throw new Error(errorMsg);
       }
 
-      if (typeof Swal !== "undefined") {
-        await Swal.fire({
-          icon: "success",
-          title: "¡Éxito!",
-          text: "Usuario creado exitosamente.",
-          showConfirmButton: true,
-        });
-      } else {
-        alert("¡Usuario creado con éxito!");
-      }
+      await NotificationService.success(
+        "Usuario creado exitosamente.",
+        "¡Éxito!",
+      );
 
-      // Redirección segura a la vista  de la misma carpeta actual
+      // Redirección segura a la vista de la misma carpeta actual
       const actualPath = window.location.pathname.substring(
         0,
         window.location.pathname.lastIndexOf("/"),
@@ -161,16 +137,12 @@ const CrearUsuarioController = (() => {
     } catch (error) {
       console.error("[CREAR USUARIO] Error detectado:", error);
 
-      let mensajeError = "No se pudo crear el usuario.";
-      if (error.message) {
-        mensajeError = error.message;
-      }
+      const mensajeError = NotificationService.getApiErrorMessage(
+        error,
+        error.message || "No se pudo crear el usuario.",
+      );
 
-      if (typeof Swal !== "undefined") {
-        Swal.fire("Error al registrar", mensajeError, "error");
-      } else {
-        alert("Error al registrar: " + mensajeError);
-      }
+      await NotificationService.error(mensajeError, "Error al registrar");
     } finally {
       if (submitBtn) submitBtn.disabled = false;
     }

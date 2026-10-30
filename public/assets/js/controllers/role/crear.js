@@ -7,6 +7,7 @@
 
 import RoleService from "../../services/role_service.js";
 import PermissionSelector from "../../components/permission_selector.js";
+import NotificationService from "../../core/notification.js";
 
 const RoleCreateController = (() => {
   const FORM_ID = "formCrearRol";
@@ -66,6 +67,10 @@ const RoleCreateController = (() => {
         const response = await RoleService.crearRol(payload);
 
         if (response && response.success) {
+          await NotificationService.success(
+            "Rol creado exitosamente.",
+            "¡Éxito!",
+          );
           // Redirigir al listado de roles de forma dinámica
           const actualPath = window.location.pathname.substring(
             0,
@@ -73,11 +78,19 @@ const RoleCreateController = (() => {
           );
           window.location.href = actualPath;
         } else {
-          throw new Error(response?.message || "No se pudo crear el rol.");
+          const errMsg = NotificationService.getApiErrorMessage(
+            response,
+            "No se pudo crear el rol.",
+          );
+          throw new Error(errMsg);
         }
       } catch (error) {
         console.error("[ROLES] Error al crear rol:", error);
-        alert(error.message || "Ocurrió un error al crear el rol.");
+        const errMsg = NotificationService.getApiErrorMessage(
+          error,
+          error.message || "Ocurrió un error al crear el rol.",
+        );
+        await NotificationService.error(errMsg, "Error al crear rol");
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-save mr-1"></i>Guardar Rol';
       }

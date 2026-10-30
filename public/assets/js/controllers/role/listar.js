@@ -288,26 +288,23 @@ const RoleListController = (() => {
 
           if (response && response.success) {
             $(`#${EDIT_MODAL_ID}`).modal("hide");
+            NotificationService.toastSuccess("Rol actualizado exitosamente.");
             await loadRoles(); // Refrescar el DataTable
           } else {
-            console.error("[ROLES] Detalles de validación:", response.errors);
-            let errMsg = response?.message || "No se pudo actualizar el rol.";
-
-            // Extraer mensajes de error detallados si existen
-            if (response.errors && typeof response.errors === "object") {
-              const details = [];
-              for (const key in response.errors) {
-                details.push(`${key}: ${JSON.stringify(response.errors[key])}`);
-              }
-              if (details.length > 0) {
-                errMsg += "\nDetalles:\n" + details.join("\n");
-              }
-            }
+            console.error("[ROLES] Detalles de validación:", response?.errors);
+            const errMsg = NotificationService.getApiErrorMessage(
+              response,
+              "No se pudo actualizar el rol.",
+            );
             throw new Error(errMsg);
           }
         } catch (error) {
           console.error("[ROLES] Error al actualizar:", error);
-          alert("Ocurrió un error al intentar actualizar el rol.");
+          const errMsg = NotificationService.getApiErrorMessage(
+            error,
+            error.message || "Ocurrió un error al intentar actualizar el rol.",
+          );
+          await NotificationService.error(errMsg, "Error al actualizar");
         } finally {
           submitBtn
             .prop("disabled", false)
@@ -333,37 +330,37 @@ const RoleListController = (() => {
 
         if (!roleId) return;
 
-        // Alerta con el nombre del rol
-        NotificationService.warning(
+        // Modal de confirmación con NotificationService.confirm
+        const confirmResult = await NotificationService.confirm(
           `¿Deseas ${actionWord} el rol "${roleName}"?`,
           `Confirmación de ${actionWord}`,
-        ).then(async (result) => {
-          if (!result.isConfirmed) return;
+        );
 
-          try {
-            // Uso correcto de RoleService
-            const response = await RoleService.cambiarEstadoRol(
-              roleId,
-              newStatus,
-            );
+        if (!confirmResult.isConfirmed) return;
 
-            if (response && response.success) {
-              NotificationService.toastSuccess(
-                `Rol "${roleName}" ${newStatus ? "activado" : "desactivado"} con éxito.`,
-              );
-              loadRoles(); // Recargar la tabla de roles
-            } else {
-              throw response;
-            }
-          } catch (error) {
-            console.error("[ROLES] Error al cambiar estado:", error);
-            const errorMsg = NotificationService.getApiErrorMessage(
-              error,
-              "Ocurrió un problema al cambiar el estado del rol.",
+        try {
+          // Uso correcto de RoleService
+          const response = await RoleService.cambiarEstadoRol(
+            roleId,
+            newStatus,
+          );
+
+          if (response && response.success) {
+            NotificationService.toastSuccess(
+              `Rol "${roleName}" ${newStatus ? "activado" : "desactivado"} con éxito.`,
             );
-            NotificationService.error(errorMsg);
+            loadRoles(); // Recargar la tabla de roles
+          } else {
+            throw response;
           }
-        });
+        } catch (error) {
+          console.error("[ROLES] Error al cambiar estado:", error);
+          const errorMsg = NotificationService.getApiErrorMessage(
+            error,
+            "Ocurrió un problema al cambiar el estado del rol.",
+          );
+          NotificationService.error(errorMsg);
+        }
       });
   }
 

@@ -2,6 +2,7 @@ import Config from "../config/config.js";
 import AuthGuard from "./auth_guard.js";
 import SecurityManager from "./security.js";
 import AuthService from "../services/auth_service.js";
+import NotificationService from "./notification.js";
 
 const App = (() => {
 
@@ -107,7 +108,10 @@ const App = (() => {
         // 3. Opcional: Verificamos si seguimos teniendo permiso en la vista actual
         const reqPerm = ROUTE_PERMISSIONS[normalizedPath];
         if (reqPerm && !SecurityManager.hasPermission(reqPerm)) {
-          alert("Tus permisos han cambiado y ya no tienes acceso a esta vista.");
+          await NotificationService.warning(
+            "Tus permisos han cambiado y ya no tienes acceso a esta vista.",
+            "Acceso restringido",
+          );
           AuthGuard.redirectToHome();
         } else {
           // No lo expulsamos, pero le avisamos (o podemos omitir alert si es muy molesto)
