@@ -4,12 +4,14 @@ const CajaService = (() => {
   const CASH_ENDPOINT = "/api/v1/cash-sessions/";
   const REGISTER_ENDPOINT = "/api/v1/cash-registers/";
 
-  // Listar sesiones de caja (historial)
+  // Listar sesiones de caja (historial) con paginación server-side
   async function listarSesiones(params = {}) {
     try {
       const query = new URLSearchParams();
       if (params.page) query.set("page", params.page);
       if (params.page_size) query.set("page_size", params.page_size);
+      if (params.search) query.set("search", params.search);
+      if (params.ordering) query.set("ordering", params.ordering);
       
       const queryString = query.toString();
       const url = queryString ? `${CASH_ENDPOINT}?${queryString}` : CASH_ENDPOINT;

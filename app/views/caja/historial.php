@@ -53,6 +53,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                     <table id="tbl_Cajas" class="table table-bordered table-striped table-hover responsive nowrap" width="100%">
                                         <thead class="bg-dark text-white">
                                             <tr>
+                                                <th class="text-center" style="width: 50px;">N°</th>
                                                 <th>Caja Registradora</th>
                                                 <th>Usuario</th>
                                                 <th>Apertura</th>
@@ -60,8 +61,8 @@ require_once __DIR__ . '/../layouts/head.php';
                                                 <th>Saldo Esperado</th>
                                                 <th>Saldo Contado</th>
                                                 <th>Diferencia</th>
-                                                <th>Estado</th>
-                                                <th class="text-center">Acciones</th>
+                                                <th class="text-center">Estado</th>
+                                                <th class="text-center" style="width: 120px;">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tablaCajasBody">
