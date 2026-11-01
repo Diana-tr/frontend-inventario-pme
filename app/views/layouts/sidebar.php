@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../config/app.php';
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo - Estilo Grande y Centrado -->
     <a href="<?php echo $URL; ?>/dashboard" class="brand-link d-flex flex-column align-items-center justify-content-center text-center" style="background-color: #1f2d3d; height: 110px; padding: 10px;">
-        <img src="<?php echo $URL; ?>/public/assets/img/Logo-sin-texto.png"
+        <img src="<?php echo $URL; ?>/public/assets/img/logo-pme.png"
             alt="Logo inventario PME"
             class="elevation-2 mb-1"
             style="opacity: 1; width: 65px; height: 65px; object-fit: contain; background: white; border-radius: 50%; padding: 3px;">
@@ -388,87 +388,5 @@ require_once __DIR__ . '/../../config/app.php';
 
             </ul>
         </nav>
-
-        <script>
-            /**
-             * Sidebar Active State Manager (3 niveles)
-             * Detecta la URL actual y resalta la funcionalidad, submódulo
-             * y módulo padre correspondiente en la jerarquía.
-             */
-            (function() {
-                const basePath = "/frontend-inventario-pme";
-                const currentPath = window.location.pathname.replace(basePath, "").replace(/\/+$/, "") || "/dashboard";
-
-                // 1. Buscar el enlace exacto que coincida con la ruta actual
-                const allLinks = document.querySelectorAll(".nav-sidebar a[data-sidebar-path]");
-                let matchedLink = null;
-
-                allLinks.forEach(link => {
-                    const linkPath = link.getAttribute("data-sidebar-path").replace(/\/+$/, "");
-                    if (currentPath === linkPath) {
-                        matchedLink = link;
-                    }
-                });
-
-                // Si no encontramos coincidencia exacta, buscar por prefijo
-                if (!matchedLink) {
-                    allLinks.forEach(link => {
-                        const linkPath = link.getAttribute("data-sidebar-path").replace(/\/+$/, "");
-                        if (linkPath !== "/dashboard" && currentPath.startsWith(linkPath)) {
-                            matchedLink = link;
-                        }
-                    });
-                }
-
-                if (!matchedLink) return;
-
-                // 2. Marcar la funcionalidad (Nivel 3) como activa
-                matchedLink.classList.add("active");
-
-                // 3. Recorrer hacia arriba y abrir todos los padres nav-item
-                let parentItem = matchedLink.closest("li.nav-item");
-                while (parentItem) {
-                    // Buscar el contenedor <ul> padre de este <li>
-                    const parentUl = parentItem.parentElement;
-                    if (!parentUl || !parentUl.classList.contains("nav-treeview")) break;
-
-                    // El <li> que contiene ese <ul> es el submódulo/módulo padre
-                    const grandParentItem = parentUl.closest("li.nav-item");
-                    if (!grandParentItem) break;
-
-                    // Abrir el treeview padre
-                    grandParentItem.classList.add("menu-open");
-                    parentUl.style.display = "block"; // Asegurar que el ul sea visible
-                    const parentLink = grandParentItem.querySelector(":scope > a.nav-link");
-                    if (parentLink) {
-                        parentLink.classList.add("active");
-                    }
-
-                    // Continuar subiendo en la jerarquía
-                    parentItem = grandParentItem;
-                }
-            })();
-
-            /**
-             * Sidebar Permissions Manager (Fase 1 — Ocultamiento preventivo)
-             * Oculta elementos con data-permission y data-permission-any
-             * hasta que SecurityManager.processDomPermissions() los restaure.
-             */
-            (function() {
-                try {
-                    const elements = document.querySelectorAll("[data-permission]");
-                    elements.forEach(el => {
-                        el.style.display = "none";
-                    });
-
-                    const anyElements = document.querySelectorAll("[data-permission-any]");
-                    anyElements.forEach(el => {
-                        el.style.display = "none";
-                    });
-                } catch (e) {
-                    console.error("Error ocultando elementos con permisos en sidebar:", e);
-                }
-            })();
-        </script>
     </div>
 </aside>

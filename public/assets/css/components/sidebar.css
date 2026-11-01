@@ -7,14 +7,12 @@
  *   Nivel 1: Módulo        (ej. Administración y Seguridad)
  *   Nivel 2: Submódulo     (ej. Usuarios)
  *   Nivel 3: Funcionalidad (ej. Listar Usuarios)
- *
- * Aplicando la paleta oficial del proyecto P.M.E.
  */
 
 /* ─── Contenedor Principal del Sidebar (Fondo Azul Petróleo Oscuro) ─── */
-aside, 
-.main-sidebar, 
-.sidebar, 
+aside,
+.main-sidebar,
+.sidebar,
 nav[class*="sidebar"] {
     background-color: #172033 !important;
 }
@@ -26,7 +24,7 @@ nav[class*="sidebar"] {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #CBD5E1; /* Texto de módulos: Gris claro */
+    color: #CBD5E1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -40,10 +38,15 @@ nav[class*="sidebar"] {
 /* ─── Enlaces y Texto del Menú ─── */
 .nav-sidebar .nav-link {
     color: #CBD5E1;
+    border-radius: 0.25rem;
+    /* Bordes redondeados modernos */
+    margin-bottom: 2px;
+    margin-left: 8px;
+    margin-right: 8px;
 }
 
 /* ─── Iconos de Módulos (Gris azulado) ─── */
-.nav-sidebar .nav-link > .nav-icon {
+.nav-sidebar .nav-link>.nav-icon {
     color: #94A3B8;
 }
 
@@ -53,67 +56,60 @@ nav[class*="sidebar"] {
     color: #FFFFFF !important;
 }
 
-.nav-sidebar .nav-link:hover > .nav-icon {
+.nav-sidebar .nav-link:hover>.nav-icon {
     color: #FFFFFF !important;
 }
 
-/* ─── Módulo Activo / Seleccionado (Azul P.M.E. #2563EB) ─── */
-.nav-sidebar .nav-link.active,
-.nav-sidebar .nav-item.menu-open > .nav-link {
+/* ============================================================
+   GESTIÓN DE ESTADOS ACTIVOS (Corregido para no saturar de azul)
+   ============================================================ */
+
+/* 1. Padres Abiertos (Nivel 1 y 2) -> Fondo sutil transparente, sin azul brillante */
+.nav-sidebar .nav-item.menu-open>.nav-link {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    /* Gris muy suave */
+    color: #FFFFFF !important;
+    font-weight: 600;
+}
+
+.nav-sidebar .nav-item.menu-open>.nav-link>.nav-icon {
+    color: #FFFFFF !important;
+}
+
+/* 2. El ítem EXACTO donde está el usuario (Nivel 3 o directo) -> Azul Oficial */
+.nav-sidebar .nav-link.active:not(.nav-item.menu-open > .nav-link) {
     background-color: #2563EB !important;
+    /* Azul P.M.E. */
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+    /* Sombra elegante */
+}
+
+.nav-sidebar .nav-link.active:not(.nav-item.menu-open > .nav-link)>.nav-icon {
     color: #FFFFFF !important;
 }
 
-.nav-sidebar .nav-link.active > .nav-icon,
-.nav-sidebar .nav-item.menu-open > .nav-link > .nav-icon {
-    color: #FFFFFF !important;
-}
+/* ─── Ajustes de Padding para la Jerarquía ─── */
 
-/* ─── Nivel 2: Submódulos (dentro de Módulo) ─── */
-.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-link {
+/* Nivel 2: Submódulos */
+.nav-sidebar>.nav-item-module>.nav-treeview>.nav-item>.nav-link {
     padding-left: 1.5rem;
     font-size: 0.88rem;
 }
 
-.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-link:hover {
-    background-color: #1E3A5F !important;
-    color: #FFFFFF !important;
-}
-
-.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-link.active {
-    background-color: #2563EB !important;
-    color: #FFFFFF !important;
-}
-
-/* ─── Nivel 3: Funcionalidades (dentro de Submódulo) ─── */
-.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link {
+/* Nivel 3: Funcionalidades */
+.nav-sidebar>.nav-item-module>.nav-treeview>.nav-item>.nav-treeview>.nav-item>.nav-link {
     padding-left: 2.8rem;
     font-size: 0.84rem;
-    opacity: 0.9;
-}
-
-.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link:hover {
-    opacity: 1;
-    background-color: #1E3A5F !important;
-    color: #FFFFFF !important;
-}
-
-.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link.active {
-    background-color: #2563EB !important;
-    color: #FFFFFF !important;
-    opacity: 1;
+    opacity: 0.85;
 }
 
 /* ─── Iconos del Nivel 3 más pequeños ─── */
-.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link > .nav-icon {
+.nav-sidebar>.nav-item-module>.nav-treeview>.nav-item>.nav-treeview>.nav-item>.nav-link>.nav-icon {
     font-size: 0.65rem;
     width: 1.2rem;
     text-align: center;
     color: #94A3B8;
-}
-
-.nav-sidebar > .nav-item-module > .nav-treeview > .nav-item > .nav-treeview > .nav-item > .nav-link.active > .nav-icon {
-    color: #FFFFFF !important;
 }
 
 /* ─── Transición suave para expand/collapse ─── */
@@ -121,7 +117,7 @@ nav[class*="sidebar"] {
     transition: max-height 0.25s ease-in-out;
 }
 
-/* ─── Separador visual entre módulos (Gris oscuro de tu maqueta) ─── */
+/* ─── Separador visual entre módulos ─── */
 .sidebar-module-divider {
     border-top: 1px solid #334155 !important;
     margin: 0.25rem 0.8rem;
@@ -131,27 +127,29 @@ nav[class*="sidebar"] {
    Estilos Profesionales para el Scroll del Sidebar
    ============================================================ */
 
-/* Asegurar que el contenedor principal del sidebar tenga el alto correcto */
 aside.main-sidebar .sidebar {
-    height: calc(100vh - 110px) !important; /* Resta la altura del logo (110px) */
+    height: calc(100vh - 110px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding-bottom: 60px !important; /* Espacio extra al final para que no se corten las últimas opciones */
+    padding-bottom: 60px !important;
 }
 
-/* Scrollbar personalizado (WebKit: Chrome, Safari, Edge) */
+/* Scrollbar personalizado (WebKit) */
 aside.main-sidebar .sidebar::-webkit-scrollbar {
     width: 6px;
 }
+
 aside.main-sidebar .sidebar::-webkit-scrollbar-track {
-    background: transparent; 
+    background: transparent;
 }
+
 aside.main-sidebar .sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15); 
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 10px;
 }
+
 aside.main-sidebar .sidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.4); 
+    background: rgba(255, 255, 255, 0.4);
 }
 
 /* Scrollbar personalizado para Firefox */
@@ -160,21 +158,25 @@ aside.main-sidebar .sidebar {
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
-/* Asegurar que si AdminLTE inyecta 'os-viewport' tome nuestro diseño de scroll */
+/* AdminLTE Overlay Scrollbars */
 .os-viewport {
     scrollbar-width: thin !important;
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent !important;
 }
+
 .os-viewport::-webkit-scrollbar {
     width: 6px;
 }
+
 .os-viewport::-webkit-scrollbar-track {
-    background: transparent; 
+    background: transparent;
 }
+
 .os-viewport::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15); 
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 10px;
 }
+
 .os-viewport::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.4); 
+    background: rgba(255, 255, 255, 0.4);
 }

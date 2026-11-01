@@ -3,6 +3,7 @@ import AuthGuard from "./auth_guard.js";
 import SecurityManager from "./security.js";
 import AuthService from "../services/auth_service.js";
 import NotificationService from "./notification.js";
+import SidebarController from "../controllers/sidebar/sidebar_controller.js";
 
 const App = (() => {
 
@@ -95,6 +96,10 @@ const App = (() => {
       // Procesar permisos en la vista (Ocultar botones, widgets, etc.)
       SecurityManager.processDomPermissions();
       
+      // ─── Inicializar SidebarController ───
+      SidebarController.init();
+
+
       // ─── Manejo de 403 Global ───
       window.addEventListener("security_forbidden", async () => {
         console.warn("[APP] Evento 403 Forbidden interceptado. Refrescando contexto...");
