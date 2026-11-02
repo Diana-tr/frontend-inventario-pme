@@ -151,6 +151,12 @@ switch ($path) {
         break;
 
 
+
+    //RUTA DEL MODULO DE FINANZAS
+    case 'finanzas':
+        require_once __DIR__ . '/app/views/finanzas/index.php';
+        break;
+
     default:
         // Evitar procesar archivos estáticos o directos por error
         if (file_exists(__DIR__ . '/' . $path) && is_file(__DIR__ . '/' . $path)) {

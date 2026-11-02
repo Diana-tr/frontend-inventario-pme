@@ -1,4 +1,4 @@
-import ApiClient from "../core/api_client";
+import ApiClient from "../core/apiClient.js";
 
 
 const FinanzasService = (() => {

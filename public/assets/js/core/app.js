@@ -47,6 +47,7 @@ const App = (() => {
     "/caja":                  "cash.view",
     "/caja/historial":        "cash.view",
     "/caja/crear":            "cash.create",
+    "/finanzas":              "reports.view"
   });
 
   async function bootstrap() {

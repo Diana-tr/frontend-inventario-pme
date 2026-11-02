@@ -386,6 +386,37 @@ require_once __DIR__ . '/../../config/app.php';
                     </ul>
                 </li>
 
+                 <!-- ============================================================
+                     MÓDULO 6: FINANZAS
+                     ============================================================ -->
+                <li class="nav-item nav-item-module" data-sidebar-module="finanzas" data-permission-any="reports.view">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <p>
+                            Panel Financiero
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item" data-permission-any="reports.view">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-wallet"></i>
+                                <p>
+                                    Finanzas
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item" data-permission="reports.view">
+                                    <a href="<?php echo $URL; ?>/finanzas" class="nav-link" data-sidebar-path="/finanzas">
+                                        <i class="nav-icon far fa-circle"></i>
+                                        <p>Panel</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
             </ul>
         </nav>
     </div>
