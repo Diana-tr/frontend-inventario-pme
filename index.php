@@ -1,169 +1,186 @@
-<?php
-// index.php (Raíz del proyecto - Front Controller)
-
-require_once __DIR__ . '/app/config/app.php';
-
-// Obtener la URI actual
-$request_uri = $_SERVER['REQUEST_URI'] ?? '/';
-
-// Determinar el base path
-$base_path = '/frontend-inventario-pme';
-
-// Remover el base_path de la URI si está presente
-if (strpos($request_uri, $base_path) === 0) {
-    $path = substr($request_uri, strlen($base_path));
-} else {
-    $path = $request_uri;
-}
-
-// Limpiar query params y slashes
-$path = parse_url($path, PHP_URL_PATH);
-$path = trim($path, '/');
-
-// Enrutador básico
-switch ($path) {
-    case '':
-    case 'login':
-        require_once __DIR__ . '/app/views/auth/login.php';
-        break;
-
-    case 'dashboard':
-        require_once __DIR__ . '/app/views/dashboard/index.php';
-        break;
-
-    case 'usuarios':
-    case 'usuarios/listar':
-        require_once __DIR__ . '/app/views/usuarios/listar.php';
-        break;
-
-    case 'usuarios/crear':
-        require_once __DIR__ . '/app/views/usuarios/crear.php';
-        break;
-
-    case 'roles':
-    case 'roles/listar':
-        require_once __DIR__ . '/app/views/roles/listar.php';
-        break;
-
-    case 'roles/crear':
-        require_once __DIR__ . '/app/views/roles/crear.php';
-        break;
-
-    // NUEVA RUTA PARA CATEGORÍAS
-    case 'categorias':
-    case 'categorias/listar':
-        require_once __DIR__ . '/app/views/categorias/listar.php';
-        break;
-
-    case 'categorias/crear':
-        require_once __DIR__ . '/app/views/categorias/crear.php';
-        break;
-
-
-    //RUTA DEL MODULO DE CLIENTES
-    case 'clientes':
-    case 'clientes/listar':
-        require_once __DIR__ . '/app/views/clientes/listar.php';
-        break;
-
-    case 'clientes/crear':
-        require_once __DIR__ . '/app/views/clientes/crear.php';
-        break;
-
-
-    //RUTA DEL MODULO DE PROVEEDORES
-    case 'proveedores':
-    case 'proveedores/listar':
-        require_once __DIR__ . '/app/views/proveedores/listar.php';
-        break;
-
-    case 'proveedores/crear':
-        require_once __DIR__ . '/app/views/proveedores/crear.php';
-        break;
-
-    //RUTA DEL MODULO DE PRODUCTOS
-    case 'productos':
-    case 'productos/listar':
-        require_once __DIR__ . '/app/views/productos/listar.php';
-        break;
-
-    case 'productos/crear':
-        require_once __DIR__ . '/app/views/productos/crear.php';
-        break;
-
-    //RUTA DEL MODULO DE INVENTARIO
-    case 'inventario':
-    case 'inventario/listar':
-        require_once __DIR__ . '/app/views/inventario/listar.php';
-        break;
-
-    case 'inventario/crear':
-        require_once __DIR__ . '/app/views/inventario/crear.php';
-        break;
-
-    case 'inventario/movimientos':
-        require_once __DIR__ . '/app/views/inventario/movimientos.php';
-        break;
-
-    //RUTA DEL MODULO DE COMPRAS
-    case 'compras':
-    case 'compras/listar':
-        require_once __DIR__ . '/app/views/compras/listar.php';
-        break;
-
-    case 'compras/crear':
-        require_once __DIR__ . '/app/views/compras/crear.php';
-        break;
-
-    case 'compras/facturas':
-        require_once __DIR__ . '/app/views/compras/facturas.php';
-        break;
-
-    //RUTA DEL MODULO DE VENTAS
-    case 'ventas':
-    case 'ventas/listar':
-        require_once __DIR__ . '/app/views/ventas/listar.php';
-        break;
-
-    case 'ventas/crear':
-        require_once __DIR__ . '/app/views/ventas/crear.php';
-        break;
-
-    case 'ventas/pos':
-        require_once __DIR__ . '/app/views/ventas/pos.php';
-        break;
-
-    case 'ventas/facturas':
-        require_once __DIR__ . '/app/views/ventas/facturas.php';
-        break;
-
-    //RUTA DEL MODULO DE CAJA
-    case 'caja':
-        require_once __DIR__ . '/app/views/caja/index.php';
-        break;
-
-    case 'caja/historial':
-        require_once __DIR__ . '/app/views/caja/historial.php';
-        break;
-
-    case 'caja/crear':
-        require_once __DIR__ . '/app/views/caja/crear.php';
-        break;
-
-
-
-    //RUTA DEL MODULO DE FINANZAS
-    case 'finanzas':
-        require_once __DIR__ . '/app/views/finanzas/index.php';
-        break;
-
-    default:
-        // Evitar procesar archivos estáticos o directos por error
-        if (file_exists(__DIR__ . '/' . $path) && is_file(__DIR__ . '/' . $path)) {
-            return false;
-        }
-
-        http_response_code(404);
-        echo "404 - Página no encontrada: " . htmlspecialchars($path);
-        break;
-}
+<?php
+// index.php (Raíz del proyecto - Front Controller)
+
+require_once __DIR__ . '/app/config/app.php';
+
+// Obtener la URI actual
+$request_uri = $_SERVER['REQUEST_URI'] ?? '/';
+
+// Determinar el base path
+$base_path = '/frontend-inventario-pme';
+
+// Remover el base_path de la URI si está presente
+if (strpos($request_uri, $base_path) === 0) {
+    $path = substr($request_uri, strlen($base_path));
+} else {
+    $path = $request_uri;
+}
+
+// Limpiar query params y slashes
+$path = parse_url($path, PHP_URL_PATH);
+$path = trim($path, '/');
+
+// Enrutador básico
+switch ($path) {
+    case '':
+    case 'login':
+        require_once __DIR__ . '/app/views/auth/login.php';
+        break;
+
+    case 'dashboard':
+        require_once __DIR__ . '/app/views/dashboard/index.php';
+        break;
+
+    case 'usuarios':
+    case 'usuarios/listar':
+        require_once __DIR__ . '/app/views/usuarios/listar.php';
+        break;
+
+    case 'usuarios/crear':
+        require_once __DIR__ . '/app/views/usuarios/crear.php';
+        break;
+
+    case 'roles':
+    case 'roles/listar':
+        require_once __DIR__ . '/app/views/roles/listar.php';
+        break;
+
+    case 'roles/crear':
+        require_once __DIR__ . '/app/views/roles/crear.php';
+        break;
+
+    // NUEVA RUTA PARA CATEGORÍAS
+    case 'categorias':
+    case 'categorias/listar':
+        require_once __DIR__ . '/app/views/categorias/listar.php';
+        break;
+
+    case 'categorias/crear':
+        require_once __DIR__ . '/app/views/categorias/crear.php';
+        break;
+
+
+    //RUTA DEL MODULO DE CLIENTES
+    case 'clientes':
+    case 'clientes/listar':
+        require_once __DIR__ . '/app/views/clientes/listar.php';
+        break;
+
+    case 'clientes/crear':
+        require_once __DIR__ . '/app/views/clientes/crear.php';
+        break;
+
+
+    //RUTA DEL MODULO DE PROVEEDORES
+    case 'proveedores':
+    case 'proveedores/listar':
+        require_once __DIR__ . '/app/views/proveedores/listar.php';
+        break;
+
+    case 'proveedores/crear':
+        require_once __DIR__ . '/app/views/proveedores/crear.php';
+        break;
+
+    //RUTA DEL MODULO DE PRODUCTOS
+    case 'productos':
+    case 'productos/listar':
+        require_once __DIR__ . '/app/views/productos/listar.php';
+        break;
+
+    case 'productos/crear':
+        require_once __DIR__ . '/app/views/productos/crear.php';
+        break;
+
+    //RUTA DEL MODULO DE INVENTARIO
+    case 'inventario':
+    case 'inventario/listar':
+        require_once __DIR__ . '/app/views/inventario/listar.php';
+        break;
+
+    case 'inventario/crear':
+        require_once __DIR__ . '/app/views/inventario/crear.php';
+        break;
+
+    case 'inventario/movimientos':
+        require_once __DIR__ . '/app/views/inventario/movimientos.php';
+        break;
+
+    //RUTA DEL MODULO DE COMPRAS
+    case 'compras':
+    case 'compras/listar':
+        require_once __DIR__ . '/app/views/compras/listar.php';
+        break;
+
+    case 'compras/crear':
+        require_once __DIR__ . '/app/views/compras/crear.php';
+        break;
+
+    case 'compras/facturas':
+        require_once __DIR__ . '/app/views/compras/facturas.php';
+        break;
+
+    //RUTA DEL MODULO DE VENTAS
+    case 'ventas':
+    case 'ventas/listar':
+        require_once __DIR__ . '/app/views/ventas/listar.php';
+        break;
+
+    case 'ventas/crear':
+        require_once __DIR__ . '/app/views/ventas/crear.php';
+        break;
+
+    case 'ventas/pos':
+        require_once __DIR__ . '/app/views/ventas/pos.php';
+        break;
+
+    case 'ventas/facturas':
+        require_once __DIR__ . '/app/views/ventas/facturas.php';
+        break;
+
+    //RUTA DEL MODULO DE CAJA
+    case 'caja':
+        require_once __DIR__ . '/app/views/caja/index.php';
+        break;
+
+    case 'caja/resumen':
+        require_once __DIR__ . '/app/views/caja/resumen.php';
+        break;
+
+    case 'caja/historial':
+        require_once __DIR__ . '/app/views/caja/historial.php';
+        break;
+
+    case 'caja/crear':
+        require_once __DIR__ . '/app/views/caja/crear.php';
+        break;
+
+
+
+    //RUTA DEL MODULO DE FINANZAS
+    case 'finanzas':
+    case 'finanzas/index':
+        require_once __DIR__ . '/app/views/finanzas/index.php';
+        break;
+
+    case 'finanzas/movimientos':
+        require_once __DIR__ . '/app/views/finanzas/movimientos.php';
+        break;
+
+    case 'finanzas/transferencias':
+        require_once __DIR__ . '/app/views/finanzas/transferencias.php';
+        break;
+
+    case 'finanzas/conciliaciones':
+        require_once __DIR__ . '/app/views/finanzas/conciliaciones.php';
+        break;
+
+    default:
+        // Evitar procesar archivos estáticos o directos por error
+        if (file_exists(__DIR__ . '/' . $path) && is_file(__DIR__ . '/' . $path)) {
+            return false;
+        }
+
+        http_response_code(404);
+        echo "404 - Página no encontrada: " . htmlspecialchars($path);
+        break;
+}
