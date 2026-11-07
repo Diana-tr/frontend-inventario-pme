@@ -1,437 +1,906 @@
-<?php
-require_once __DIR__ . '/../../config/app.php';
-?>
-<!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <!-- Brand Logo - Estilo Grande y Centrado -->
-    <a href="<?php echo $URL; ?>/dashboard" class="brand-link d-flex flex-column align-items-center justify-content-center text-center" style="background-color: #1f2d3d; height: 110px; padding: 10px;">
-        <img src="<?php echo $URL; ?>/public/assets/img/logo-pme.png"
-            alt="Logo inventario PME"
-            class="elevation-2 mb-1"
-            style="opacity: 1; width: 65px; height: 65px; object-fit: contain; background: white; border-radius: 50%; padding: 3px;">
-        <span class="brand-text font-weight-bold text-white" style="font-size: 0.95rem; letter-spacing: 0.5px;">Software P.M.E</span>
-    </a>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <!-- Sidebar user panel -->
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image">
-                <div id="sidebar-avatar-large"
-                    class="img-circle elevation-2 d-flex align-items-center justify-content-center"
-                    style="width: 34px; height: 34px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; border-radius: 50%;">
-                    <span>--</span>
-                </div>
-            </div>
-            <div class="info">
-                <a href="#" class="d-block" id="sidebar-username">Cargando...</a>
-            </div>
-        </div>
-
-        <!-- ============================================================
-             Sidebar Menu — Navegación Jerárquica
-             Nivel 1: MÓDULO        → nav-header-module + nav-item-module
-             Nivel 2: SUBMÓDULO     → nav-item con nav-treeview
-             Nivel 3: FUNCIONALIDAD → nav-item con enlace directo
-             ============================================================ -->
-        <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-
-                <!-- ============================================================
-                     Dashboard (sin jerarquía — acceso directo)
-                     ============================================================ -->
-                <li class="nav-item" data-sidebar-module="dashboard">
-                    <a href="<?php echo $URL; ?>/dashboard" class="nav-link" data-sidebar-path="/dashboard">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
-
-                <!-- ============================================================
-                     MÓDULO 1: Administración y Seguridad
-                     ============================================================ -->
-                <li class="nav-item nav-item-module" data-sidebar-module="admin-seguridad" data-permission-any="users.view,users.create,roles.view,roles.create,user_roles.view">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-shield-alt"></i>
-                        <p>
-                            Admin. y Seguridad
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-
-                        <!-- ── Submódulo: Usuarios ── -->
-                        <li class="nav-item" data-permission-any="users.view,users.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>
-                                    Usuarios
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="users.view">
-                                    <a href="<?php echo $URL; ?>/usuarios" class="nav-link" data-sidebar-path="/usuarios">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Listar Usuarios</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="users.create">
-                                    <a href="<?php echo $URL; ?>/usuarios/crear" class="nav-link" data-sidebar-path="/usuarios/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Usuario</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <!-- ── Submódulo: Roles y Permisos ── -->
-                        <li class="nav-item" data-permission-any="roles.view,roles.create,user_roles.view">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-user-shield"></i>
-                                <p>
-                                    Roles y Permisos
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="roles.view">
-                                    <a href="<?php echo $URL; ?>/roles" class="nav-link" data-sidebar-path="/roles">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Listar Roles</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="roles.create">
-                                    <a href="<?php echo $URL; ?>/roles/crear" class="nav-link" data-sidebar-path="/roles/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Rol</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- ============================================================
-                     MÓDULO 2: Catálogo e Inventario
-                     ============================================================ -->
-                <li class="nav-item nav-item-module" data-sidebar-module="catalogo-inventario" data-permission-any="categories.view,categories.create,products.view,products.create">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-boxes"></i>
-                        <p>
-                            Catálogo e Inventario
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item" data-permission-any="categories.view,categories.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-tags"></i>
-                                <p>
-                                    Categorías y Marcas
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="categories.view">
-                                    <a href="<?php echo $URL; ?>/categorias" class="nav-link" data-sidebar-path="/categorias">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Listar Categorías</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="categories.create">
-                                    <a href="<?php echo $URL; ?>/categorias/crear" class="nav-link" data-sidebar-path="/categorias/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Categoría</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item" data-permission-any="products.view,products.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-box"></i>
-                                <p>
-                                    Productos
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="products.view">
-                                    <a href="<?php echo $URL; ?>/productos" class="nav-link" data-sidebar-path="/productos">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Gestionar Producto</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="products.create">
-                                    <a href="<?php echo $URL; ?>/productos/crear" class="nav-link" data-sidebar-path="/productos/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Producto</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item" data-permission-any="inventory.view,inventory.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-warehouse"></i>
-                                <p>
-                                    Inventario
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="inventory.view">
-                                    <a href="<?php echo $URL; ?>/inventario" class="nav-link" data-sidebar-path="/inventario">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Gestionar Inventario</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="inventory.create">
-                                    <a href="<?php echo $URL; ?>/inventario/crear" class="nav-link" data-sidebar-path="/inventario/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Inventario</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item" data-permission-any="inventory.view,inventory.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-exchange-alt"></i>
-                                <p>
-                                    Ajuste de inventario
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="inventory.view">
-                                    <a href="<?php echo $URL; ?>/inventario/movimientos" class="nav-link" data-sidebar-path="/inventario/movimientos">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Registrar Movimiento</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- ============================================================
-                     MÓDULO 4: Ventas y Facturación
-                     ============================================================ -->
-                <li class="nav-item nav-item-module" data-sidebar-module="ventas-facturacion" data-permission-any="customers.view,customers.create">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-cash-register"></i>
-                        <p>
-                            Ventas y Facturación
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item" data-permission-any="customers.view,customers.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-user-tie"></i>
-                                <p>
-                                    Clientes
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="customers.view">
-                                    <a href="<?php echo $URL; ?>/clientes" class="nav-link" data-sidebar-path="/clientes">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Listar Clientes</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="customers.create">
-                                    <a href="<?php echo $URL; ?>/clientes/crear" class="nav-link" data-sidebar-path="/clientes/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Cliente</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item" data-permission-any="sales.view,sales.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-cash-register"></i>
-                                <p>
-                                    Ventas
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="customers.view">
-                                    <a href="<?php echo $URL; ?>/ventas" class="nav-link" data-sidebar-path="/ventas">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Gestion de Ventas</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="sales.create">
-                                    <a href="<?php echo $URL; ?>/ventas/crear" class="nav-link" data-sidebar-path="/ventas/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Factura Venta (Formal)</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="sales.create">
-                                    <a href="<?php echo $URL; ?>/ventas/pos" class="nav-link" data-sidebar-path="/ventas/pos">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Punto de Venta (POS)</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="sales.create">
-                                    <a href="<?php echo $URL; ?>/ventas/facturas" class="nav-link" data-sidebar-path="/ventas/facturas">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Facturas de Ventas</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item" data-permission-any="cash.view,cash.open,cash.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-cash-register"></i>
-                                <p>
-                                    Caja Registradora
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="cash.view">
-                                    <a href="<?php echo $URL; ?>/caja" class="nav-link" data-sidebar-path="/caja">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Estado Actual</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="cash.view">
-                                    <a href="<?php echo $URL; ?>/caja/resumen" class="nav-link" data-sidebar-path="/caja/resumen">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Monitor de Cajas</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="cash.view">
-                                    <a href="<?php echo $URL; ?>/caja/historial" class="nav-link" data-sidebar-path="/caja/historial">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Historial de Cajas</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="cash.create">
-                                    <a href="<?php echo $URL; ?>/caja/crear" class="nav-link" data-sidebar-path="/caja/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Caja</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- ============================================================
-                     MÓDULO 5: Compras y Proveedores
-                     ============================================================ -->
-                <li class="nav-item nav-item-module" data-sidebar-module="compras-proveedores" data-permission-any="suppliers.view,suppliers.create,purchases.view,purchases.create">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-shopping-cart"></i>
-                        <p>
-                            Prov. y Compras
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item" data-permission-any="suppliers.view,suppliers.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-truck"></i>
-                                <p>
-                                    Proveedores
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="suppliers.view">
-                                    <a href="<?php echo $URL; ?>/proveedores" class="nav-link" data-sidebar-path="/proveedores">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Listar Proveedores</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="suppliers.create"> <!-- Corrección de customers.create que estaba mal en el sidebar original -->
-                                    <a href="<?php echo $URL; ?>/proveedores/crear" class="nav-link" data-sidebar-path="/proveedores/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Crear Proveedores</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item" data-permission-any="purchases.view,purchases.create">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-shopping-basket"></i>
-                                <p>
-                                    Compras
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item" data-permission="purchases.view">
-                                    <a href="<?php echo $URL; ?>/compras" class="nav-link" data-sidebar-path="/compras">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Lista de compras</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="purchases.create">
-                                    <a href="<?php echo $URL; ?>/compras/crear" class="nav-link" data-sidebar-path="/compras/crear">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Registrar compra</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item" data-permission="purchases.view">
-                                    <a href="<?php echo $URL; ?>/compras/facturas" class="nav-link" data-sidebar-path="/compras/facturas">
-                                        <i class="nav-icon far fa-circle"></i>
-                                        <p>Ver facturas</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-
-                 <!-- ============================================================
-                     MÓDULO 6: FINANZAS Y TESORERÍA
-                     ============================================================ -->
-                <li class="nav-item nav-item-module" data-sidebar-module="finanzas" data-permission-any="finance.view,finance.create,finance.transfer,finance.reconcile">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-coins"></i>
-                        <p>
-                            Finanzas y Tesorería
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item" data-permission="finance.view">
-                            <a href="<?php echo $URL; ?>/finanzas" class="nav-link" data-sidebar-path="/finanzas">
-                                <i class="nav-icon far fa-circle"></i>
-                                <p>Panel de Tesorería</p>
-                            </a>
-                        </li>
-                        <li class="nav-item" data-permission="finance.view">
-                            <a href="<?php echo $URL; ?>/finanzas/movimientos" class="nav-link" data-sidebar-path="/finanzas/movimientos">
-                                <i class="nav-icon far fa-circle"></i>
-                                <p>Movimientos</p>
-                            </a>
-                        </li>
-                        <li class="nav-item" data-permission="finance.transfer">
-                            <a href="<?php echo $URL; ?>/finanzas/transferencias" class="nav-link" data-sidebar-path="/finanzas/transferencias">
-                                <i class="nav-icon far fa-circle"></i>
-                                <p>Transferencias</p>
-                            </a>
-                        </li>
-                        <li class="nav-item" data-permission="finance.reconcile">
-                            <a href="<?php echo $URL; ?>/finanzas/conciliaciones" class="nav-link" data-sidebar-path="/finanzas/conciliaciones">
-                                <i class="nav-icon far fa-circle"></i>
-                                <p>Conciliaciones</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-            </ul>
-        </nav>
-    </div>
-</aside>
+<?php
+
+require_once __DIR__ . '/../../config/app.php';
+
+?>
+
+<!-- Main Sidebar Container -->
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+    <!-- Brand Logo - Estilo Grande y Centrado -->
+
+    <a href="<?php echo $URL; ?>/dashboard" class="brand-link d-flex flex-column align-items-center justify-content-center text-center" style="background-color: #1f2d3d; height: 110px; padding: 10px;">
+
+        <img src="<?php echo $URL; ?>/public/assets/img/logo-pme.png"
+
+            alt="Logo inventario PME"
+
+            class="elevation-2 mb-1"
+
+            style="opacity: 1; width: 65px; height: 65px; object-fit: contain; background: white; border-radius: 50%; padding: 3px;">
+
+        <span class="brand-text font-weight-bold text-white" style="font-size: 0.95rem; letter-spacing: 0.5px;">Software P.M.E</span>
+
+    </a>
+
+
+
+    <!-- Sidebar -->
+
+    <div class="sidebar">
+
+        <!-- Sidebar user panel -->
+
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+
+            <div class="image">
+
+                <div id="sidebar-avatar-large"
+
+                    class="img-circle elevation-2 d-flex align-items-center justify-content-center"
+
+                    style="width: 34px; height: 34px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; border-radius: 50%;">
+
+                    <span>--</span>
+
+                </div>
+
+            </div>
+
+            <div class="info">
+
+                <a href="#" class="d-block" id="sidebar-username">Cargando...</a>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ============================================================
+
+             Sidebar Menu — Navegación Jerárquica
+
+             Nivel 1: MÓDULO        → nav-header-module + nav-item-module
+
+             Nivel 2: SUBMÓDULO     → nav-item con nav-treeview
+
+             Nivel 3: FUNCIONALIDAD → nav-item con enlace directo
+
+             ============================================================ -->
+
+        <nav class="mt-2">
+
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+
+
+                <!-- ============================================================
+
+                     Dashboard (sin jerarquía — acceso directo)
+
+                     ============================================================ -->
+
+                <li class="nav-item" data-sidebar-module="dashboard">
+
+                    <a href="<?php echo $URL; ?>/dashboard" class="nav-link" data-sidebar-path="/dashboard">
+
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+
+                        <p>Dashboard</p>
+
+                    </a>
+
+                </li>
+
+
+
+                <!-- ============================================================
+
+                     MÓDULO 1: Administración y Seguridad
+
+                     ============================================================ -->
+
+                <li class="nav-item nav-item-module" data-sidebar-module="admin-seguridad" data-permission-any="users.view,users.create,roles.view,roles.create,user_roles.view">
+
+                    <a href="#" class="nav-link">
+
+                        <i class="nav-icon fas fa-shield-alt"></i>
+
+                        <p>
+
+                            Admin. y Seguridad
+
+                        </p>
+
+                    </a>
+
+                    <ul class="nav nav-treeview">
+
+
+
+                        <!-- ── Submódulo: Usuarios ── -->
+
+                        <li class="nav-item" data-permission-any="users.view,users.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-users"></i>
+
+                                <p>
+
+                                    Usuarios
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="users.view">
+
+                                    <a href="<?php echo $URL; ?>/usuarios" class="nav-link" data-sidebar-path="/usuarios">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Listar Usuarios</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="users.create">
+
+                                    <a href="<?php echo $URL; ?>/usuarios/crear" class="nav-link" data-sidebar-path="/usuarios/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Crear Usuario</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+
+
+                        <!-- ── Submódulo: Roles y Permisos ── -->
+
+                        <li class="nav-item" data-permission-any="roles.view,roles.create,user_roles.view">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-user-shield"></i>
+
+                                <p>
+
+                                    Roles y Permisos
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="roles.view">
+
+                                    <a href="<?php echo $URL; ?>/roles" class="nav-link" data-sidebar-path="/roles">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Listar Roles</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="roles.create">
+
+                                    <a href="<?php echo $URL; ?>/roles/crear" class="nav-link" data-sidebar-path="/roles/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Crear Rol</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                    </ul>
+
+                </li>
+
+
+
+                <!-- ============================================================
+
+                     MÓDULO 2: Catálogo e Inventario
+
+                     ============================================================ -->
+
+                <li class="nav-item nav-item-module" data-sidebar-module="catalogo-inventario" data-permission-any="categories.view,categories.create,products.view,products.create">
+
+                    <a href="#" class="nav-link">
+
+                        <i class="nav-icon fas fa-boxes"></i>
+
+                        <p>
+
+                            Catálogo e Inventario
+
+                        </p>
+
+                    </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission-any="categories.view,categories.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-tags"></i>
+
+                                <p>
+
+                                    Categorías y Marcas
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="categories.view">
+
+                                    <a href="<?php echo $URL; ?>/categorias" class="nav-link" data-sidebar-path="/categorias">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Listar Categorías</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="categories.create">
+
+                                    <a href="<?php echo $URL; ?>/categorias/crear" class="nav-link" data-sidebar-path="/categorias/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Crear Categoría</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                    </ul>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission-any="products.view,products.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-box"></i>
+
+                                <p>
+
+                                    Productos
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="products.view">
+
+                                    <a href="<?php echo $URL; ?>/productos" class="nav-link" data-sidebar-path="/productos">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Gestionar Producto</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="products.create">
+
+                                    <a href="<?php echo $URL; ?>/productos/crear" class="nav-link" data-sidebar-path="/productos/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Crear Producto</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                    </ul>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission-any="inventory.view,inventory.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-warehouse"></i>
+
+                                <p>
+
+                                    Inventario
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="inventory.view">
+
+                                    <a href="<?php echo $URL; ?>/inventario" class="nav-link" data-sidebar-path="/inventario">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Gestionar Inventario</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="inventory.create">
+
+                                    <a href="<?php echo $URL; ?>/inventario/crear" class="nav-link" data-sidebar-path="/inventario/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Crear Inventario</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                    </ul>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission-any="inventory.view,inventory.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-exchange-alt"></i>
+
+                                <p>
+
+                                    Ajuste de inventario
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="inventory.view">
+
+                                    <a href="<?php echo $URL; ?>/inventario/movimientos" class="nav-link" data-sidebar-path="/inventario/movimientos">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Registrar Movimiento</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                    </ul>
+
+                </li>
+
+
+
+                <!-- ============================================================
+
+                     MÓDULO 4: Ventas y Facturación
+
+                     ============================================================ -->
+
+                <li class="nav-item nav-item-module" data-sidebar-module="ventas-facturacion" data-permission-any="customers.view,customers.create">
+
+                    <a href="#" class="nav-link">
+
+                        <i class="nav-icon fas fa-cash-register"></i>
+
+                        <p>
+
+                            Ventas y Facturación
+
+                        </p>
+
+                    </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission-any="customers.view,customers.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-user-tie"></i>
+
+                                <p>
+
+                                    Clientes
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="customers.view">
+
+                                    <a href="<?php echo $URL; ?>/clientes" class="nav-link" data-sidebar-path="/clientes">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Listar Clientes</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="customers.create">
+
+                                    <a href="<?php echo $URL; ?>/clientes/crear" class="nav-link" data-sidebar-path="/clientes/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Crear Cliente</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                        <li class="nav-item" data-permission-any="sales.view,sales.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-cash-register"></i>
+
+                                <p>
+
+                                    Ventas
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="customers.view">
+
+                                    <a href="<?php echo $URL; ?>/ventas" class="nav-link" data-sidebar-path="/ventas">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Gestion de Ventas</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="sales.create">
+
+                                    <a href="<?php echo $URL; ?>/ventas/crear" class="nav-link" data-sidebar-path="/ventas/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Factura Venta (Formal)</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="sales.create">
+
+                                    <a href="<?php echo $URL; ?>/ventas/pos" class="nav-link" data-sidebar-path="/ventas/pos">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Punto de Venta (POS)</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="sales.create">
+
+                                    <a href="<?php echo $URL; ?>/ventas/facturas" class="nav-link" data-sidebar-path="/ventas/facturas">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Facturas de Ventas</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                        <li class="nav-item" data-permission-any="cash.view,cash.open,cash.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-cash-register"></i>
+
+                                <p>
+
+                                    Caja Registradora
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="cash.view">
+
+                                    <a href="<?php echo $URL; ?>/caja" class="nav-link" data-sidebar-path="/caja">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Estado Actual</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="cash.view">
+
+                                    <a href="<?php echo $URL; ?>/caja/resumen" class="nav-link" data-sidebar-path="/caja/resumen">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Monitor de Cajas</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="cash.view">
+
+                                    <a href="<?php echo $URL; ?>/caja/historial" class="nav-link" data-sidebar-path="/caja/historial">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Historial de Cajas</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="cash.create">
+
+                                    <a href="<?php echo $URL; ?>/caja/crear" class="nav-link" data-sidebar-path="/caja/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Crear Caja</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                    </ul>
+
+                </li>
+
+
+
+                <!-- ============================================================
+
+                     MÓDULO 5: Compras y Proveedores
+
+                     ============================================================ -->
+
+                <li class="nav-item nav-item-module" data-sidebar-module="compras-proveedores" data-permission-any="suppliers.view,suppliers.create,purchases.view,purchases.create">
+
+                    <a href="#" class="nav-link">
+
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+
+                        <p>
+
+                            Prov. y Compras
+
+                        </p>
+
+                    </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission-any="suppliers.view,suppliers.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-truck"></i>
+
+                                <p>
+
+                                    Proveedores
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="suppliers.view">
+
+                                    <a href="<?php echo $URL; ?>/proveedores" class="nav-link" data-sidebar-path="/proveedores">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Listar Proveedores</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="suppliers.create"> <!-- Corrección de customers.create que estaba mal en el sidebar original -->
+
+                                    <a href="<?php echo $URL; ?>/proveedores/crear" class="nav-link" data-sidebar-path="/proveedores/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Crear Proveedores</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                    </ul>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission-any="purchases.view,purchases.create">
+
+                            <a href="#" class="nav-link">
+
+                                <i class="nav-icon fas fa-shopping-basket"></i>
+
+                                <p>
+
+                                    Compras
+
+                                    <i class="right fas fa-angle-left"></i>
+
+                                </p>
+
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+                                <li class="nav-item" data-permission="purchases.view">
+
+                                    <a href="<?php echo $URL; ?>/compras" class="nav-link" data-sidebar-path="/compras">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Lista de compras</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="purchases.create">
+
+                                    <a href="<?php echo $URL; ?>/compras/crear" class="nav-link" data-sidebar-path="/compras/crear">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Registrar compra</p>
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item" data-permission="purchases.view">
+
+                                    <a href="<?php echo $URL; ?>/compras/facturas" class="nav-link" data-sidebar-path="/compras/facturas">
+
+                                        <i class="nav-icon far fa-circle"></i>
+
+                                        <p>Ver facturas</p>
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </li>
+
+                    </ul>
+
+                </li>
+
+
+
+                <!-- ============================================================
+
+                     MÓDULO 6: FINANZAS Y TESORERÍA
+
+                     ============================================================ -->
+
+                <li class="nav-item nav-item-module" data-sidebar-module="finanzas" data-permission-any="finance.view,finance.create,finance.transfer,finance.reconcile">
+
+                    <a href="#" class="nav-link">
+
+                        <i class="nav-icon fas fa-coins"></i>
+
+                        <p>
+
+                            Finanzas y Tesorería
+
+                        </p>
+
+                    </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission="finance.view">
+
+                            <a href="<?php echo $URL; ?>/finanzas" class="nav-link" data-sidebar-path="/finanzas">
+
+                                <i class="nav-icon far fa-circle"></i>
+
+                                <p>Panel de Tesorería</p>
+
+                            </a>
+
+                        </li>
+
+                        <li class="nav-item" data-permission="finance.view">
+
+                            <a href="<?php echo $URL; ?>/finanzas/movimientos" class="nav-link" data-sidebar-path="/finanzas/movimientos">
+
+                                <i class="nav-icon far fa-circle"></i>
+
+                                <p>Movimientos</p>
+
+                            </a>
+
+                        </li>
+
+                        <li class="nav-item" data-permission="finance.transfer">
+
+                            <a href="<?php echo $URL; ?>/finanzas/transferencias" class="nav-link" data-sidebar-path="/finanzas/transferencias">
+
+                                <i class="nav-icon far fa-circle"></i>
+
+                                <p>Transferencias</p>
+
+                            </a>
+
+                        </li>
+
+                        <li class="nav-item" data-permission="finance.reconcile">
+
+                            <a href="<?php echo $URL; ?>/finanzas/conciliaciones" class="nav-link" data-sidebar-path="/finanzas/conciliaciones">
+
+                                <i class="nav-icon far fa-circle"></i>
+
+                                <p>Conciliaciones</p>
+
+                            </a>
+
+                        </li>
+
+                    </ul>
+
+                </li>
+
+                <!-- ============================================================
+
+                     MÓDULO 7: CONFIGURACIÓN Y AJUSTES
+
+                     ============================================================ -->
+                <li class="nav-item nav-item-module" data-sidebar-module="configuracion y ajustes" data-permission-any="settings.view,settings.update">
+
+                    <a href="#" class="nav-link">
+
+                        <i class="nav-icon fas fa-cogs"></i>
+
+                        <p>
+
+                            Configuración y Ajustes
+
+                        </p>
+
+                    </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item" data-permission="settings.view">
+
+                            <a href="<?php echo $URL; ?>/configuracion" class="nav-link" data-sidebar-path="/configuracion">
+
+                                <i class="nav-icon far fa-circle"></i>
+
+                                <p>Versiones y Novedades</p>
+
+                            </a>
+
+                        </li>
+
+                    </ul>
+
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </div>
+
+</aside>

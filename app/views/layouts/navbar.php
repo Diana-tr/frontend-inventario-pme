@@ -26,17 +26,31 @@ require_once __DIR__ . '/../../config/app.php';
     </ul>
 
     <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
-        <!-- Notifications Dropdown Menu -->
-        <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#">
+    <ul class="navbar-nav ml-auto align-items-center">
+        <!-- Notifications Dropdown Menu (Campanita Oficial P.M.E.) -->
+        <li class="nav-item dropdown" id="navbar-notifications-item">
+            <a class="nav-link" data-toggle="dropdown" href="#" id="navbar-notifications-bell" title="Notificaciones de versiones y novedades">
                 <i class="far fa-bell"></i>
-                <span class="badge badge-warning navbar-badge">15</span>
+                <span class="badge badge-warning navbar-badge" id="navbar-notifications-badge" style="display: none;">0</span>
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <span class="dropdown-item dropdown-header">15 Notifications</span>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right shadow-sm border-0" id="navbar-notifications-dropdown" style="min-width: 320px; border-radius: 12px;">
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light" style="border-radius: 12px 12px 0 0;">
+                    <span class="font-weight-bold text-dark small" id="navbar-notifications-header">
+                        <i class="fas fa-bell mr-1 text-primary"></i> Notificaciones
+                    </span>
+                    <button type="button" class="btn btn-link btn-xs text-primary p-0 text-decoration-none" id="navbar-notifications-mark-all" style="font-size: 0.75rem; font-weight: 600;">
+                        Marcar todas leídas
+                    </button>
+                </div>
+                <div id="navbar-notifications-list" style="max-height: 280px; overflow-y: auto;">
+                    <div class="text-center py-4 text-muted small" id="navbar-notifications-empty">
+                        <i class="fas fa-check-circle text-success mr-1"></i> No hay notificaciones pendientes.
+                    </div>
+                </div>
+                <div class="dropdown-divider m-0"></div>
+                <a href="<?php echo $URL; ?>/configuracion" class="dropdown-item dropdown-footer text-center py-2 text-primary font-weight-bold small">
+                    <i class="fas fa-history mr-1"></i> Ver historial de versiones
+                </a>
             </div>
         </li>
 

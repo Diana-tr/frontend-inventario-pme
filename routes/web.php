@@ -19,4 +19,8 @@ if (isset($router)) {
     $router->add('/finanzas/movimientos', 'app/views/finanzas/movimientos.php');
     $router->add('/finanzas/transferencias', 'app/views/finanzas/transferencias.php');
     $router->add('/finanzas/conciliaciones', 'app/views/finanzas/conciliaciones.php');
+
+    // Módulo de Configuración y Versiones
+    $router->add('/configuracion', 'app/views/configuracion/versiones.php');
+    $router->add('/configuracion/versiones', 'app/views/configuracion/versiones.php');
 }

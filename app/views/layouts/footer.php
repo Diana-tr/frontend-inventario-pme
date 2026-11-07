@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../config/app.php';
         | <i class="fas fa-code mx-1"></i>Desarrollado por: <strong>Diana Vanessa Trujillo</strong> | <strong>Jhan Snaider Sanchez</strong>
     </span>
     <div class="float-right d-none d-sm-inline-block">
-        <b>Version</b> 1.0.0
+        <b>Version</b> <span id="app-version-text" data-current-version="1.0.0">1.0.0</span>
     </div>
 </footer>
 

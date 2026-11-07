@@ -90,7 +90,7 @@ require_once __DIR__ . '/../../config/app.php';
                 </form>
 
                 <div class="login-footer">
-                    <p>Inventario P.M.E v1.0.0 • © 2026</p>
+                    <p>Inventario P.M.E v1.13.0 • © 2026</p>
                     <a href="#" class="support-link">Soporte y Ayuda</a>
                 </div>
 

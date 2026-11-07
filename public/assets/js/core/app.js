@@ -4,6 +4,7 @@ import SecurityManager from "./security.js";
 import AuthService from "../services/auth_service.js";
 import NotificationService from "./notification.js";
 import SidebarController from "../controllers/sidebar/sidebar_controller.js";
+import VersionController from "../controllers/version/version_controller.js";
 
 const App = (() => {
 
@@ -47,7 +48,9 @@ const App = (() => {
     "/caja":                  "cash.view",
     "/caja/historial":        "cash.view",
     "/caja/crear":            "cash.create",
-    "/finanzas":              "reports.view"
+    "/finanzas":              "finance.view",
+    "/configuracion":          ["settings.view", "roles.view"],
+    "/configuracion/versiones":["settings.view", "roles.view"]
   });
 
   async function bootstrap() {
@@ -86,12 +89,18 @@ const App = (() => {
 
       const requiredPermission = ROUTE_PERMISSIONS[normalizedPath];
 
-      if (requiredPermission && !SecurityManager.hasPermission(requiredPermission)) {
-        console.warn(
-          `[APP] Acceso denegado a "${normalizedPath}": requiere "${requiredPermission}".`
-        );
-        AuthGuard.redirectToHome();
-        return;
+      if (requiredPermission) {
+        const hasAccess = Array.isArray(requiredPermission)
+          ? SecurityManager.hasAnyPermission(requiredPermission)
+          : SecurityManager.hasPermission(requiredPermission);
+
+        if (!hasAccess) {
+          console.warn(
+            `[APP] Acceso denegado a "${normalizedPath}": requiere "${requiredPermission}".`
+          );
+          AuthGuard.redirectToHome();
+          return;
+        }
       }
 
       // Procesar permisos en la vista (Ocultar botones, widgets, etc.)
@@ -99,6 +108,9 @@ const App = (() => {
       
       // ─── Inicializar SidebarController ───
       SidebarController.init();
+
+      // ─── Inicializar VersionController ───
+      VersionController.init();
 
 
       // ─── Manejo de 403 Global ───
