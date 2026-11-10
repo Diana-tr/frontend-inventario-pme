@@ -89,6 +89,12 @@ const ApiClient = (() => {
       headers.Authorization = `Bearer ${token}`;
     }
 
+    // Inyección del contexto de Empresa Activa (Multi-Tenant SaaS)
+    const activeCompanyId = Storage.getActiveCompanyId();
+    if (activeCompanyId && !isPublicEndpoint) {
+      headers["X-Company-ID"] = activeCompanyId;
+    }
+
     // Configuración de timeout mediante AbortController si no se proveyó un signal
     let timeoutId = null;
     let effectiveSignal = options.signal;

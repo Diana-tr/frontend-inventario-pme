@@ -113,6 +113,13 @@ const App = (() => {
       VersionController.init();
 
 
+      // ─── Manejo de Cambio de Empresa Multi-Tenant ───
+      window.addEventListener("company_changed", async (event) => {
+        console.log("[APP] Evento company_changed detectado:", event.detail);
+        await AuthService.fetchSecurityContext(true);
+        SecurityManager.processDomPermissions();
+      });
+
       // ─── Manejo de 403 Global ───
       window.addEventListener("security_forbidden", async () => {
         console.warn("[APP] Evento 403 Forbidden interceptado. Refrescando contexto...");

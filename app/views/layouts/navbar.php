@@ -27,6 +27,26 @@ require_once __DIR__ . '/../../config/app.php';
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto align-items-center">
+        <!-- Conmutador Multiempresa SaaS (Company Switcher) -->
+        <li class="nav-item dropdown mr-2" id="navbar-company-item">
+            <a class="nav-link px-2 py-1 d-flex align-items-center shadow-sm text-decoration-none" data-toggle="dropdown" href="#" id="navbar-company-toggle" title="Cambiar Empresa / Sucursal" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease;">
+                <i class="fas fa-building mr-2" style="color: #4F46E5;"></i>
+                <span id="navbar-active-company-name" class="font-weight-bold text-dark mr-1" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Cargando...</span>
+                <i class="fas fa-chevron-down text-muted ml-1" style="font-size: 0.65rem;"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow border-0" id="navbar-company-dropdown" style="min-width: 280px; border-radius: 12px; margin-top: 8px;">
+                <div class="px-3 py-2 border-bottom bg-light d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
+                    <span class="font-weight-bold text-dark small">
+                        <i class="fas fa-city mr-1 text-primary"></i> Mis Empresas
+                    </span>
+                    <span id="navbar-company-count-badge" class="badge badge-primary px-2 py-1" style="font-size: 0.65rem; border-radius: 10px;">0</span>
+                </div>
+                <div id="navbar-company-list" style="max-height: 250px; overflow-y: auto;">
+                    <div class="text-center py-3 text-muted small">Cargando empresas...</div>
+                </div>
+            </div>
+        </li>
+
         <!-- Notifications Dropdown Menu (Campanita Oficial P.M.E.) -->
         <li class="nav-item dropdown" id="navbar-notifications-item">
             <a class="nav-link" data-toggle="dropdown" href="#" id="navbar-notifications-bell" title="Notificaciones de versiones y novedades">

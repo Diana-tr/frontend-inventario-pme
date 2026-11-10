@@ -7,6 +7,7 @@
 
 import AuthService from "../../services/auth_service.js";
 import CajaService from "../../services/caja_service.js";
+import CompanyInfoService from "../../services/company_info_service.js";
 import SystemService from "../../services/system_service.js";
 import Storage from "../../storage/storage.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
@@ -62,6 +63,7 @@ const NavbarController = (() => {
     }
 
     renderUserData(user);
+    await initCompanySwitcher();
     await checkNavbarCajaStatus();
     initNotifications();
 
@@ -417,8 +419,163 @@ const NavbarController = (() => {
     });
   }
 
+  /**
+   * ============================================================
+   * CONMUTADOR MULTIEMPRESA SAAS (COMPANY SWITCHER)
+   * ============================================================
+   */
+  async function initCompanySwitcher() {
+    const activeNameEl = document.getElementById("navbar-active-company-name");
+    const listEl = document.getElementById("navbar-company-list");
+    const countBadge = document.getElementById("navbar-company-count-badge");
+
+    if (!activeNameEl || !listEl) return;
+
+    try {
+      let companies = Storage.getUserCompanies();
+      let activeCompany = Storage.getActiveCompany();
+      let activeCompanyId = Storage.getActiveCompanyId();
+
+      // Consultar API si no hay empresas en memoria o para asegurar sincronización
+      if (!companies || companies.length === 0) {
+        const response = await CompanyInfoService.obtenerMisEmpresas();
+        if (response && response.success && Array.isArray(response.data)) {
+          companies = response.data;
+          Storage.saveUserCompanies(companies);
+        }
+      }
+
+      if (!companies || companies.length === 0) {
+        activeNameEl.textContent = "Sin Empresa";
+        listEl.innerHTML = '<div class="text-center py-3 text-muted small"><i class="fas fa-info-circle mr-1"></i>No pertenece a ninguna empresa.</div>';
+        if (countBadge) countBadge.textContent = "0";
+        return;
+      }
+
+      // Si no hay empresa activa seleccionada en Storage, auto-seleccionar la primera o activa
+      if (!activeCompanyId) {
+        const defaultCompany = companies.find((c) => c.status === "ACTIVE") || companies[0];
+        activeCompanyId = defaultCompany.id_company;
+        activeCompany = defaultCompany;
+        Storage.saveActiveCompanyId(activeCompanyId);
+        Storage.saveActiveCompany(activeCompany);
+      } else if (!activeCompany) {
+        activeCompany = companies.find((c) => String(c.id_company) === String(activeCompanyId)) || companies[0];
+        Storage.saveActiveCompany(activeCompany);
+      }
+
+      const displayName = activeCompany ? (activeCompany.trade_name || activeCompany.business_name || `Empresa #${activeCompany.id_company}`) : "Empresa";
+      activeNameEl.textContent = displayName;
+      if (countBadge) countBadge.textContent = String(companies.length);
+
+      renderCompanyList(companies, activeCompanyId);
+    } catch (error) {
+      console.warn("[NAVBAR] Error inicializando Company Switcher:", error);
+      if (activeNameEl) activeNameEl.textContent = "Empresa";
+    }
+  }
+
+  function renderCompanyList(companies, activeCompanyId) {
+    const listEl = document.getElementById("navbar-company-list");
+    if (!listEl) return;
+
+    listEl.innerHTML = "";
+
+    companies.forEach((comp) => {
+      const isActive = String(comp.id_company) === String(activeCompanyId);
+      const compName = escapeHtml(comp.trade_name || comp.business_name || `Empresa #${comp.id_company}`);
+      const taxId = escapeHtml(comp.tax_id || "");
+      const roleText = escapeHtml(comp.is_owner ? "Propietario" : (comp.role || "Miembro"));
+
+      const itemBtn = document.createElement("a");
+      itemBtn.href = "#";
+      itemBtn.className = `dropdown-item d-flex align-items-center justify-content-between py-2 border-bottom ${isActive ? "bg-light font-weight-bold" : ""}`;
+      itemBtn.style.cursor = "pointer";
+
+      itemBtn.innerHTML = `
+        <div class="d-flex align-items-center" style="max-width: 80%;">
+          <div class="mr-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: ${isActive ? "#EEF2FF" : "#F1F5F9"}; color: ${isActive ? "#4F46E5" : "#64748B"}; font-weight: 700; font-size: 0.8rem;">
+            <i class="fas fa-building"></i>
+          </div>
+          <div style="overflow: hidden;">
+            <div class="text-truncate text-dark small font-weight-bold" title="${compName}">${compName}</div>
+            <div class="text-muted" style="font-size: 0.7rem;">${taxId ? `NIT: ${taxId} • ` : ""}${roleText}</div>
+          </div>
+        </div>
+        <div>
+          ${isActive ? '<span class="badge badge-success px-2 py-1" style="font-size: 0.65rem;"><i class="fas fa-check mr-1"></i>Activa</span>' : '<span class="badge badge-secondary px-2 py-1 text-muted" style="font-size: 0.65rem; background: #E2E8F0;">Cambiar</span>'}
+        </div>
+      `;
+
+      itemBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isActive) return;
+        await handleCompanySwitch(comp);
+      });
+
+      listEl.appendChild(itemBtn);
+    });
+  }
+
+  async function handleCompanySwitch(targetCompany) {
+    const compName = targetCompany.trade_name || targetCompany.business_name || `Empresa #${targetCompany.id_company}`;
+
+    const result = await Swal.fire({
+      title: "Cambiar de Empresa",
+      text: `¿Desea cambiar el contexto de trabajo a "${compName}"?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#4F46E5",
+      cancelButtonColor: "#64748B",
+      confirmButtonText: "Sí, cambiar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+      title: "Cambiando de empresa...",
+      text: `Estableciendo contexto en ${compName}`,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      // 1. Guardar en almacenamiento local
+      Storage.saveActiveCompanyId(targetCompany.id_company);
+      Storage.saveActiveCompany(targetCompany);
+
+      // 2. Limpiar cachés de sesión y permisos
+      sessionStorage.removeItem("inventariopme_security_context");
+      CompanyInfoService.invalidarCache();
+      CajaService.invalidarSesionActual();
+
+      // 3. Forzar refresco de contexto de seguridad con el nuevo X-Company-ID
+      await AuthService.fetchSecurityContext(true);
+
+      // 4. Notificar a la app
+      window.dispatchEvent(
+        new CustomEvent("company_changed", { detail: targetCompany })
+      );
+
+      // 5. Recargar la ventana para rehidratar completamente la vista actual
+      window.location.reload();
+    } catch (err) {
+      console.error("[NAVBAR] Error al conmutar empresa:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No fue posible cambiar de empresa. Intente nuevamente.",
+      });
+    }
+  }
+
   return Object.freeze({
     init,
+    initCompanySwitcher,
   });
 })();
 

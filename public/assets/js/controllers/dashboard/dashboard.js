@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * Inventario PME
- * Dashboard Controller v2
+ * Dashboard Controller v2 (Compatible con Chart.js v2.9.4 & Multi-Tenant)
  * ============================================================
  */
 
@@ -14,10 +14,10 @@ const DashboardController = (() => {
     purchases_monthly: { type: "chart", canvasId: "chart-purchases-monthly", emptyId: "chart-purchases-empty" },
     sales_monthly: { type: "chart", canvasId: "chart-sales-monthly", emptyId: "chart-sales-empty" },
     payment_methods: { type: "chart", canvasId: "chart-payment-methods", emptyId: "chart-payment-empty" },
-    erp_activity: { type: "list", containerId: "erp_activity_container" },
-    needs_attention: { type: "list", containerId: "needs_attention_container" },
-    top_selling_products: { type: "list", containerId: "top_selling_container" },
-    latest_sales: { type: "table", containerId: "latest_sales_container" },
+    erp_activity: { type: "list", containerId: "erp_activity_container", emptyText: "Sin actividad reciente" },
+    needs_attention: { type: "list", containerId: "needs_attention_container", emptyText: '<i class="fas fa-check-circle text-success mr-1"></i> Sin alertas pendientes' },
+    top_selling_products: { type: "list", containerId: "top_selling_container", emptyText: "Sin ventas registradas" },
+    latest_sales: { type: "table", containerId: "latest_sales_container", emptyText: "No hay ventas registradas" },
   };
 
   async function init() {
@@ -28,6 +28,7 @@ const DashboardController = (() => {
 
       if (!response || (!response.data && !Array.isArray(response))) {
         console.warn("[DASHBOARD] La API no devolvió una estructura válida.");
+        clearAllSpinners();
         return;
       }
 
@@ -38,11 +39,13 @@ const DashboardController = (() => {
       const lists = [];
       const tables = [];
 
-      // Procesar widgets configurados
+      // Procesar widgets configurados presentes en la respuesta
+      const processedCodes = new Set();
       if (Array.isArray(widgets)) {
         for (const widget of widgets) {
           const config = WIDGET_CONFIG[widget.code];
           if (!config) continue;
+          processedCodes.add(widget.code);
 
           switch (config.type) {
             case "chart":
@@ -58,28 +61,84 @@ const DashboardController = (() => {
         }
       }
 
-      // Verificación directa para Métodos de Pago
-      if (!charts.some(c => c.code === "payment_methods") && rawData.payment_methods) {
+      // Verificación directa para Métodos de Pago si viniera como propiedad raíz
+      if (!processedCodes.has("payment_methods") && rawData.payment_methods) {
         charts.push({
           code: "payment_methods",
           value: rawData.payment_methods,
           config: WIDGET_CONFIG.payment_methods
         });
+        processedCodes.add("payment_methods");
       }
 
-      // Renderizar 6 KPIs consolidados
-      renderConsolidatedKPIs(rawData, widgets);
+      // Asegurar que cada widget configurado tenga representación para limpiar spinners
+      for (const [code, config] of Object.entries(WIDGET_CONFIG)) {
+        if (!processedCodes.has(code)) {
+          if (config.type === "list") {
+            lists.push({ code, value: [], config });
+          } else if (config.type === "table") {
+            tables.push({ code, value: [], config });
+          } else if (config.type === "chart") {
+            charts.push({ code, value: [], config });
+          }
+        }
+      }
 
-      // Renderizar Gráficos, Listas y Tablas
-      renderCharts(charts, rawData);
-      renderLists(lists);
-      renderTables(tables);
+      // 1. Renderizar 6 KPIs consolidados
+      try {
+        renderConsolidatedKPIs(rawData, widgets);
+      } catch (kpiError) {
+        console.error("[DASHBOARD] Error al renderizar KPIs:", kpiError);
+      }
+
+      // 2. Renderizar Gráficos
+      try {
+        renderCharts(charts, rawData);
+      } catch (chartsError) {
+        console.error("[DASHBOARD] Error al renderizar Gráficos:", chartsError);
+      }
+
+      // 3. Renderizar Listas (alertas, actividad, top productos)
+      try {
+        renderLists(lists);
+      } catch (listsError) {
+        console.error("[DASHBOARD] Error al renderizar Listas:", listsError);
+      }
+
+      // 4. Renderizar Tablas (últimas ventas)
+      try {
+        renderTables(tables);
+      } catch (tablesError) {
+        console.error("[DASHBOARD] Error al renderizar Tablas:", tablesError);
+      }
 
     } catch (error) {
       console.error("[DASHBOARD] Error en la inicialización:", error);
+      clearAllSpinners();
     } finally {
       hideLoading();
     }
+  }
+
+  function clearAllSpinners() {
+    for (const [code, config] of Object.entries(WIDGET_CONFIG)) {
+      if (config.type === "list") {
+        const el = document.getElementById(config.containerId);
+        if (el) el.innerHTML = `<li class="text-center text-muted py-3 list-unstyled">${config.emptyText || "Sin datos"}</li>`;
+      } else if (config.type === "table") {
+        const el = document.getElementById(config.containerId);
+        if (el) el.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">${config.emptyText || "No hay datos"}</td></tr>`;
+      } else if (config.type === "chart") {
+        const canvas = document.getElementById(config.canvasId);
+        const emptyMsg = document.getElementById(config.emptyId);
+        if (canvas) canvas.classList.add("d-none");
+        if (emptyMsg) emptyMsg.classList.remove("d-none");
+      }
+    }
+    const pieCanvas = document.getElementById("chart-sales-pie");
+    const pieEmpty = document.getElementById("chart-pie-empty");
+    if (pieCanvas) pieCanvas.classList.add("d-none");
+    if (pieEmpty) pieEmpty.classList.remove("d-none");
   }
 
   // 🎯 RENDERIZADO DE LAS 6 TARJETAS CONSOLIDADAS
@@ -143,7 +202,7 @@ const DashboardController = (() => {
         color: "#F59E0B",
         bgIcon: "#FFFBEB",
         textColor: "",
-        url: "productos?filter=alerts" // 👈 Redirige aplicando el filtro de alertas
+        url: "productos?filter=alerts"
       },
       {
         title: "COMPRAS",
@@ -241,98 +300,117 @@ const DashboardController = (() => {
         continue;
       }
 
-      if (emptyMsg) emptyMsg.classList.add("d-none");
-      if (canvas) canvas.classList.remove("d-none");
-
-      if (code === "purchases_monthly") {
-        renderBarChart(canvas, value);
-      } else if (code === "sales_monthly") {
-        renderLineChart(canvas, value);
-      } else if (code === "payment_methods") {
-        renderPaymentMethodsChart(canvas, value);
+      try {
+        if (code === "purchases_monthly") {
+          renderBarChart(canvas, value);
+        } else if (code === "sales_monthly") {
+          renderLineChart(canvas, value);
+        } else if (code === "payment_methods") {
+          renderPaymentMethodsChart(canvas, value);
+        }
+      } catch (chartErr) {
+        console.error(`[DASHBOARD] Error al renderizar gráfico ${code}:`, chartErr);
+        if (canvas) canvas.classList.add("d-none");
+        if (emptyMsg) emptyMsg.classList.remove("d-none");
       }
     }
 
-    // 🎯 Gráfico Doughnut (Stock de Inventario - SIEMPRE CON LAS 3 OPCIONES)
-    const pieCanvas = document.getElementById("chart-sales-pie");
-    const pieEmpty = document.getElementById("chart-pie-empty");
+    // 🎯 Gráfico Doughnut (Stock de Inventario)
+    try {
+      const pieCanvas = document.getElementById("chart-sales-pie");
+      const pieEmpty = document.getElementById("chart-pie-empty");
 
-    const extractWidgetVal = (code, fallbackKey) => {
-      if (Array.isArray(fullResponseData.widgets)) {
-        const found = fullResponseData.widgets.find(w => w.code === code);
-        if (found && found.value !== undefined) return Number(found.value) || 0;
-      }
-      return Number(fullResponseData[fallbackKey]) || 0;
-    };
-
-    const stockDistributionWidget = Array.isArray(fullResponseData.widgets)
-      ? fullResponseData.widgets.find(w => w.code === "inventory_stock_distribution")
-      : null;
-
-    let normalStock = 0, almostLowStockProd = 0, lowStockProd = 0, criticalStockProd = 0;
-
-    if (stockDistributionWidget && stockDistributionWidget.value) {
-      const dataArr = stockDistributionWidget.value;
-      const getVal = (label) => {
-        const item = dataArr.find(d => d.label === label || d.label.replace('í', 'i') === label.replace('í', 'i'));
-        return item ? (Number(item.value) || 0) : 0;
+      const extractWidgetVal = (code, fallbackKey) => {
+        if (Array.isArray(fullResponseData.widgets)) {
+          const found = fullResponseData.widgets.find(w => w.code === code);
+          if (found && found.value !== undefined) return Number(found.value) || 0;
+        }
+        return Number(fullResponseData[fallbackKey]) || 0;
       };
-      normalStock = getVal("Stock Normal");
-      almostLowStockProd = getVal("Casi Bajo Stock");
-      lowStockProd = getVal("Bajo Stock");
-      criticalStockProd = getVal("Stock Critico");
-    } else {
-      const totalProd = extractWidgetVal("products_total", "products_total");
-      lowStockProd = extractWidgetVal("products_low_stock", "products_low_stock");
-      criticalStockProd = extractWidgetVal("inventory_alerts", "products_critical");
-      normalStock = Math.max(0, totalProd - lowStockProd - criticalStockProd);
-    }
 
-    const totalCalculated = normalStock + almostLowStockProd + lowStockProd + criticalStockProd;
+      const stockDistributionWidget = Array.isArray(fullResponseData.widgets)
+        ? fullResponseData.widgets.find(w => w.code === "inventory_stock_distribution")
+        : null;
 
-    // Siempre estructuramos los estados
-    const stockData = [
-      { label: "Stock Normal", value: normalStock },
-      { label: "Casi Bajo Stock", value: almostLowStockProd },
-      { label: "Bajo Stock", value: lowStockProd },
-      { label: "Stock Crítico", value: criticalStockProd }
-    ];
+      let normalStock = 0, almostLowStockProd = 0, lowStockProd = 0, criticalStockProd = 0;
 
-    if (pieCanvas) {
-      if (totalCalculated > 0) {
-        if (pieEmpty) pieEmpty.classList.add("d-none");
-        pieCanvas.classList.remove("d-none");
-        renderPieChart(pieCanvas, stockData);
+      if (stockDistributionWidget && stockDistributionWidget.value) {
+        const dataArr = stockDistributionWidget.value;
+        const getVal = (label) => {
+          const item = dataArr.find(d => d.label === label || d.label.replace('í', 'i') === label.replace('í', 'i'));
+          return item ? (Number(item.value) || 0) : 0;
+        };
+        normalStock = getVal("Stock Normal");
+        almostLowStockProd = getVal("Casi Bajo Stock");
+        lowStockProd = getVal("Bajo Stock");
+        criticalStockProd = getVal("Stock Critico");
       } else {
-        pieCanvas.classList.add("d-none");
-        if (pieEmpty) pieEmpty.classList.remove("d-none");
+        const totalProd = extractWidgetVal("products_total", "products_total");
+        lowStockProd = extractWidgetVal("products_low_stock", "products_low_stock");
+        criticalStockProd = extractWidgetVal("inventory_alerts", "products_critical");
+        normalStock = Math.max(0, totalProd - lowStockProd - criticalStockProd);
       }
 
-      const elNormal = document.getElementById("stock-normal-count");
-      const elCasiBajo = document.getElementById("stock-casi-bajo-count");
-      const elBajo = document.getElementById("stock-bajo-count");
-      const elCritico = document.getElementById("stock-critico-count");
-      if (elNormal) elNormal.textContent = normalStock;
-      if (elCasiBajo) elCasiBajo.textContent = almostLowStockProd;
-      if (elBajo) elBajo.textContent = lowStockProd;
-      if (elCritico) elCritico.textContent = criticalStockProd;
+      const totalCalculated = normalStock + almostLowStockProd + lowStockProd + criticalStockProd;
+
+      const stockData = [
+        { label: "Stock Normal", value: normalStock },
+        { label: "Casi Bajo Stock", value: almostLowStockProd },
+        { label: "Bajo Stock", value: lowStockProd },
+        { label: "Stock Crítico", value: criticalStockProd }
+      ];
+
+      if (pieCanvas) {
+        if (totalCalculated > 0) {
+          if (pieEmpty) pieEmpty.classList.add("d-none");
+          pieCanvas.classList.remove("d-none");
+          renderPieChart(pieCanvas, stockData);
+        } else {
+          pieCanvas.classList.add("d-none");
+          if (pieEmpty) pieEmpty.classList.remove("d-none");
+        }
+
+        const elNormal = document.getElementById("stock-normal-count");
+        const elCasiBajo = document.getElementById("stock-casi-bajo-count");
+        const elBajo = document.getElementById("stock-bajo-count");
+        const elCritico = document.getElementById("stock-critico-count");
+        if (elNormal) elNormal.textContent = normalStock;
+        if (elCasiBajo) elCasiBajo.textContent = almostLowStockProd;
+        if (elBajo) elBajo.textContent = lowStockProd;
+        if (elCritico) elCritico.textContent = criticalStockProd;
+      }
+    } catch (pieErr) {
+      console.error("[DASHBOARD] Error al renderizar gráfico de inventario:", pieErr);
     }
   }
 
+  // 1. Gráfico de Barras: Ventas vs Compras (Chart.js v2.9.4 compatible)
   function renderBarChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    if (window.myBarChartInstance) window.myBarChartInstance.destroy();
+    if (window.myBarChartInstance) {
+      try { window.myBarChartInstance.destroy(); } catch (e) {}
+    }
 
     const labels = data.map((d) => d.label || d.month || d.mes || "");
-    const ventas = data.map((d) => d.ventas ?? d.sales ?? 0);
-    const compras = data.map((d) => d.compras ?? d.purchases ?? 0);
+    const ventas = data.map((d) => Number(d.ventas ?? d.sales ?? 0));
+    const compras = data.map((d) => Number(d.compras ?? d.purchases ?? 0));
+
+    const hasValues = ventas.some(v => v > 0) || compras.some(c => c > 0);
+    const emptyMsg = document.getElementById("chart-purchases-empty");
+    if (!hasValues && emptyMsg) {
+      canvas.classList.add("d-none");
+      emptyMsg.classList.remove("d-none");
+      return;
+    }
+    if (emptyMsg) emptyMsg.classList.add("d-none");
+    canvas.classList.remove("d-none");
 
     const ctx = canvas.getContext("2d");
-    const gradientVentas = ctx.createLinearGradient(0, 0, 0, 400);
+    const gradientVentas = ctx.createLinearGradient(0, 0, 0, 300);
     gradientVentas.addColorStop(0, 'rgba(22, 163, 74, 1)');
     gradientVentas.addColorStop(1, 'rgba(22, 163, 74, 0.5)');
 
-    const gradientCompras = ctx.createLinearGradient(0, 0, 0, 400);
+    const gradientCompras = ctx.createLinearGradient(0, 0, 0, 300);
     gradientCompras.addColorStop(0, 'rgba(37, 99, 235, 1)');
     gradientCompras.addColorStop(1, 'rgba(37, 99, 235, 0.5)');
 
@@ -341,148 +419,270 @@ const DashboardController = (() => {
       data: {
         labels,
         datasets: [
-          { label: "Ventas", backgroundColor: gradientVentas, hoverBackgroundColor: "#15803D", borderRadius: 6, data: ventas, barPercentage: 0.7, categoryPercentage: 0.8 },
-          { label: "Compras", backgroundColor: gradientCompras, hoverBackgroundColor: "#1D4ED8", borderRadius: 6, data: compras, barPercentage: 0.7, categoryPercentage: 0.8 },
+          {
+            label: "Ventas",
+            backgroundColor: gradientVentas,
+            hoverBackgroundColor: "#15803D",
+            data: ventas,
+            barPercentage: 0.7,
+            categoryPercentage: 0.8,
+          },
+          {
+            label: "Compras",
+            backgroundColor: gradientCompras,
+            hoverBackgroundColor: "#1D4ED8",
+            data: compras,
+            barPercentage: 0.7,
+            categoryPercentage: 0.8,
+          },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { position: "top", labels: { usePointStyle: true, font: { size: 11 } } },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: $${Number(ctx.raw).toLocaleString("es-CO")}`
+        legend: {
+          display: true,
+          position: "top",
+          labels: {
+            usePointStyle: true,
+            fontSize: 11,
+            fontColor: "#64748B",
+          },
+        },
+        tooltips: {
+          backgroundColor: "rgba(15, 23, 42, 0.9)",
+          xPadding: 10,
+          yPadding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            label: function (tooltipItem, chartData) {
+              const dataset = chartData.datasets[tooltipItem.datasetIndex];
+              const val = dataset.data[tooltipItem.index] || 0;
+              return ` ${dataset.label}: $${Number(val).toLocaleString("es-CO")}`;
             },
-            backgroundColor: "rgba(15, 23, 42, 0.9)",
-            padding: 10,
-            cornerRadius: 8
-          }
+          },
         },
         scales: {
-          x: { grid: { display: false } },
-          y: { 
-            beginAtZero: true, 
-            grid: { borderDash: [4, 4], color: "#E2E8F0" },
-            ticks: { callback: (val) => "$" + Number(val).toLocaleString("es-CO") } 
-          }
-        }
+          xAxes: [
+            {
+              gridLines: { display: false },
+              ticks: { fontColor: "#64748B", fontSize: 11 },
+            },
+          ],
+          yAxes: [
+            {
+              ticks: {
+                beginAtZero: true,
+                fontColor: "#64748B",
+                fontSize: 11,
+                callback: function (val) {
+                  return "$" + Number(val).toLocaleString("es-CO");
+                },
+              },
+              gridLines: {
+                borderDash: [4, 4],
+                color: "#E2E8F0",
+              },
+            },
+          ],
+        },
       },
     });
   }
 
+  // 2. Gráfico de Línea: Ventas últimos 30 días (Chart.js v2.9.4 compatible)
   function renderLineChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    if (window.myLineChartInstance) window.myLineChartInstance.destroy();
+    if (window.myLineChartInstance) {
+      try { window.myLineChartInstance.destroy(); } catch (e) {}
+    }
 
     const labels = data.map((d) => d.label || d.date || d.fecha || d.dia || "");
-    const values = data.map((d) => d.value ?? d.total ?? d.monto ?? d.total_ventas ?? 0);
+    const values = data.map((d) => Number(d.value ?? d.total ?? d.monto ?? d.total_ventas ?? 0));
+
+    const hasValues = values.some(v => v > 0);
+    const emptyMsg = document.getElementById("chart-sales-empty");
+    if (!hasValues && emptyMsg) {
+      canvas.classList.add("d-none");
+      emptyMsg.classList.remove("d-none");
+      return;
+    }
+    if (emptyMsg) emptyMsg.classList.add("d-none");
+    canvas.classList.remove("d-none");
 
     window.myLineChartInstance = new Chart(canvas.getContext("2d"), {
       type: "line",
       data: {
         labels,
-        datasets: [{
-          label: "Ventas ($)",
-          backgroundColor: "rgba(22, 163, 74, 0.1)",
-          borderColor: "#16A34A",
-          borderWidth: 2,
-          pointRadius: 3,
-          fill: true,
-          tension: 0.3,
-          data: values,
-        }],
+        datasets: [
+          {
+            label: "Ventas ($)",
+            backgroundColor: "rgba(22, 163, 74, 0.1)",
+            borderColor: "#16A34A",
+            borderWidth: 2,
+            pointRadius: 3,
+            fill: true,
+            lineTension: 0.3,
+            data: values,
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        legend: { display: false },
+        tooltips: {
+          backgroundColor: "rgba(15, 23, 42, 0.9)",
+          xPadding: 10,
+          yPadding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            label: function (tooltipItem) {
+              const val = tooltipItem.yLabel || 0;
+              return ` Ventas: $${Number(val).toLocaleString("es-CO")}`;
+            },
+          },
+        },
         scales: {
-          y: { beginAtZero: true, ticks: { callback: (val) => "$" + Number(val).toLocaleString("es-CO") } }
-        }
+          xAxes: [
+            {
+              gridLines: { display: false },
+              ticks: { fontColor: "#64748B", fontSize: 11 },
+            },
+          ],
+          yAxes: [
+            {
+              ticks: {
+                beginAtZero: true,
+                fontColor: "#64748B",
+                fontSize: 11,
+                callback: function (val) {
+                  return "$" + Number(val).toLocaleString("es-CO");
+                },
+              },
+              gridLines: {
+                borderDash: [4, 4],
+                color: "#E2E8F0",
+              },
+            },
+          ],
+        },
       },
     });
   }
 
+  // 3. Gráfico Doughnut: Stock de Inventario (Chart.js v2.9.4 compatible)
   function renderPieChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    if (window.myPieChartInstance) window.myPieChartInstance.destroy();
+    if (window.myPieChartInstance) {
+      try { window.myPieChartInstance.destroy(); } catch (e) {}
+    }
 
     const labels = data.map((d) => d.label);
     const values = data.map((d) => Number(d.value) || 0);
 
-    // Mapeo fijo de los colores para los estados
     const colorMap = {
-      "Stock Normal": "#16A34A",  // Verde
-      "Casi Bajo Stock": "#3B82F6", // Azul
-      "Bajo Stock": "#F59E0B",    // Amarillo/Naranja
-      "Stock Crítico": "#DC2626"  // Rojo
+      "Stock Normal": "#16A34A",
+      "Casi Bajo Stock": "#3B82F6",
+      "Bajo Stock": "#F59E0B",
+      "Stock Crítico": "#DC2626",
     };
 
-    const backgroundColors = labels.map(label => colorMap[label] || "#2563EB");
+    const backgroundColors = labels.map((label) => colorMap[label] || "#2563EB");
 
     window.myPieChartInstance = new Chart(canvas.getContext("2d"), {
       type: "doughnut",
       data: {
         labels,
-        datasets: [{
-          data: values,
-          backgroundColor: backgroundColors,
-          borderWidth: 2,
-          borderColor: "#FFFFFF"
-        }],
+        datasets: [
+          {
+            data: values,
+            backgroundColor: backgroundColors,
+            borderWidth: 2,
+            borderColor: "#FFFFFF",
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "70%",
-        layout: {
-          padding: { left: 0, right: 30 }
-        },
+        cutoutPercentage: 70,
         legend: { display: false },
-        plugins: {
-          legend: { display: false }
-        }
+        tooltips: {
+          backgroundColor: "rgba(15, 23, 42, 0.9)",
+          cornerRadius: 8,
+          callbacks: {
+            label: function (tooltipItem, chartData) {
+              const label = chartData.labels[tooltipItem.index] || "";
+              const val = chartData.datasets[0].data[tooltipItem.index] || 0;
+              return ` ${label}: ${val} productos`;
+            },
+          },
+        },
       },
     });
   }
 
+  // 4. Gráfico Doughnut: Métodos de Pago (Chart.js v2.9.4 compatible)
   function renderPaymentMethodsChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    if (window.myPaymentChartInstance) window.myPaymentChartInstance.destroy();
+    if (window.myPaymentChartInstance) {
+      try { window.myPaymentChartInstance.destroy(); } catch (e) {}
+    }
 
     const labels = data.map((d) => d.metodo || d.forma_pago || d.label || d.nombre || "");
-    const values = data.map((d) => d.monto || d.total || d.value || d.cantidad || 0);
+    const values = data.map((d) => Number(d.monto || d.total || d.value || d.cantidad || 0));
+
+    const hasValues = values.some(v => v > 0);
+    const emptyMsg = document.getElementById("chart-payment-empty");
+    if (!hasValues && emptyMsg) {
+      canvas.classList.add("d-none");
+      emptyMsg.classList.remove("d-none");
+      return;
+    }
+    if (emptyMsg) emptyMsg.classList.add("d-none");
+    canvas.classList.remove("d-none");
 
     window.myPaymentChartInstance = new Chart(canvas.getContext("2d"), {
       type: "doughnut",
       data: {
         labels,
-        datasets: [{
-          data: values,
-          backgroundColor: ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899"],
-          hoverBackgroundColor: ["#2563EB", "#059669", "#D97706", "#7C3AED", "#DB2777"],
-          borderWidth: 3,
-          borderColor: "#FFFFFF",
-          hoverOffset: 6
-        }]
+        datasets: [
+          {
+            data: values,
+            backgroundColor: ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899"],
+            hoverBackgroundColor: ["#2563EB", "#059669", "#D97706", "#7C3AED", "#DB2777"],
+            borderWidth: 3,
+            borderColor: "#FFFFFF",
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "75%",
-        plugins: {
-          legend: { position: "right", labels: { boxWidth: 12, padding: 15, usePointStyle: true, font: { size: 11 } } },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => ` ${ctx.label}: $${Number(ctx.raw).toLocaleString("es-CO")}`
+        cutoutPercentage: 75,
+        legend: {
+          position: "right",
+          labels: {
+            boxWidth: 12,
+            padding: 15,
+            usePointStyle: true,
+            fontSize: 11,
+            fontColor: "#64748B",
+          },
+        },
+        tooltips: {
+          backgroundColor: "rgba(15, 23, 42, 0.9)",
+          cornerRadius: 8,
+          callbacks: {
+            label: function (tooltipItem, chartData) {
+              const label = chartData.labels[tooltipItem.index] || "";
+              const val = chartData.datasets[0].data[tooltipItem.index] || 0;
+              return ` ${label}: $${Number(val).toLocaleString("es-CO")}`;
             },
-            backgroundColor: "rgba(15, 23, 42, 0.9)",
-            padding: 10,
-            cornerRadius: 8
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -492,9 +692,9 @@ const DashboardController = (() => {
       if (!container) continue;
 
       if (count !== undefined && code === "needs_attention") {
-        const cardTitle = container.closest('.card')?.querySelector('.card-title');
-        if (cardTitle) {
-          cardTitle.innerHTML = `<i class="${config.icon || 'fas fa-exclamation-circle'} mr-2 text-danger"></i>${config.label || 'Requiere atención'} (${count})`;
+        const heading = container.closest('div')?.parentElement?.querySelector('h6');
+        if (heading) {
+          heading.innerHTML = `<i class="fas fa-exclamation-circle mr-1 text-danger"></i> Atención Requerida${count > 0 ? ` (${count})` : ''}`;
         }
       }
 
@@ -543,7 +743,8 @@ const DashboardController = (() => {
         }
         container.appendChild(fragment);
       } else {
-        container.innerHTML = `<li class="text-center text-muted py-3 list-unstyled">Sin datos registrados</li>`;
+        const emptyMsg = config.emptyText || "Sin datos registrados";
+        container.innerHTML = `<li class="text-center text-muted py-3 list-unstyled">${emptyMsg}</li>`;
       }
     }
   }
@@ -577,7 +778,8 @@ const DashboardController = (() => {
         }
         tbody.appendChild(fragment);
       } else {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No hay datos disponibles</td></tr>`;
+        const emptyMsg = config.emptyText || "No hay datos disponibles";
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">${emptyMsg}</td></tr>`;
       }
     }
   }

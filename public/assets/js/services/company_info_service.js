@@ -101,8 +101,19 @@ const CompanyInfoService = (() => {
     }
   }
 
+  // Listar empresas accesibles para el usuario autenticado (con rol y membresía).
+  async function obtenerMisEmpresas() {
+    try {
+      return await ApiClient.get(`${ENDPOINT}my-companies/`);
+    } catch (error) {
+      console.error("[COMPANY INFO SERVICE] Error al obtener mis empresas:", error);
+      throw error;
+    }
+  }
+
   return Object.freeze({
     obtenerEmpresaActual,
+    obtenerMisEmpresas,
     listarEmpresas,
     obtenerEmpresaPorId,
     crearEmpresa,

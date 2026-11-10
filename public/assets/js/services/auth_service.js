@@ -143,6 +143,15 @@ const AuthService = (() => {
           if (parsedContext.roles) {
             Storage.saveRoles(parsedContext.roles);
           }
+          if (parsedContext.companies) {
+            Storage.saveUserCompanies(parsedContext.companies);
+          }
+          if (parsedContext.active_company) {
+            Storage.saveActiveCompany(parsedContext.active_company);
+            if (!Storage.getActiveCompanyId()) {
+              Storage.saveActiveCompanyId(parsedContext.active_company.id_company);
+            }
+          }
           return;
         }
       }
@@ -153,6 +162,15 @@ const AuthService = (() => {
         Storage.savePermissions(response.data.permissions);
         Storage.saveActions(response.data.actions || {});
         Storage.saveRoles(response.data.roles || []);
+        if (response.data.companies) {
+          Storage.saveUserCompanies(response.data.companies);
+        }
+        if (response.data.active_company) {
+          Storage.saveActiveCompany(response.data.active_company);
+          if (!Storage.getActiveCompanyId()) {
+            Storage.saveActiveCompanyId(response.data.active_company.id_company);
+          }
+        }
       } else {
         console.warn("[AUTH] No se pudo obtener el contexto de seguridad.");
       }

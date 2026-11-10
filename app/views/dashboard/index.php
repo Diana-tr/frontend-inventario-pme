@@ -282,8 +282,8 @@ require_once __DIR__ . '/../layouts/head.php';
 
     <!-- Script al final del archivo PHP -->
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-        import DashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/dashboard/dashboard.js";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo time(); ?>";
+        import DashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/dashboard/dashboard.js?v=<?php echo time(); ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             await App.bootstrap();
