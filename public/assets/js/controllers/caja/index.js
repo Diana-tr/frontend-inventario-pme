@@ -1,6 +1,7 @@
 import CajaService from "../../services/caja_service.js";
 import NotificationService from "../../core/notification.js";
 import SecurityManager from "../../core/security.js";
+import { escapeHtml } from "../../core/utils.js";
 
 const CajaIndexController = (() => {
   let currentSessionId = null;
@@ -28,7 +29,7 @@ const CajaIndexController = (() => {
     if (!navbarNombre || !badgeEstado) return;
 
     if (isOpen) {
-      navbarNombre.innerHTML = `Caja: <span class="text-dark font-weight-bold">${registerName}</span>`;
+      navbarNombre.innerHTML = `Caja: <span class="text-dark font-weight-bold">${escapeHtml(registerName)}</span>`;
       badgeEstado.textContent = "Abierta";
       badgeEstado.style.backgroundColor = "#DCFCE7"; // Verde suave
       badgeEstado.style.color = "#16A34A";         // Texto verde

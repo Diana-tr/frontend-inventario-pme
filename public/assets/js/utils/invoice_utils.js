@@ -1,9 +1,11 @@
+import { escapeHtml } from "../core/utils.js";
+
 export function formatCurrency(amount) {
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
     currency: "COP",
     minimumFractionDigits: 2,
-  }).format(amount);
+  }).format(amount || 0);
 }
 
 export function renderInvoiceItems(items, tbodyElement) {
@@ -11,10 +13,12 @@ export function renderInvoiceItems(items, tbodyElement) {
   tbody.empty();
   if (items && items.length > 0) {
     items.forEach((item) => {
+      const pName = escapeHtml(item.product_name || `Producto #${item.product || item.product_id}`);
+      const qty = escapeHtml(String(item.quantity !== undefined ? item.quantity : 0));
       const tr = `
         <tr>
-          <td>${item.product_name || `Producto #${item.product || item.product_id}`}</td>
-          <td class="text-center">${item.quantity}</td>
+          <td>${pName}</td>
+          <td class="text-center">${qty}</td>
           <td class="text-right">${formatCurrency(item.unit_price)}</td>
           <td class="text-right">${formatCurrency(item.subtotal)}</td>
         </tr>

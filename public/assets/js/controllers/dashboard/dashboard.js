@@ -6,6 +6,7 @@
  */
 
 import ApiClient from "../../core/apiClient.js";
+import { escapeHtml } from "../../core/utils.js";
 
 const DashboardController = (() => {
   const DASHBOARD_ENDPOINT = "/api/v1/security/dashboard/";
@@ -704,10 +705,10 @@ const DashboardController = (() => {
         let index = 0;
         for (const item of value) {
           index++;
-          const title = item.title || item.label || item.name || "";
-          const subtitle = item.subtitle || item.date || "";
-          const badgeVal = item.value ?? item.badge ?? "";
-          const badgeColor = item.color || item.badgeClass || "secondary";
+          const title = escapeHtml(item.title || item.label || item.name || "");
+          const subtitle = escapeHtml(item.subtitle || item.date || "");
+          const badgeVal = escapeHtml(String(item.value ?? item.badge ?? ""));
+          const badgeColor = escapeHtml(item.color || item.badgeClass || "secondary");
 
           const li = document.createElement("li");
           
@@ -758,10 +759,10 @@ const DashboardController = (() => {
         tbody.innerHTML = "";
         const fragment = document.createDocumentFragment();
         for (const row of value) {
-          const id = row.id ?? "#";
-          const client = row.cliente ?? row.customer ?? row.client_name ?? "Cliente Ocasional";
+          const id = escapeHtml(String(row.id ?? "#"));
+          const client = escapeHtml(row.cliente ?? row.customer ?? row.client_name ?? "Cliente Ocasional");
           const amount = row.monto ?? row.amount ?? row.total ?? 0;
-          const date = row.fecha ?? row.date ?? row.created_at ?? "";
+          const date = escapeHtml(String(row.fecha ?? row.date ?? row.created_at ?? ""));
           const tipo = row.tipo || "";
 
           const tipoBadge = tipo === "POS" 

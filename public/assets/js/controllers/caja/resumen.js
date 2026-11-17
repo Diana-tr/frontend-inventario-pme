@@ -45,7 +45,9 @@ const CajaResumenController = (() => {
     $("#kpi_sales_cash").text(formatCurrency(today.cash_in));
     $("#kpi_cash_out").text(formatCurrency(today.cash_out));
     $("#kpi_sales_elec").text(formatCurrency(today.electronic_in));
-    $("#kpi_discrepancy").text(formatCurrency(today.total_discrepancy));
+    if ($("#kpi_discrepancy").length) {
+      $("#kpi_discrepancy").text(formatCurrency(today.total_discrepancy));
+    }
   }
 
   function renderTablaSesiones(sessions) {

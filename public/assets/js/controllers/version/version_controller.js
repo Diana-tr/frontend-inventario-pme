@@ -1,4 +1,5 @@
-import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
+import SwalFallback from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
+const Swal = typeof window !== "undefined" && window.Swal ? window.Swal : SwalFallback;
 import SystemService from "../../services/system_service.js";
 
 const VersionController = (() => {

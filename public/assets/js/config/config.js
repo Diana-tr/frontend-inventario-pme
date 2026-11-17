@@ -6,13 +6,17 @@
  */
 
 const isLocalhost =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
+  typeof window !== "undefined"
+    ? window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    : true;
 
 // Detecta automáticamente si está corriendo bajo el subdirectorio /frontend-inventario-pme (XAMPP) o en la raíz (Hosting)
-const basePath = window.location.pathname.startsWith("/frontend-inventario-pme")
-  ? "/frontend-inventario-pme"
-  : "";
+const basePath =
+  typeof window !== "undefined" &&
+  window.location.pathname.startsWith("/frontend-inventario-pme")
+    ? "/frontend-inventario-pme"
+    : "";
 
 const Config = Object.freeze({
   APP_NAME: "Software Inventario P.M.E.",
@@ -28,9 +32,9 @@ const Config = Object.freeze({
   LOGIN_PATH: "/",
 
   // Configuración de la API del Backend:
-  // - En local (XAMPP): apunta a tu backend local http://127.0.0.1:8000
-  // - En producción: cuando montes el backend en la nube (ej: Render/Railway con HTTPS),
-  //   simplemente actualizas esta URL aquí.
+  // - En local (XAMPP): apunta al backend local http://127.0.0.1:8000
+  // - En produccion: cuando se monte el backend en la nube (ej: Render con HTTPS),
+  //   simplemente actualizamos esta URL aqui.
   API_BASE_URL: isLocalhost
     ? "http://127.0.0.1:8000"
     : "http://127.0.0.1:8000",

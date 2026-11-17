@@ -6,36 +6,28 @@
  *
  * Servicio centralizado de notificaciones mediante SweetAlert2.
  *
- * Responsabilidades:
- * - Mostrar éxitos.
- * - Mostrar errores.
- * - Mostrar advertencias.
- * - Mostrar información.
- * - Mostrar confirmaciones.
- * - Mostrar estados de carga.
- *
- * No contiene:
- * - Peticiones HTTP.
- * - Autenticación.
- * - Lógica de negocio.
- * - Redirecciones.
- * ============================================================
+ * Soporta de manera híbrida la librería local precargada en AdminLTE
+ * con fallback transparente al módulo ESM.
  */
 
-import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
+import SwalFallback from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
 
 const NotificationService = (() => {
-  const Toast = Swal.mixin({
-    toast: true,
-    position: "top-end",
-    showConfirmButton: false,
-    showCloseButton: true,
-    timer: 3000,
-    timerProgressBar: true,
-  });
+  const getSwal = () =>
+    (typeof window !== "undefined" && window.Swal) || SwalFallback;
+
+  const getToast = () =>
+    getSwal().mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      showCloseButton: true,
+      timer: 3000,
+      timerProgressBar: true,
+    });
 
   function success(message, title = "Operación exitosa") {
-    return Swal.fire({
+    return getSwal().fire({
       icon: "success",
       title,
       text: message,
@@ -44,7 +36,7 @@ const NotificationService = (() => {
   }
 
   function error(message, title = "Ha ocurrido un error") {
-    return Swal.fire({
+    return getSwal().fire({
       icon: "error",
       title,
       text: message,
@@ -53,7 +45,7 @@ const NotificationService = (() => {
   }
 
   function warning(message, title = "Advertencia") {
-    return Swal.fire({
+    return getSwal().fire({
       icon: "warning",
       title,
       text: message,
@@ -62,7 +54,7 @@ const NotificationService = (() => {
   }
 
   function info(message, title = "Información") {
-    return Swal.fire({
+    return getSwal().fire({
       icon: "info",
       title,
       text: message,
@@ -71,7 +63,7 @@ const NotificationService = (() => {
   }
 
   function confirm(message, title = "Confirmar acción", customOptions = {}) {
-    return Swal.fire({
+    return getSwal().fire({
       icon: "warning",
       title,
       text: message,
@@ -84,28 +76,28 @@ const NotificationService = (() => {
   }
 
   function toastSuccess(message) {
-    return Toast.fire({
+    return getToast().fire({
       icon: "success",
       title: message,
     });
   }
 
   function toastError(message) {
-    return Toast.fire({
+    return getToast().fire({
       icon: "error",
       title: message,
     });
   }
 
   function toastWarning(message) {
-    return Toast.fire({
+    return getToast().fire({
       icon: "warning",
       title: message,
     });
   }
 
   function toastInfo(message) {
-    return Toast.fire({
+    return getToast().fire({
       icon: "info",
       title: message,
     });
@@ -113,27 +105,27 @@ const NotificationService = (() => {
 
   function loading(
     title = "Procesando...",
-    message = "Por favor, espera un momento.",
+    message = "Por favor, espera un momento."
   ) {
-    return Swal.fire({
+    return getSwal().fire({
       title,
       text: message,
       allowOutsideClick: false,
       allowEscapeKey: false,
       showConfirmButton: false,
       didOpen: () => {
-        Swal.showLoading();
+        getSwal().showLoading();
       },
     });
   }
 
   function close() {
-    Swal.close();
+    getSwal().close();
   }
 
   function getApiErrorMessage(
     response,
-    fallback = "No fue posible completar la operación.",
+    fallback = "No fue posible completar la operación."
   ) {
     if (!response) {
       return fallback;

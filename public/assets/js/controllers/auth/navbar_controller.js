@@ -10,7 +10,8 @@ import CajaService from "../../services/caja_service.js";
 import CompanyInfoService from "../../services/company_info_service.js";
 import SystemService from "../../services/system_service.js";
 import Storage from "../../storage/storage.js";
-import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
+import SwalFallback from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
+const Swal = typeof window !== "undefined" && window.Swal ? window.Swal : SwalFallback;
 
 const NavbarController = (() => {
   let isInitialized = false;
@@ -47,7 +48,7 @@ const NavbarController = (() => {
         const result = await AuthService.getCurrentUser();
         if (result && result.ok && result.data?.user) {
           user = result.data.user;
-          Storage.setUser(user);
+          Storage.saveUser(user);
         }
       } catch (error) {
         console.warn("[NAVBAR] Error obteniendo usuario por API fallback:", error);
@@ -333,7 +334,7 @@ const NavbarController = (() => {
         const session = result.data;
         const registerName = session.cash_register_name || (session.cash_register && session.cash_register.name) || "Principal";
 
-        navbarNombre.innerHTML = `Caja: <span class="text-dark font-weight-bold">${registerName}</span>`;
+        navbarNombre.innerHTML = `Caja: <span class="text-dark font-weight-bold">${escapeHtml(registerName)}</span>`;
         badgeEstado.textContent = "Abierta";
         badgeEstado.style.backgroundColor = "#DCFCE7";
         badgeEstado.style.color = "#16A34A";

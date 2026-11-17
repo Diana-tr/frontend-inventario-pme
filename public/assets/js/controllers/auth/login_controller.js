@@ -324,9 +324,9 @@ const LoginController = (() => {
     submitButton.disabled = loading;
     submitButton.setAttribute("aria-busy", String(loading));
 
-    submitButton.textContent = loading
-      ? "Iniciando sesión..."
-      : "Iniciar sesión";
+    submitButton.innerHTML = loading
+      ? '<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> <span>Iniciando sesión...</span>'
+      : '<span>Iniciar sesión</span> <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>';
   }
 
   /**
