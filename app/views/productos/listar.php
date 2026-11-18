@@ -1256,3 +1256,4 @@ require_once __DIR__ . '/../layouts/head.php';
     </script>
 
 </body>
+</html>

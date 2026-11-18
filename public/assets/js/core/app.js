@@ -7,6 +7,8 @@ import SidebarController from "../controllers/sidebar/sidebar_controller.js";
 import VersionController from "../controllers/version/version_controller.js";
 
 const App = (() => {
+  let isBootstrapped = false;
+  let bootstrapPromise = null;
 
   /**
    * Mapa de rutas del frontend → permiso requerido.
@@ -14,68 +16,68 @@ const App = (() => {
    * Las rutas se comparan sin el BASE_PATH ni trailing slashes.
    */
   const ROUTE_PERMISSIONS = Object.freeze({
-    "/usuarios":              "users.view",
-    "/usuarios/listar":       "users.view",
-    "/usuarios/crear":        "users.create",
-    "/roles":                 "roles.view",
-    "/roles/listar":          "roles.view",
-    "/roles/crear":           "roles.create",
-    "/categorias":            "categories.view",
-    "/categorias/listar":     "categories.view",
-    "/categorias/crear":      "categories.create",
-    "/clientes":              "customers.view",
-    "/clientes/listar":       "customers.view",
-    "/clientes/crear":        "customers.create",
-    "/proveedores":           "suppliers.view",
-    "/proveedores/listar":    "suppliers.view",
-    "/proveedores/crear":     "suppliers.create",
-    "/productos":             "products.view",
-    "/productos/listar":      "products.view",
-    "/productos/crear":       "products.create",
-    "/inventario":            "inventory.view",
-    "/inventario/listar":     "inventory.view",
-    "/inventario/crear":      "inventory.create",
-    "/inventario/movimientos":"inventory.view",
-    "/compras":               "purchases.view",
-    "/compras/listar":        "purchases.view",
-    "/compras/crear":         "purchases.create",
-    "/compras/facturas":      "purchases.view",
-    "/ventas":                "sales.view",
-    "/ventas/listar":         "sales.view",
-    "/ventas/crear":          "sales.create",
-    "/ventas/pos":            "sales.create",
-    "/ventas/facturas":       "sales.view",
-    "/caja":                  "cash.view",
-    "/caja/historial":        "cash.view",
-    "/caja/crear":            "cash.create",
-    "/finanzas":              "finance.view",
+    "/usuarios":               "users.view",
+    "/usuarios/listar":        "users.view",
+    "/usuarios/crear":         "users.create",
+    "/roles":                  "roles.view",
+    "/roles/listar":           "roles.view",
+    "/roles/crear":            "roles.create",
+    "/categorias":             "categories.view",
+    "/categorias/listar":      "categories.view",
+    "/categorias/crear":       "categories.create",
+    "/clientes":               "customers.view",
+    "/clientes/listar":        "customers.view",
+    "/clientes/crear":         "customers.create",
+    "/proveedores":            "suppliers.view",
+    "/proveedores/listar":     "suppliers.view",
+    "/proveedores/crear":      "suppliers.create",
+    "/productos":              "products.view",
+    "/productos/listar":       "products.view",
+    "/productos/crear":        "products.create",
+    "/inventario":             "inventory.view",
+    "/inventario/listar":      "inventory.view",
+    "/inventario/crear":       "inventory.create",
+    "/inventario/movimientos": "inventory.view",
+    "/compras":                "purchases.view",
+    "/compras/listar":         "purchases.view",
+    "/compras/crear":          "purchases.create",
+    "/compras/facturas":       "purchases.view",
+    "/ventas":                 "sales.view",
+    "/ventas/listar":          "sales.view",
+    "/ventas/crear":           "sales.create",
+    "/ventas/pos":             "sales.create",
+    "/ventas/facturas":        "sales.view",
+    "/caja":                   "cash.view",
+    "/caja/historial":         "cash.view",
+    "/caja/crear":             "cash.create",
+    "/finanzas":               "finance.view",
     "/configuracion":          ["settings.view", "roles.view"],
-    "/configuracion/versiones":["settings.view", "roles.view"]
+    "/configuracion/versiones": ["settings.view", "roles.view"],
   });
 
-  async function bootstrap() {
+  async function _executeBootstrap() {
     try {
       console.log("[APP] Aplicación iniciada.");
-      
+
       const currentPath = window.location.pathname;
-      const basePath = Config.BASE_PATH;
+      const basePath = Config.BASE_PATH || "";
       const loginPath = `${basePath}${Config.LOGIN_PATH}`;
 
       // Si estamos en la raíz o en una ruta sin vista real definida, forzamos redirección según auth
       if (currentPath === `${basePath}/` || currentPath === basePath) {
         await AuthGuard.requireGuest(); // si es guest, va al login. si está auth, va a dashboard.
-        return;
+        return true;
       }
 
       // Si es el login, requerimos ser guest
       if (currentPath === loginPath || currentPath.includes("login")) {
         await AuthGuard.requireGuest();
-        return;
+        return true;
       }
 
       // Si es cualquier otra vista (dashboard, usuarios, etc), requerimos estar logueados
       const authenticated = await AuthGuard.requireAuth();
-      if (!authenticated) return;
+      if (!authenticated) return false;
 
       // ─── FASE CRÍTICA: Refrescar permisos desde el backend ───
       // Consultamos el contexto. `false` permite que use el caché de sessionStorage
@@ -83,9 +85,10 @@ const App = (() => {
       await AuthService.fetchSecurityContext(false);
 
       // ─── Verificación de permiso por ruta ───
-      const normalizedPath = currentPath
-        .replace(basePath, "")
-        .replace(/\/+$/, "") || "/dashboard";
+      const normalizedPath =
+        currentPath
+          .replace(basePath, "")
+          .replace(/\/+$/, "") || "/dashboard";
 
       const requiredPermission = ROUTE_PERMISSIONS[normalizedPath];
 
@@ -99,47 +102,75 @@ const App = (() => {
             `[APP] Acceso denegado a "${normalizedPath}": requiere "${requiredPermission}".`
           );
           AuthGuard.redirectToHome();
-          return;
+          return false;
         }
       }
 
       // Procesar permisos en la vista (Ocultar botones, widgets, etc.)
       SecurityManager.processDomPermissions();
-      
+
       // ─── Inicializar SidebarController ───
       SidebarController.init();
 
       // ─── Inicializar VersionController ───
       VersionController.init();
 
+      // ─── Manejo de Cambio de Empresa Multi-Tenant (Registrado una única vez) ───
+      window.addEventListener("company_changed", async (event) => {
+        console.log("[APP] Evento company_changed detectado:", event.detail);
+        await AuthService.fetchSecurityContext(true);
+        SecurityManager.processDomPermissions();
+      });
 
-      // ─── Manejo de 403 Global ───
+      // ─── Manejo de 403 Global (Registrado una única vez) ───
       window.addEventListener("security_forbidden", async () => {
         console.warn("[APP] Evento 403 Forbidden interceptado. Refrescando contexto...");
-        
+
         // 1. Refrescamos el contexto (limpia caché local y trae lo nuevo)
-        await AuthService.fetchSecurityContext(true); // asumiendo que fuerza refresh
-        
+        await AuthService.fetchSecurityContext(true);
+
         // 2. Volvemos a procesar permisos en la vista actual
         SecurityManager.processDomPermissions();
-        
-        // 3. Opcional: Verificamos si seguimos teniendo permiso en la vista actual
+
+        // 3. Verificamos si seguimos teniendo permiso en la vista actual
         const reqPerm = ROUTE_PERMISSIONS[normalizedPath];
         if (reqPerm && !SecurityManager.hasPermission(reqPerm)) {
           await NotificationService.warning(
             "Tus permisos han cambiado y ya no tienes acceso a esta vista.",
-            "Acceso restringido",
+            "Acceso restringido"
           );
           AuthGuard.redirectToHome();
         } else {
-          // No lo expulsamos, pero le avisamos (o podemos omitir alert si es muy molesto)
           console.warn("[APP] Vista actual sobrevive al 403, UI actualizada.");
         }
       });
-      
+
+      isBootstrapped = true;
+      return true;
     } catch (error) {
       console.error("[APP] Error durante la inicialización:", error);
+      return false;
     }
+  }
+
+  /**
+   * Inicializa la aplicación de manera idempotente.
+   * Si ya fue ejecutado o está en proceso de ejecución, reutiliza la misma promesa.
+   * @returns {Promise<boolean>}
+   */
+  async function bootstrap() {
+    if (isBootstrapped) {
+      return true;
+    }
+    if (bootstrapPromise) {
+      return bootstrapPromise;
+    }
+
+    bootstrapPromise = _executeBootstrap().finally(() => {
+      bootstrapPromise = null;
+    });
+
+    return bootstrapPromise;
   }
 
   return Object.freeze({

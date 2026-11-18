@@ -5,12 +5,14 @@
  * ============================================================
  */
 
+import Config from "../../config/config.js";
+
 const SidebarController = (() => {
   /**
    * Sidebar Active State Manager (3 niveles)
    */
   function initActiveState() {
-    const basePath = "/frontend-inventario-pme";
+    const basePath = Config.BASE_PATH || "";
     const currentPath =
       window.location.pathname.replace(basePath, "").replace(/\/+$/, "") ||
       "/dashboard";

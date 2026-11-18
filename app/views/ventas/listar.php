@@ -124,6 +124,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                     <i class="fas fa-info-circle mr-1"></i> Datos de Venta
                                 </h6>
                                 <p class="mb-1"><strong class="text-dark">ID Venta:</strong> #<span id="detail_sale_id"></span></p>
+                                <p class="mb-1"><strong class="text-dark">Nº Venta:</strong> <span id="detail_sale_number"></span></p>
                                 <p class="mb-1"><strong class="text-dark">Fecha Emisión:</strong> <span id="detail_issue_date"></span></p>
                                 <p class="mb-1"><strong class="text-dark">Estado:</strong> <span id="detail_status_badge"></span></p>
                                 <p class="mb-1"><strong class="text-dark">Notas:</strong> <span id="detail_notes"></span></p>
@@ -279,3 +280,4 @@ require_once __DIR__ . '/../layouts/head.php';
         });
     </script>
 </body>
+</html>

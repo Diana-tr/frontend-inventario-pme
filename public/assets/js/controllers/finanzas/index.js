@@ -232,16 +232,21 @@ const FinanceDashboardController = (() => {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-        },
+        legend: { display: false },
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: (val) => "$" + Number(val).toLocaleString("es-CO"),
+          xAxes: [
+            {
+              gridLines: { display: false },
             },
-          },
+          ],
+          yAxes: [
+            {
+              ticks: {
+                beginAtZero: true,
+                callback: (val) => "$" + Number(val).toLocaleString("es-CO"),
+              },
+            },
+          ],
         },
       },
     });

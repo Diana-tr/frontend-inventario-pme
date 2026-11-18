@@ -142,8 +142,8 @@ require_once __DIR__ . '/../layouts/head.php';
 
     <!-- DataTables & Plugins -->
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-        import TransferenciasController from "<?php echo $URL; ?>/public/assets/js/controllers/finanzas/transferencias.js";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo time(); ?>";
+        import TransferenciasController from "<?php echo $URL; ?>/public/assets/js/controllers/finanzas/transferencias.js?v=<?php echo time(); ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             await App.bootstrap();

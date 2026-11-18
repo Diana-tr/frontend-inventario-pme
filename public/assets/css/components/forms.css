@@ -1,15 +1,18 @@
 /* public/assets/css/components/forms.css */
 
-.form-group {
-    margin-bottom: 22px;
+/* Limitado al formulario de login o contenedores con iconos para evitar conflictos con Bootstrap/AdminLTE */
+.login-form .form-group {
+    margin-bottom: 20px;
+    text-align: left;
 }
 
-.form-group label {
+.login-form .form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #334155;
-    font-size: 13px;
+    color: #1E293B; /* WCAG AAA: ratio 12.65:1 */
+    font-size: 13.5px;
+    letter-spacing: -0.01em;
 }
 
 /* Contenedor relativo para posicionar los iconos */
@@ -17,51 +20,118 @@
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .input-with-icon .input-icon {
     position: absolute;
     left: 16px;
-    color: #94a3b8;
-    font-size: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748B; /* WCAG AA: ratio 4.63:1 */
+    font-size: 16px;
     pointer-events: none;
-    /* Evita que el click en el icono bloquee el input */
+    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    line-height: 1;
 }
 
-.form-group input {
+.input-with-icon:focus-within .input-icon {
+    color: var(--primary-color, #2563EB);
+}
+
+/* Estilos de input en login con transiciones suaves */
+.login-form .form-group input,
+.input-with-icon input {
     width: 100%;
-    padding: 12px 45px 12px 45px;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
+    height: 48px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 10px;
     background: #F8FAFC;
-    font-size: 14px;
-    transition: .3s;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: #0F172A; /* WCAG AAA: ratio 15.65:1 */
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box;
-    color: var(--text-color);
 }
 
-.form-group input:focus {
+/* Hover suave en inputs */
+.login-form .form-group input:hover,
+.input-with-icon input:hover {
+    border-color: #94A3B8;
+    background: #FFFFFF;
+}
+
+/* REGLA CRÍTICA DE ESPECIFICIDAD:
+   Asegura espacio generoso para el icono izquierdo (48px) y el botón derecho (48px),
+   impidiendo que el texto o placeholder se solapen con los iconos bajo cualquier circunstancia. */
+.login-form .form-group .input-with-icon input,
+.login-form .input-with-icon input,
+.input-with-icon input {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    padding-left: 48px !important;
+    padding-right: 48px !important;
+}
+
+.login-form .form-group input::placeholder,
+.input-with-icon input::placeholder {
+    color: #64748B; /* WCAG AA: ratio 4.63:1 sobre fondo blanco */
+    font-size: 14px;
+}
+
+/* Estado Focus accesible */
+.login-form .form-group input:focus,
+.input-with-icon input:focus {
     outline: none;
-    border-color: var(--primary-color);
-    background: var(--card-color);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
+    border-color: var(--primary-color, #2563EB);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
-/* Botón flotante para ver contraseña */
+/* Normalización de autofill para evitar fondo amarillo del navegador y preservar espaciado */
+.input-with-icon input:-webkit-autofill,
+.input-with-icon input:-webkit-autofill:hover, 
+.input-with-icon input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #F8FAFC inset !important;
+    -webkit-text-fill-color: #0F172A !important;
+    border-color: #CBD5E1 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Botón flotante accesible para ver/ocultar contraseña */
 .toggle-password {
     position: absolute;
-    right: 15px;
-    background: none;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
     border: none;
     cursor: pointer;
-    color: #94a3b8;
-    font-size: 15px;
+    color: #475569; /* WCAG AA: ratio 5.91:1 */
+    font-size: 16px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
     padding: 0;
-    transition: color 0.2s;
 }
 
 .toggle-password:hover {
-    color: var(--primary-color);
+    color: var(--primary-dark, #1D4ED8);
+    background-color: rgba(37, 99, 235, 0.08);
+}
+
+.toggle-password:focus-visible {
+    outline: 2px solid var(--primary-color, #2563EB);
+    outline-offset: 2px;
 }
 
 /* Fila de Recordarme y Olvidó su contraseña */
@@ -69,24 +139,62 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
-    font-size: 14px;
+    margin-top: -2px;
+    margin-bottom: 24px;
+    font-size: 13.5px;
 }
 
 .remember-me {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    color: #475569;
+    color: #334155; /* WCAG AAA: ratio 8.52:1 */
+    user-select: none;
+    font-weight: 500;
+}
+
+.remember-me input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color, #2563EB);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.remember-me input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--primary-color, #2563EB);
+    outline-offset: 2px;
 }
 
 .forgot-link {
-    color: var(--primary-color);
+    color: var(--primary-dark, #1D4ED8); /* WCAG AA: ratio 6.45:1 */
     text-decoration: none;
     font-weight: 600;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
 }
 
 .forgot-link:hover {
+    color: #1E3A8A;
     text-decoration: underline;
+}
+
+.forgot-link:focus-visible {
+    outline: 2px solid var(--primary-color, #2563EB);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Mensajes de validación / error accesible */
+#login-message {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background-color: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #991B1B; /* WCAG AAA: ratio 7.2:1 sobre #FEF2F2 */
+    font-size: 13.5px;
+    line-height: 1.4;
+    text-align: left;
+    font-weight: 500;
 }

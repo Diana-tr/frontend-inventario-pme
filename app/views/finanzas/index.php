@@ -399,8 +399,8 @@ require_once __DIR__ . '/../layouts/head.php';
     <!-- Chart.js -->
     <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/chart.js/Chart.bundle.min.js"></script>
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-        import FinanceDashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/finanzas/index.js";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo time(); ?>";
+        import FinanceDashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/finanzas/index.js?v=<?php echo time(); ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             await App.bootstrap();

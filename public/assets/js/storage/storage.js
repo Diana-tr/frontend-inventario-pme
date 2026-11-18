@@ -14,6 +14,9 @@ const Storage = (() => {
     PERMISSIONS: "inventariopme_permissions",
     ACTIONS: "inventariopme_actions",
     ROLES: "inventariopme_roles",
+    ACTIVE_COMPANY_ID: "inventariopme_active_company_id",
+    ACTIVE_COMPANY: "inventariopme_active_company",
+    USER_COMPANIES: "inventariopme_user_companies",
   });
 
   /* ===========================
@@ -100,6 +103,42 @@ const Storage = (() => {
   };
 
   /* ===========================
+       Multiempresa / Tenants
+    =========================== */
+
+  const saveActiveCompanyId = (companyId) => {
+    if (companyId === null || companyId === undefined || companyId === "null" || companyId === "undefined" || companyId === "") {
+      localStorage.removeItem(KEYS.ACTIVE_COMPANY_ID);
+    } else {
+      localStorage.setItem(KEYS.ACTIVE_COMPANY_ID, String(companyId));
+    }
+  };
+
+  const getActiveCompanyId = () => {
+    const val = localStorage.getItem(KEYS.ACTIVE_COMPANY_ID);
+    if (!val || val === "null" || val === "undefined" || val === "") {
+      return null;
+    }
+    return val;
+  };
+
+  const saveActiveCompany = (company) => {
+    save(KEYS.ACTIVE_COMPANY, company);
+  };
+
+  const getActiveCompany = () => {
+    return read(KEYS.ACTIVE_COMPANY);
+  };
+
+  const saveUserCompanies = (companies) => {
+    save(KEYS.USER_COMPANIES, companies);
+  };
+
+  const getUserCompanies = () => {
+    return read(KEYS.USER_COMPANIES) || [];
+  };
+
+  /* ===========================
        Limpieza
     =========================== */
 
@@ -129,6 +168,13 @@ const Storage = (() => {
 
     saveRoles,
     getRoles,
+
+    saveActiveCompanyId,
+    getActiveCompanyId,
+    saveActiveCompany,
+    getActiveCompany,
+    saveUserCompanies,
+    getUserCompanies,
 
     clear,
   });

@@ -8,6 +8,8 @@
  * permisos de roles de forma amigable, agrupada por módulos.
  */
 
+import { escapeHtml } from "../core/utils.js";
+
 const PermissionSelector = (() => {
   /**
    * Renderiza el selector de permisos en un contenedor.
@@ -41,16 +43,19 @@ const PermissionSelector = (() => {
       header.className = "card-header d-flex justify-content-between align-items-center bg-light p-2";
       
       const titleWrapper = document.createElement("div");
+      const safeLabel = escapeHtml(module.label);
+      const safeModuleId = escapeHtml(module.module_id);
+      const safeIcon = escapeHtml(module.icon || 'fas fa-puzzle-piece');
       titleWrapper.innerHTML = `
-        <i class="${module.icon || 'fas fa-puzzle-piece'} text-secondary mr-2"></i>
-        <span class="font-weight-bold">${module.label}</span>
+        <i class="${safeIcon} text-secondary mr-2"></i>
+        <span class="font-weight-bold">${safeLabel}</span>
       `;
       
       const selectAllWrapper = document.createElement("div");
       selectAllWrapper.className = "custom-control custom-checkbox";
       selectAllWrapper.innerHTML = `
-        <input type="checkbox" class="custom-control-input module-select-all" id="mod_all_${module.module_id}">
-        <label class="custom-control-label small text-muted" for="mod_all_${module.module_id}">Todos</label>
+        <input type="checkbox" class="custom-control-input module-select-all" id="mod_all_${safeModuleId}">
+        <label class="custom-control-label small text-muted" for="mod_all_${safeModuleId}">Todos</label>
       `;
 
       header.appendChild(titleWrapper);
@@ -72,17 +77,20 @@ const PermissionSelector = (() => {
         col.dataset.searchText = `${item.description} ${item.code}`.toLowerCase();
 
         const isChecked = currentPermissions[item.code] === true;
+        const safeCode = escapeHtml(item.code);
+        const safeDesc = escapeHtml(item.description);
+        const codeId = escapeHtml(item.code.replace(/\./g, '_'));
 
         col.innerHTML = `
           <div class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input perm-checkbox" 
-                   id="perm_${item.code.replace(/\./g, '_')}" 
-                   value="${item.code}"
-                   data-module="${module.module_id}"
+                   id="perm_${codeId}" 
+                   value="${safeCode}"
+                   data-module="${safeModuleId}"
                    ${isChecked ? 'checked' : ''}>
-            <label class="custom-control-label font-weight-normal" for="perm_${item.code.replace(/\./g, '_')}">
-              ${item.description} 
-              <small class="text-muted d-block" style="font-size: 10px;">${item.code} ${type === 'action' ? '(Acción)' : ''}</small>
+            <label class="custom-control-label font-weight-normal" for="perm_${codeId}">
+              ${safeDesc} 
+              <small class="text-muted d-block" style="font-size: 10px;">${safeCode} ${type === 'action' ? '(Acción)' : ''}</small>
             </label>
           </div>
         `;

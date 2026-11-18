@@ -19,6 +19,9 @@ require_once __DIR__ . '/../../config/app.php';
 <!-- Bootstrap 4 -->
 <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+<!-- SweetAlert2 (Local Bundled) -->
+<script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/sweetalert2/sweetalert2.all.min.js"></script>
+
 <!-- DataTables Core -->
 <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/datatables/jquery.dataTables.min.js"></script>
 <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
@@ -44,7 +47,7 @@ require_once __DIR__ . '/../../config/app.php';
 <!-- AdminLTE App -->
 <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/dist/js/adminlte.js"></script>
 
-<!-- Aplicación principal -->
+<!-- Inicialización de sesión global y logout -->
 <script type="module">
     import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
     import LogoutController from "<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js";
@@ -54,7 +57,3 @@ require_once __DIR__ . '/../../config/app.php';
         LogoutController.init();
     });
 </script>
-
-</body>
-
-</html>

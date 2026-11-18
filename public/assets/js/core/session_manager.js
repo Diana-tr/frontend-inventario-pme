@@ -101,16 +101,31 @@ const SessionManager = (() => {
     }
   }
 
+  let isCrossTabSetup = false;
+
   /**
-   * Escucha cambios en otras pestañas (si otra pestaña hace logout).
+   * Escucha cambios en otras pestañas (logout concurrente o cambio de empresa).
    */
   function setupCrossTabCommunication() {
+    if (isCrossTabSetup) return;
+    isCrossTabSetup = true;
+
     window.addEventListener("storage", (event) => {
       // Si el access token fue eliminado desde otra pestaña
       if (event.key === "inventariopme_access_token" && !event.newValue) {
         console.warn("[SESSION] Sesión cerrada desde otra pestaña.");
         stopInactivityMonitor();
         window.location.replace(Config.BASE_PATH + Config.LOGIN_PATH);
+      }
+
+      // Si la empresa activa fue cambiada en otra pestaña
+      if (
+        event.key === "inventariopme_active_company_id" &&
+        event.newValue &&
+        event.newValue !== event.oldValue
+      ) {
+        console.log("[SESSION] Empresa cambiada en otra pestaña, sincronizando contexto...");
+        window.location.reload();
       }
     });
   }

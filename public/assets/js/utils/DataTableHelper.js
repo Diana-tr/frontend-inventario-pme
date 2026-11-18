@@ -6,13 +6,13 @@
  *
  * Provee configuración estándar para inicialización de DataTables,
  * integración de permisos con SecurityManager para botones de exportación,
+ * diccionario de localización en español offline (cero peticiones externas),
  * y layout profesional responsivo.
  */
 
 import SecurityManager from "../core/security.js";
 
 const DataTableHelper = (() => {
-
   /**
    * Layout responsivo DOM compatible con Bootstrap 4 / AdminLTE 3.
    * Coloca "Mostrar registros" a la izquierda, y en la derecha
@@ -30,11 +30,46 @@ const DataTableHelper = (() => {
     ">";
 
   /**
-   * Configuración de idioma español estándar para DataTables.
+   * Configuración de idioma español estándar embebida para DataTables.
+   * Elimina la dependencia de CDN externa evitando retrasos de red y fallos offline.
    */
-  const LANGUAGE_ES = {
-    url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-  };
+  const LANGUAGE_ES = Object.freeze({
+    processing: "Procesando registros...",
+    search: "Buscar:",
+    lengthMenu: "Mostrar _MENU_ registros",
+    info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
+    infoEmpty: "Mostrando 0 a 0 de 0 registros",
+    infoFiltered: "(filtrado de un total de _MAX_ registros)",
+    infoPostFix: "",
+    loadingRecords: "Cargando datos...",
+    zeroRecords: "No se encontraron resultados coincidentes",
+    emptyTable: "No hay datos disponibles en la tabla",
+    paginate: {
+      first: "Primero",
+      previous: "Anterior",
+      next: "Siguiente",
+      last: "Último",
+    },
+    aria: {
+      sortAscending: ": activar para ordenar la columna ascendente",
+      sortDescending: ": activar para ordenar la columna descendente",
+    },
+    buttons: {
+      copy: "Copiar",
+      colvis: "Visibilidad",
+      collection: "Colección",
+      colvisRestore: "Restaurar",
+      copyTitle: "Copiado al portapapeles",
+      copySuccess: {
+        1: "1 fila copiada al portapapeles",
+        _: "%d filas copiadas al portapapeles",
+      },
+      csv: "CSV",
+      excel: "Excel",
+      pdf: "PDF",
+      print: "Imprimir",
+    },
+  });
 
   /**
    * Genera los botones de exportación protegidos por permisos del backend.

@@ -36,6 +36,8 @@ require_once __DIR__ . '/../../config/app.php';
     <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
     <!-- DataTables Buttons Bootstrap 4 -->
     <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <!-- SweetAlert2 Bootstrap 4 Theme -->
+    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
     <!-- Custom Styles -->
     <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/main.css">
 </head>

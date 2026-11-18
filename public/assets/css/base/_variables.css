@@ -21,9 +21,8 @@
 
     --danger-color: #DC2626;
 
-    /* Tipografía */
-
-    --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    /* Tipografía moderna para ERP */
+    --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
     /* Bordes */
 
