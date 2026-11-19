@@ -4,6 +4,62 @@ require_once __DIR__ . '/../../config/app.php';
 
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- BANNER DE MODO SOPORTE (Impersonation) -->
+    <div id="support-mode-banner" class="bg-danger text-white text-center py-2 shadow-sm d-none" style="position: sticky; top: 0; z-index: 1030;">
+        <i class="fas fa-user-secret mr-2"></i>
+        <strong>MODO SOPORTE ACTIVO:</strong> Estás viendo el sistema como <span id="support-company-name" class="badge badge-light text-danger ml-1"></span>
+        <button class="btn btn-sm btn-outline-light ml-3 font-weight-bold" id="btn-exit-support">Salir de Modo Soporte</button>
+    </div>
+
+    <script>
+        // Validación rápida en frontend para mostrar el banner
+        document.addEventListener("DOMContentLoaded", () => {
+            if (sessionStorage.getItem("is_impersonating") === "true") {
+                const banner = document.getElementById("support-mode-banner");
+                const compName = sessionStorage.getItem("impersonating_company_name");
+                if (banner) {
+                    banner.classList.remove("d-none");
+                    document.getElementById("support-company-name").textContent = compName;
+                }
+            }
+
+            // Logica para salir del modo soporte
+            const btnExit = document.getElementById("btn-exit-support");
+            if (btnExit) {
+                btnExit.addEventListener("click", () => {
+                    // 1. Recuperar tokens originales del Superadmin
+                    const adminToken = sessionStorage.getItem("admin_original_token");
+                    const adminRefresh = sessionStorage.getItem("admin_original_refresh");
+
+                    if (adminToken && adminRefresh) {
+                        // 2.LIMPIAR EL STORAGE (Clave para no quedar pegado en la empresa cliente)
+                        localStorage.removeItem("inventariopme_active_company_id");
+                        localStorage.removeItem("inventariopme_active_company");
+                        localStorage.removeItem("inventariopme_user");
+                        localStorage.removeItem("inventariopme_permissions");
+                        localStorage.removeItem("inventariopme_actions");
+                        localStorage.removeItem("inventariopme_roles");
+                        localStorage.removeItem("inventariopme_user_companies");
+
+                        // 3. Restaurar los tokens del Superadmin
+                        localStorage.setItem("inventariopme_access_token", adminToken);
+                        localStorage.setItem("inventariopme_refresh_token", adminRefresh);
+
+                        // 4. Limpiar sesión de soporte
+                        sessionStorage.removeItem("is_impersonating");
+                        sessionStorage.removeItem("admin_original_token");
+                        sessionStorage.removeItem("admin_original_refresh");
+                        sessionStorage.removeItem("impersonating_company_name");
+
+                        // 5. Redirigir al panel de Superadmin
+                        window.location.href = "/frontend-inventario-pme/saas-admin/dashboard";
+                    } else {
+                        window.location.reload();
+                    }
+                });
+            }
+        });
+    </script>
     <!-- Left navbar links -->
     <ul class="navbar-nav align-items-center">
         <li class="nav-item">
@@ -98,6 +154,12 @@ require_once __DIR__ . '/../../config/app.php';
                     <a href="#" class="btn btn-default btn-flat">Perfil</a>
                     <a href="#" id="logout-btn" class="btn btn-danger btn-flat float-right text-white">
                         <i class="fas fa-sign-out-alt mr-1"></i> Cerrar Sesión
+                    </a>
+                </li>
+                <!-- BOTON PANEL SAAS ADMIN (Oculto por defecto) -->
+                <li id="nav-item-saas-admin" class="d-none border-top">
+                    <a href="<?php echo $URL; ?>/saas-admin/dashboard" class="dropdown-item text-center py-2 font-weight-bold" style="color: #4F46E5; background-color: #F8FAFC;">
+                        <i class="fas fa-user-shield mr-1"></i> Ir al Panel SaaS Admin
                     </a>
                 </li>
             </ul>

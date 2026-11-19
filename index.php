@@ -357,6 +357,19 @@ switch ($path) {
         require_once __DIR__ . '/app/views/configuracion/versiones.php';
         break;
 
+
+
+    //RUTAS DEL PANEL SAAS ADMIN
+    case 'saas-admin/dashboard':
+        require_once __DIR__ . '/app/views/saas_admin/dashboard.php';
+        break;
+    case 'saas-admin/tenants':
+        require_once __DIR__ . '/app/views/saas_admin/tenants.php';
+        break;
+
+
+
+
     default:
 
         // Evitar procesar archivos estáticos o directos por error

@@ -2,6 +2,10 @@
 
 ## ⏳ En Proceso / Pendientes
 
+- [] Implementar el filtrado de busquedas para todas las tablas. *(Asignado: )*
+- [] Toca arreglar y mirar un bug que esta pasando que cuando se crea un usuario me dice q la cedula esta repetida sin haber usuarios en esa empresa toca revisar que no este pasando eso en todos los modulos *(Asignado: )*
+- [] Revisar por que cuando se entrar a una empresa como soporte tecnico manda es al login. *(Asignado: )*
+
 ## ✅ Completado
 
 - [x] Conexión al backend e inicio de sesión con redirección al Dashboard. *(Asignado: Jhan)*

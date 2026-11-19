@@ -138,6 +138,14 @@ const ApiClient = (() => {
         if (refreshed) {
           return request(endpoint, options, false);
         } else {
+          //SI ESTAMOS EN MODO SOPORTE NO REDIRIGIR AL LOGIN
+          if (sessionStorage.getItem("is_impersonating") === "true") {
+            console.warn("[API] Token de soporte expirado o invalido. Regresando al panel SaaS...");
+            // Limpiar sesion de soporte y volver al panel
+            sessionStorage.removeItem("is_impersonating");
+            window.location.href = `${Config.BASE_PATH}/saas-admin/dashboard`;
+            return { ok: false, status: 401, success: false};
+          }
           // Si falló el refresh (el refresh token expiró o es inválido)
           // debemos destruir la sesión y mandar al login de inmediato.
           Storage.clear();

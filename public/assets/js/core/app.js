@@ -5,6 +5,7 @@ import AuthService from "../services/auth_service.js";
 import NotificationService from "./notification.js";
 import SidebarController from "../controllers/sidebar/sidebar_controller.js";
 import VersionController from "../controllers/version/version_controller.js";
+import Storage from "../storage/storage.js";
 
 const App = (() => {
   let isBootstrapped = false;
@@ -89,6 +90,27 @@ const App = (() => {
         currentPath
           .replace(basePath, "")
           .replace(/\/+$/, "") || "/dashboard";
+
+
+      const user = Storage.getUser();
+      const isSaaSAdminRouter = normalizedPath.startsWith("/saas-admin");
+
+      //PROTECCION DE RUTAS SAAS ADMIN
+      if (isSaaSAdminRouter) {
+        if (!user || !user.is_superuser) {
+          console.warn("[APP] Acceso denegado. Se requiere privilegios de Superadmin.");
+          AuthGuard.redirectToHome();
+          return false;
+        }
+      }else {
+        //MOSTRAR BOTON EN EL NAVBAR SOLO SI ES SUPERADMIN
+        if (user && user.is_superuser) {
+          const saasAdminBtn = document.getElementById("nav-item-saas-admin");
+          if (saasAdminBtn) {
+            saasAdminBtn.classList.remove("d-none");
+          }
+        }
+      }
 
       const requiredPermission = ROUTE_PERMISSIONS[normalizedPath];
 
