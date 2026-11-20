@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../../config/app.php';
 ?>
 
+<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/components/notifications.css?v=2026">
+
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- BANNER DE MODO SOPORTE (Impersonation) -->
@@ -11,51 +13,40 @@ require_once __DIR__ . '/../../config/app.php';
         <button class="btn btn-sm btn-outline-light ml-3 font-weight-bold" id="btn-exit-support">Salir de Modo Soporte</button>
     </div>
 
-    <script>
-        // Validación rápida en frontend para mostrar el banner
+    <script type="module">
+        import Storage from "<?php echo $URL; ?>/public/assets/js/storage/storage.js";
+        import ApiClient from "<?php echo $URL; ?>/public/assets/js/core/apiClient.js";
+
         document.addEventListener("DOMContentLoaded", () => {
-            if (sessionStorage.getItem("is_impersonating") === "true") {
+            if (Storage.isImpersonating()) {
                 const banner = document.getElementById("support-mode-banner");
-                const compName = sessionStorage.getItem("impersonating_company_name");
+                const backup = Storage.getImpersonationBackup();
+                const compName = backup?.company_name || sessionStorage.getItem("impersonating_company_name") || "Empresa";
                 if (banner) {
                     banner.classList.remove("d-none");
-                    document.getElementById("support-company-name").textContent = compName;
+                    const nameSpan = document.getElementById("support-company-name");
+                    if (nameSpan) nameSpan.textContent = compName;
                 }
             }
 
-            // Logica para salir del modo soporte
             const btnExit = document.getElementById("btn-exit-support");
             if (btnExit) {
-                btnExit.addEventListener("click", () => {
-                    // 1. Recuperar tokens originales del Superadmin
-                    const adminToken = sessionStorage.getItem("admin_original_token");
-                    const adminRefresh = sessionStorage.getItem("admin_original_refresh");
+                btnExit.addEventListener("click", async () => {
+                    btnExit.disabled = true;
+                    btnExit.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Finalizando...';
 
-                    if (adminToken && adminRefresh) {
-                        // 2.LIMPIAR EL STORAGE (Clave para no quedar pegado en la empresa cliente)
-                        localStorage.removeItem("inventariopme_active_company_id");
-                        localStorage.removeItem("inventariopme_active_company");
-                        localStorage.removeItem("inventariopme_user");
-                        localStorage.removeItem("inventariopme_permissions");
-                        localStorage.removeItem("inventariopme_actions");
-                        localStorage.removeItem("inventariopme_roles");
-                        localStorage.removeItem("inventariopme_user_companies");
-
-                        // 3. Restaurar los tokens del Superadmin
-                        localStorage.setItem("inventariopme_access_token", adminToken);
-                        localStorage.setItem("inventariopme_refresh_token", adminRefresh);
-
-                        // 4. Limpiar sesión de soporte
-                        sessionStorage.removeItem("is_impersonating");
-                        sessionStorage.removeItem("admin_original_token");
-                        sessionStorage.removeItem("admin_original_refresh");
-                        sessionStorage.removeItem("impersonating_company_name");
-
-                        // 5. Redirigir al panel de Superadmin
-                        window.location.href = "/frontend-inventario-pme/saas-admin/dashboard";
-                    } else {
-                        window.location.reload();
+                    try {
+                        // Notificar al backend la finalización formal de la sesión de soporte
+                        await ApiClient.post("/api/v1/saas-admin/tenants/impersonate/end/");
+                    } catch (e) {
+                        console.warn("[NAVBAR] Error notificando fin de soporte al backend:", e);
                     }
+
+                    // Restaurar de manera atómica el contexto administrativo
+                    Storage.restoreFromImpersonation();
+
+                    // Redirigir al panel de administración SaaS
+                    window.location.replace("<?php echo $URL; ?>/saas-admin/dashboard");
                 });
             }
         });
@@ -124,7 +115,10 @@ require_once __DIR__ . '/../../config/app.php';
                     </div>
                 </div>
                 <div class="dropdown-divider m-0"></div>
-                <a href="<?php echo $URL; ?>/configuracion" class="dropdown-item dropdown-footer text-center py-2 text-primary font-weight-bold small">
+                <a href="#" class="dropdown-item dropdown-footer text-center py-2 text-primary font-weight-bold small border-bottom" id="navbar-notifications-open-center">
+                    <i class="fas fa-th-list mr-1"></i> Abrir Centro de Notificaciones
+                </a>
+                <a href="<?php echo $URL; ?>/configuracion" class="dropdown-item dropdown-footer text-center py-2 text-secondary font-weight-bold small">
                     <i class="fas fa-history mr-1"></i> Ver historial de versiones
                 </a>
             </div>
@@ -183,9 +177,11 @@ require_once __DIR__ . '/../../config/app.php';
 <script type="module">
     import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js?v=2026';
     import LogoutController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js?v=2026';
+    import NotificationFeedController from '<?php echo $URL; ?>/public/assets/js/controllers/notifications/notification_feed_controller.js?v=2026';
 
     document.addEventListener('DOMContentLoaded', () => {
         NavbarController.init();
         LogoutController.init();
+        NotificationFeedController.init();
     });
 </script>

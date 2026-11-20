@@ -38,13 +38,13 @@ const VersionController = (() => {
         return;
       }
 
-      const installedVersion = response.installed_version || response.version || "1.0.0";
+      const installedVersion = response.latest_version || response.installed_version || response.version || "1.0.0";
 
-      // Inyectar versión instalada en el pie de página
+      // Inyectar versión en el pie de página
       if (versionElement) {
         versionElement.textContent = `v${installedVersion}`;
         versionElement.style.cursor = "pointer";
-        versionElement.title = `Versión instalada v${installedVersion}. Haga clic para ver detalles del sistema.`;
+        versionElement.title = `Versión del software v${installedVersion}. Haga clic para ver detalles del sistema.`;
         versionElement.onclick = () => showUpdateDetailsModal();
       }
     } catch (error) {

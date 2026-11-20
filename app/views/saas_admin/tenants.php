@@ -5,7 +5,8 @@ require_once __DIR__ . '/../layouts/head.php';
 
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-        <?php require_once __DIR__ . '/../layouts/navbar.php'; ?>
+        <!-- Navbar SaaS Admin Exclusivo -->
+        <?php require_once __DIR__ . '/layouts/navbar.php'; ?>
         <?php require_once __DIR__ . '/layouts/sidebar.php'; ?>
 
         <div class="content-wrapper" style="background-color: #F8FAFC;">
@@ -88,7 +89,8 @@ require_once __DIR__ . '/../layouts/head.php';
         import SaaSAdminTenantController from "<?php echo $URL; ?>/public/assets/js/controllers/saas_admin/tenants_controller.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
-            await App.bootstrap();
+            const ok = await App.bootstrap();
+            if (!ok) return;
             SaaSAdminTenantController.init();
         });
     </script>

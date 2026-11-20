@@ -118,6 +118,35 @@ const SecurityManager = (() => {
   };
 
   /**
+   * Obtiene la lista de módulos contratados por el plan de la empresa activa.
+   * @returns {string[]|null}
+   */
+  const getContractedModules = () => {
+    return Storage.getContractedModules();
+  };
+
+  /**
+   * Verifica si un módulo está contratado en el plan de la empresa activa.
+   * Soporta retrocompatibilidad (si no hay lista explícita, se permite por defecto).
+   * @param {string} moduleCode
+   * @returns {boolean}
+   */
+  const isModuleContracted = (moduleCode) => {
+    if (!moduleCode) return true;
+    const user = Storage.getUser();
+    if (user && (user.is_superuser || user.is_staff)) return true;
+
+    const contracted = getContractedModules();
+    if (!contracted || !Array.isArray(contracted)) return true;
+
+    let canonical = moduleCode.toLowerCase().trim();
+    if (canonical === "clients") canonical = "customers";
+    if (canonical === "stock") canonical = "inventory";
+
+    return contracted.includes(canonical);
+  };
+
+  /**
    * Escanea el DOM y muestra/oculta los elementos según
    * el permiso que requieren (atributo data-permission).
    * 
@@ -151,6 +180,30 @@ const SecurityManager = (() => {
         el.style.display = "none";
       }
     });
+
+    // Procesar elementos condicionados explícitamente por módulo contratado
+    const moduleElements = document.querySelectorAll("[data-module]");
+    moduleElements.forEach((el) => {
+      const mod = el.getAttribute("data-module");
+      if (mod && !isModuleContracted(mod)) {
+        el.style.display = "none";
+      }
+    });
+
+    // Colapsar cabeceras o contenedores de menú padre si todos sus submódulos están ocultos
+    const menuParents = document.querySelectorAll(".nav-sidebar li.nav-item");
+    menuParents.forEach((parent) => {
+      const treeview = parent.querySelector(":scope > ul.nav-treeview");
+      if (treeview) {
+        const children = treeview.querySelectorAll(":scope > li.nav-item");
+        if (children.length > 0) {
+          const hasVisibleChild = Array.from(children).some((child) => child.style.display !== "none");
+          if (!hasVisibleChild) {
+            parent.style.display = "none";
+          }
+        }
+      }
+    });
   };
 
   /**
@@ -173,6 +226,8 @@ const SecurityManager = (() => {
   return Object.freeze({
     getPermissions,
     getActions,
+    getContractedModules,
+    isModuleContracted,
     hasPermission,
     hasAction,
     canExport,

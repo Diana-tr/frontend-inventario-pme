@@ -180,7 +180,12 @@ require_once __DIR__ . '/../../config/app.php';
 
                 <footer class="login-footer">
                     <p>Inventario P.M.E v1.13.0 • &copy; <?php echo date('Y'); ?></p>
-                    <a href="#" class="support-link"><i class="fa-regular fa-circle-question" aria-hidden="true"></i> Soporte y Ayuda</a>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <a href="#" class="support-link"><i class="fa-regular fa-circle-question" aria-hidden="true"></i> Soporte y Ayuda</a>
+                        <a href="<?php echo $URL; ?>/saas-admin" class="support-link" style="opacity: 0.75; font-size: 0.75rem;" title="Portal exclusivo para personal administrativo">
+                            <i class="fa-solid fa-shield-halved mr-1" aria-hidden="true"></i> Acceso administrativo SaaS
+                        </a>
+                    </div>
                 </footer>
 
             </div>
@@ -194,7 +199,8 @@ require_once __DIR__ . '/../../config/app.php';
         import LoginController from "<?php echo $URL; ?>/public/assets/js/controllers/auth/login_controller.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
-            await App.bootstrap();
+            const ok = await App.bootstrap();
+            if (!ok) return;
             LoginController.init();
 
             /* ========================================================

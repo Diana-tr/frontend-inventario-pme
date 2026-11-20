@@ -143,6 +143,9 @@ const AuthService = (() => {
           if (parsedContext.roles) {
             Storage.saveRoles(parsedContext.roles);
           }
+          if (parsedContext.contracted_modules) {
+            Storage.saveContractedModules(parsedContext.contracted_modules);
+          }
           if (parsedContext.companies) {
             Storage.saveUserCompanies(parsedContext.companies);
           }
@@ -162,6 +165,9 @@ const AuthService = (() => {
         Storage.savePermissions(response.data.permissions);
         Storage.saveActions(response.data.actions || {});
         Storage.saveRoles(response.data.roles || []);
+        if (response.data.contracted_modules) {
+          Storage.saveContractedModules(response.data.contracted_modules);
+        }
         if (response.data.companies) {
           Storage.saveUserCompanies(response.data.companies);
         }

@@ -14,42 +14,54 @@ import Config from "../config/config.js";
 const Routes = (() => {
   const PATHS = Object.freeze({
     AUTH: Object.freeze({
-      LOGIN: "login.php",
-      LOGOUT: "logout.php",
+      LOGIN: "/login",
+      LOGOUT: "/login",
     }),
 
     DASHBOARD: Object.freeze({
-      HOME: "index.php",
+      HOME: "/dashboard",
+    }),
+
+    SAAS: Object.freeze({
+      LOGIN: "/saas-admin/login",
+      DASHBOARD: "/saas-admin/dashboard",
+      TENANTS: "/saas-admin/tenants",
+      PLANES: "/saas-admin/planes",
+      VERSIONES: "/saas-admin/versiones",
+      EQUIPO: "/saas-admin/equipo",
+      AUDITORIA: "/saas-admin/auditoria",
     }),
 
     SECURITY: Object.freeze({
-      USERS: "views/pages/usuarios/index.php",
-      ROLES: "views/pages/roles/index.php",
-      USER_ROLES: "views/pages/asignacion-roles/index.php",
+      USERS: "/usuarios",
+      ROLES: "/roles",
     }),
 
     CONTACTS: Object.freeze({
-      CUSTOMERS: "views/pages/clientes/index.php",
-      SUPPLIERS: "views/pages/proveedores/index.php",
+      CUSTOMERS: "/clientes",
+      SUPPLIERS: "/proveedores",
     }),
 
     INVENTORY: Object.freeze({
-      CATEGORIES: "views/pages/categorias/index.php",
-      PRODUCTS: "views/pages/productos/index.php",
-      INVENTORY: "views/pages/inventario/index.php",
+      CATEGORIES: "/categorias",
+      PRODUCTS: "/productos",
+      INVENTORY: "/inventario",
     }),
 
     OPERATIONS: Object.freeze({
-      PURCHASES: "views/pages/compras/index.php",
-      SALES: "views/pages/ventas/index.php",
+      PURCHASES: "/compras",
+      SALES: "/ventas",
+      POS: "/ventas/pos",
+      CAJA: "/caja",
     }),
 
-    REPORTS: Object.freeze({
-      HOME: "views/pages/reportes/index.php",
+    FINANCES: Object.freeze({
+      HOME: "/finanzas",
     }),
 
     SETTINGS: Object.freeze({
-      HOME: "views/pages/configuracion/index.php",
+      HOME: "/configuracion",
+      VERSIONS: "/configuracion/versiones",
     }),
   });
 

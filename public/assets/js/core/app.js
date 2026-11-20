@@ -61,57 +61,90 @@ const App = (() => {
       console.log("[APP] Aplicación iniciada.");
 
       const currentPath = window.location.pathname;
-      const basePath = Config.BASE_PATH || "";
-      const loginPath = `${basePath}${Config.LOGIN_PATH}`;
+      const normalizedPath = AuthGuard.getNormalizedPath(currentPath);
+      const isSaaSRoute = normalizedPath.startsWith("/saas-admin");
+      const isSaaSLoginRoute =
+        normalizedPath === "/saas-admin" ||
+        normalizedPath === "/saas-admin/login" ||
+        normalizedPath === "/saas-admin/login.php";
+      const isERPLoginRoute =
+        normalizedPath === "/" ||
+        normalizedPath === "/login" ||
+        normalizedPath === "/index.php";
 
-      // Si estamos en la raíz o en una ruta sin vista real definida, forzamos redirección según auth
-      if (currentPath === `${basePath}/` || currentPath === basePath) {
-        await AuthGuard.requireGuest(); // si es guest, va al login. si está auth, va a dashboard.
+      // ─── 1. Control de Rutas de Login / Guest ───
+      if (isSaaSLoginRoute) {
+        const canProceed = await AuthGuard.requireSaaSGuest();
+        if (!canProceed) return false;
+        isBootstrapped = true;
         return true;
       }
 
-      // Si es el login, requerimos ser guest
-      if (currentPath === loginPath || currentPath.includes("login")) {
-        await AuthGuard.requireGuest();
+      if (isERPLoginRoute) {
+        const canProceed = await AuthGuard.requireGuest();
+        if (!canProceed) return false;
+        isBootstrapped = true;
         return true;
       }
 
-      // Si es cualquier otra vista (dashboard, usuarios, etc), requerimos estar logueados
-      const authenticated = await AuthGuard.requireAuth();
+      // ─── 2. Control de Rutas Protegidas de SaaS Admin ───
+      if (isSaaSRoute) {
+        const authorized = await AuthGuard.requireSaaSAdmin(normalizedPath);
+        if (!authorized) return false;
+
+        // Inicializar VersionController para el footer y permisos DOM en SaaS
+        VersionController.init();
+        SecurityManager.processDomPermissions();
+        isBootstrapped = true;
+        return true;
+      }
+
+      // ─── 3. Control de Rutas Protegidas del ERP ───
+      const authenticated = await AuthGuard.requireAuth("erp");
       if (!authenticated) return false;
 
-      // ─── FASE CRÍTICA: Refrescar permisos desde el backend ───
-      // Consultamos el contexto. `false` permite que use el caché de sessionStorage
-      // y evita llamadas a la API redundantes en cada recarga de página.
+      // ─── Refrescar permisos desde el backend (con caché de sessionStorage) ───
       await AuthService.fetchSecurityContext(false);
 
-      // ─── Verificación de permiso por ruta ───
-      const normalizedPath =
-        currentPath
-          .replace(basePath, "")
-          .replace(/\/+$/, "") || "/dashboard";
-
-
       const user = Storage.getUser();
-      const isSaaSAdminRouter = normalizedPath.startsWith("/saas-admin");
 
-      //PROTECCION DE RUTAS SAAS ADMIN
-      if (isSaaSAdminRouter) {
-        if (!user || !user.is_superuser) {
-          console.warn("[APP] Acceso denegado. Se requiere privilegios de Superadmin.");
-          AuthGuard.redirectToHome();
-          return false;
-        }
-      }else {
-        //MOSTRAR BOTON EN EL NAVBAR SOLO SI ES SUPERADMIN
-        if (user && user.is_superuser) {
-          const saasAdminBtn = document.getElementById("nav-item-saas-admin");
-          if (saasAdminBtn) {
-            saasAdminBtn.classList.remove("d-none");
-          }
+      // Mostrar botón en el navbar del ERP solo si es superadmin o staff
+      if (user && (user.is_superuser || user.is_staff)) {
+        const saasAdminBtn = document.getElementById("nav-item-saas-admin");
+        if (saasAdminBtn) {
+          saasAdminBtn.classList.remove("d-none");
         }
       }
 
+      // ─── Verificación de módulo contratado por ruta en el ERP ───
+      const ROUTE_TO_MODULE = {
+        "/usuarios": "users",
+        "/roles": "roles",
+        "/categorias": "categories",
+        "/clientes": "customers",
+        "/proveedores": "suppliers",
+        "/productos": "products",
+        "/inventario": "inventory",
+        "/compras": "purchases",
+        "/ventas": "sales",
+        "/caja": "cash",
+        "/finanzas": "finance",
+      };
+
+      for (const [routePrefix, moduleCode] of Object.entries(ROUTE_TO_MODULE)) {
+        if (normalizedPath === routePrefix || normalizedPath.startsWith(routePrefix + "/")) {
+          if (!SecurityManager.isModuleContracted(moduleCode)) {
+            console.warn(
+              `[APP] Módulo "${moduleCode}" no contratado en el plan de la empresa. Redirigiendo...`
+            );
+            AuthGuard.redirectToHome("erp");
+            return false;
+          }
+          break;
+        }
+      }
+
+      // ─── Verificación de permiso por ruta en el ERP ───
       const requiredPermission = ROUTE_PERMISSIONS[normalizedPath];
 
       if (requiredPermission) {
@@ -123,7 +156,7 @@ const App = (() => {
           console.warn(
             `[APP] Acceso denegado a "${normalizedPath}": requiere "${requiredPermission}".`
           );
-          AuthGuard.redirectToHome();
+          AuthGuard.redirectToHome("erp");
           return false;
         }
       }
@@ -131,10 +164,10 @@ const App = (() => {
       // Procesar permisos en la vista (Ocultar botones, widgets, etc.)
       SecurityManager.processDomPermissions();
 
-      // ─── Inicializar SidebarController ───
+      // Inicializar SidebarController del ERP
       SidebarController.init();
 
-      // ─── Inicializar VersionController ───
+      // Inicializar VersionController
       VersionController.init();
 
       // ─── Manejo de Cambio de Empresa Multi-Tenant (Registrado una única vez) ───

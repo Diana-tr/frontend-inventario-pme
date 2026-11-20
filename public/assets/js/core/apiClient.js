@@ -90,8 +90,13 @@ const ApiClient = (() => {
     }
 
     // Inyección del contexto de Empresa Activa (Multi-Tenant SaaS)
+    // Se excluye estrictamente si la petición pertenece a la administración SaaS o si estamos en la interfaz SaaS Admin
+    const isSaaSAdminContext =
+      endpoint.includes("/saas-admin/") ||
+      (typeof window !== "undefined" && window.location.pathname.includes("saas-admin"));
+
     const activeCompanyId = Storage.getActiveCompanyId();
-    if (activeCompanyId && !isPublicEndpoint) {
+    if (activeCompanyId && !isPublicEndpoint && !isSaaSAdminContext) {
       headers["X-Company-ID"] = activeCompanyId;
     }
 
@@ -138,18 +143,21 @@ const ApiClient = (() => {
         if (refreshed) {
           return request(endpoint, options, false);
         } else {
-          //SI ESTAMOS EN MODO SOPORTE NO REDIRIGIR AL LOGIN
-          if (sessionStorage.getItem("is_impersonating") === "true") {
-            console.warn("[API] Token de soporte expirado o invalido. Regresando al panel SaaS...");
-            // Limpiar sesion de soporte y volver al panel
-            sessionStorage.removeItem("is_impersonating");
-            window.location.href = `${Config.BASE_PATH}/saas-admin/dashboard`;
-            return { ok: false, status: 401, success: false};
+          // Si estamos en modo soporte / impersonación, restaurar la sesión original del Superadmin y volver
+          if (Storage.isImpersonating()) {
+            console.warn("[API] Token de soporte expirado o inválido. Restaurando contexto administrativo...");
+            Storage.restoreFromImpersonation();
+            window.location.replace(`${Config.BASE_PATH}/saas-admin/dashboard`);
+            return { ok: false, status: 401, success: false };
           }
           // Si falló el refresh (el refresh token expiró o es inválido)
-          // debemos destruir la sesión y mandar al login de inmediato.
+          // debemos destruir la sesión y mandar al login contextual correspondiente de inmediato.
           Storage.clear();
-          window.location.replace(`${Config.BASE_PATH || ""}/login`);
+          const isSaaSContext = typeof window !== "undefined" && window.location.pathname.includes("saas-admin");
+          const targetLogin = isSaaSContext
+            ? `${Config.BASE_PATH}/saas-admin/login`
+            : `${Config.BASE_PATH || ""}/login`;
+          window.location.replace(targetLogin);
           return { ok: false, status: 401, success: false };
         }
       }

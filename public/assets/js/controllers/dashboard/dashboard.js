@@ -7,9 +7,171 @@
 
 import ApiClient from "../../core/apiClient.js";
 import { escapeHtml } from "../../core/utils.js";
+import Storage from "../../storage/storage.js";
+import SecurityManager from "../../core/security.js";
 
 const DashboardController = (() => {
   const DASHBOARD_ENDPOINT = "/api/v1/security/dashboard/";
+
+  let clockIntervalId = null;
+
+  /**
+   * Obtiene el saludo adecuado según la hora local del navegador.
+   * - 05:00 a 11:59: "Buenos días"
+   * - 12:00 a 18:59: "Buenas tardes"
+   * - 19:00 a 04:59: "Buenas noches"
+   * @returns {string}
+   */
+  function getTimeGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      return "Buenos días";
+    } else if (hour >= 12 && hour < 19) {
+      return "Buenas tardes";
+    } else {
+      return "Buenas noches";
+    }
+  }
+
+  /**
+   * Obtiene los datos del usuario autenticado desde Storage.
+   * @returns {Object|null}
+   */
+  function getUserData() {
+    try {
+      return Storage.getUser() || null;
+    } catch (error) {
+      console.warn("[DASHBOARD] Error leyendo datos de usuario:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Obtiene los datos de la empresa activa desde Storage.
+   * @returns {Object|null}
+   */
+  function getActiveCompanyData() {
+    try {
+      return Storage.getActiveCompany() || null;
+    } catch (error) {
+      console.warn("[DASHBOARD] Error leyendo empresa activa:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Renderiza la información de bienvenida en el Hero Banner:
+   * saludo, nombre del usuario y nombre de la empresa activa.
+   */
+  function renderHeroWelcome() {
+    const greetingEl = document.getElementById("hero-greeting");
+    const userNameEl = document.getElementById("hero-user-name");
+    const companyNameEl = document.getElementById("hero-company-name");
+
+    // 1. Saludo dinámico según la hora local
+    if (greetingEl) {
+      greetingEl.textContent = getTimeGreeting();
+    }
+
+    // 2. Nombre de usuario seguro con textContent
+    if (userNameEl) {
+      const user = getUserData();
+      const displayName = user
+        ? (user.first_name || user.name || user.username || "Usuario")
+        : "Usuario";
+      userNameEl.textContent = displayName;
+    }
+
+    // 3. Nombre de la empresa activa
+    if (companyNameEl) {
+      const company = getActiveCompanyData();
+      const companyName = company
+        ? (company.business_name || company.trade_name || company.name || null)
+        : null;
+      companyNameEl.textContent = companyName
+        ? `Panel de Control Operativo — ${companyName}`
+        : "Panel de Control Operativo";
+    }
+  }
+
+  /**
+   * Inicia y gestiona el reloj en tiempo real usando Intl.DateTimeFormat (es-CO).
+   * Se actualiza cada segundo y evita intervalos duplicados.
+   */
+  function startLiveClock() {
+    const clockEl = document.getElementById("hero-live-clock");
+    if (!clockEl) return;
+
+    if (clockIntervalId) {
+      clearInterval(clockIntervalId);
+      clockIntervalId = null;
+    }
+
+    let formatter;
+    try {
+      formatter = new Intl.DateTimeFormat("es-CO", {
+        dateStyle: "full",
+        timeStyle: "medium",
+      });
+    } catch (err) {
+      formatter = new Intl.DateTimeFormat("es-CO", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+    }
+
+    const updateClock = () => {
+      try {
+        const now = new Date();
+        const formatted = formatter.format(now);
+        // Capitalizar la primera letra (ej. "Jueves, 19 de noviembre de 2026...")
+        clockEl.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      } catch (e) {
+        clockEl.textContent = new Date().toLocaleString("es-CO");
+      }
+    };
+
+    updateClock();
+    clockIntervalId = setInterval(updateClock, 1000);
+  }
+
+  /**
+   * Limpia el temporizador del reloj si el componente se destruye o descarga.
+   */
+  function destroyLiveClock() {
+    if (clockIntervalId) {
+      clearInterval(clockIntervalId);
+      clockIntervalId = null;
+    }
+  }
+
+  /**
+   * Inicializa los accesos rápidos y procesa sus permisos mediante SecurityManager.
+   */
+  function initHeroQuickActions() {
+    try {
+      if (typeof SecurityManager !== "undefined" && typeof SecurityManager.processDomPermissions === "function") {
+        SecurityManager.processDomPermissions();
+      }
+    } catch (err) {
+      console.warn("[DASHBOARD] Error aplicando permisos a accesos rápidos:", err);
+    }
+  }
+
+  /**
+   * Orquestador de inicialización del Hero Banner.
+   */
+  function initHeroBanner() {
+    renderHeroWelcome();
+    startLiveClock();
+    initHeroQuickActions();
+  }
 
   const WIDGET_CONFIG = {
     purchases_monthly: { type: "chart", canvasId: "chart-purchases-monthly", emptyId: "chart-purchases-empty" },
@@ -22,6 +184,13 @@ const DashboardController = (() => {
   };
 
   async function init() {
+    // 0. Inicializar Hero Banner inmediatamente (sin depender de red)
+    initHeroBanner();
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", destroyLiveClock, { once: true });
+    }
+
     console.log("[DASHBOARD] Cargando datos del sistema...");
 
     try {
@@ -790,7 +959,7 @@ const DashboardController = (() => {
     if (loader) loader.remove();
   }
 
-  return Object.freeze({ init });
+  return Object.freeze({ init, destroy: destroyLiveClock });
 })();
 
 export default DashboardController;

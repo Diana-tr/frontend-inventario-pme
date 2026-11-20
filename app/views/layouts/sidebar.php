@@ -122,7 +122,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                         <!-- ── Submódulo: Usuarios ── -->
 
-                        <li class="nav-item" data-permission-any="users.view,users.create">
+                        <li class="nav-item" data-module="users" data-permission-any="users.view,users.create">
 
                             <a href="#" class="nav-link">
 
@@ -172,7 +172,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                         <!-- ── Submódulo: Roles y Permisos ── -->
 
-                        <li class="nav-item" data-permission-any="roles.view,roles.create,user_roles.view">
+                        <li class="nav-item" data-module="roles" data-permission-any="roles.view,roles.create,user_roles.view">
 
                             <a href="#" class="nav-link">
 
@@ -230,7 +230,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                      ============================================================ -->
 
-                <li class="nav-item nav-item-module" data-sidebar-module="catalogo-inventario" data-permission-any="categories.view,categories.create,products.view,products.create">
+                <li class="nav-item nav-item-module" data-sidebar-module="catalogo-inventario" data-permission-any="categories.view,categories.create,products.view,products.create,inventory.view,inventory.create">
 
                     <a href="#" class="nav-link">
 
@@ -246,7 +246,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission-any="categories.view,categories.create">
+                        <li class="nav-item" data-module="categories" data-permission-any="categories.view,categories.create">
 
                             <a href="#" class="nav-link">
 
@@ -296,7 +296,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission-any="products.view,products.create">
+                        <li class="nav-item" data-module="products" data-permission-any="products.view,products.create">
 
                             <a href="#" class="nav-link">
 
@@ -346,7 +346,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission-any="inventory.view,inventory.create">
+                        <li class="nav-item" data-module="inventory" data-permission-any="inventory.view,inventory.create">
 
                             <a href="#" class="nav-link">
 
@@ -396,7 +396,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission-any="inventory.view,inventory.create">
+                        <li class="nav-item" data-module="inventory" data-permission-any="inventory.view,inventory.create">
 
                             <a href="#" class="nav-link">
 
@@ -442,7 +442,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                      ============================================================ -->
 
-                <li class="nav-item nav-item-module" data-sidebar-module="ventas-facturacion" data-permission-any="customers.view,customers.create">
+                <li class="nav-item nav-item-module" data-sidebar-module="ventas-facturacion" data-permission-any="customers.view,customers.create,sales.view,sales.create,cash.view,cash.open,cash.create">
 
                     <a href="#" class="nav-link">
 
@@ -458,7 +458,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission-any="customers.view,customers.create">
+                        <li class="nav-item" data-module="customers" data-permission-any="customers.view,customers.create">
 
                             <a href="#" class="nav-link">
 
@@ -504,7 +504,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                         </li>
 
-                        <li class="nav-item" data-permission-any="sales.view,sales.create">
+                        <li class="nav-item" data-module="sales" data-permission-any="sales.view,sales.create">
 
                             <a href="#" class="nav-link">
 
@@ -522,7 +522,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                             <ul class="nav nav-treeview">
 
-                                <li class="nav-item" data-permission="customers.view">
+                                <li class="nav-item" data-permission="sales.view">
 
                                     <a href="<?php echo $URL; ?>/ventas" class="nav-link" data-sidebar-path="/ventas">
 
@@ -558,7 +558,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                                 </li>
 
-                                <li class="nav-item" data-permission="sales.create">
+                                <li class="nav-item" data-module="sales" data-permission-any="sales.view,sales.create">
 
                                     <a href="<?php echo $URL; ?>/ventas/facturas" class="nav-link" data-sidebar-path="/ventas/facturas">
 
@@ -574,7 +574,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                         </li>
 
-                        <li class="nav-item" data-permission-any="cash.view,cash.open,cash.create">
+                        <li class="nav-item" data-module="cash" data-permission-any="cash.view,cash.open,cash.create">
 
                             <a href="#" class="nav-link">
 
@@ -672,7 +672,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission-any="suppliers.view,suppliers.create">
+                        <li class="nav-item" data-module="suppliers" data-permission-any="suppliers.view,suppliers.create">
 
                             <a href="#" class="nav-link">
 
@@ -722,7 +722,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission-any="purchases.view,purchases.create">
+                        <li class="nav-item" data-module="purchases" data-permission-any="purchases.view,purchases.create">
 
                             <a href="#" class="nav-link">
 
@@ -808,7 +808,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission="finance.view">
+                        <li class="nav-item" data-module="finance" data-permission="finance.view">
 
                             <a href="<?php echo $URL; ?>/finanzas" class="nav-link" data-sidebar-path="/finanzas">
 
@@ -820,7 +820,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                         </li>
 
-                        <li class="nav-item" data-permission="finance.view">
+                        <li class="nav-item" data-module="finance" data-permission="finance.view">
 
                             <a href="<?php echo $URL; ?>/finanzas/movimientos" class="nav-link" data-sidebar-path="/finanzas/movimientos">
 
@@ -832,7 +832,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                         </li>
 
-                        <li class="nav-item" data-permission="finance.transfer">
+                        <li class="nav-item" data-module="finance" data-permission="finance.transfer">
 
                             <a href="<?php echo $URL; ?>/finanzas/transferencias" class="nav-link" data-sidebar-path="/finanzas/transferencias">
 
@@ -844,7 +844,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                         </li>
 
-                        <li class="nav-item" data-permission="finance.reconcile">
+                        <li class="nav-item" data-module="finance" data-permission="finance.reconcile">
 
                             <a href="<?php echo $URL; ?>/finanzas/conciliaciones" class="nav-link" data-sidebar-path="/finanzas/conciliaciones">
 
@@ -881,7 +881,7 @@ require_once __DIR__ . '/../../config/app.php';
 
                     <ul class="nav nav-treeview">
 
-                        <li class="nav-item" data-permission="settings.view">
+                        <li class="nav-item" data-module="settings" data-permission="settings.view">
 
                             <a href="<?php echo $URL; ?>/configuracion" class="nav-link" data-sidebar-path="/configuracion">
 

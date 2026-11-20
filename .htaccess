@@ -1,17 +1,25 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Ignorar reescritura para archivos y directorios reales (assets)
+    # 1. Seguridad: Proteger carpetas internas sensibles contra acceso directo vía HTTP
+    RewriteRule ^app(/.*)?$ - [F,L]
+
+    # 2. Enrutamiento explícito para SaaS Admin (evita conflicto con directorio físico en disco)
+    RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^saas-admin(/.*)?$ /frontend-inventario-pme/index.php [QSA,L]
+
+    RewriteRule ^saas-admin(/.*)?$ index.php [QSA,L]
+
+    # 3. Ignorar reescritura para archivos y directorios estáticos reales (assets en /public/)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 
-    # 1. Regla para entorno local XAMPP (cuando se accede vía localhost o 127.0.0.1 con subdirectorio)
+    # 4. Regla general para entorno local XAMPP (cuando se accede vía localhost o 127.0.0.1 con subdirectorio)
     RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
     RewriteRule ^(.*)$ /frontend-inventario-pme/index.php [QSA,L]
 
-    # 2. Regla para entorno de producción (Hosting remoto como InfinityFree en la raíz del dominio)
+    # 5. Regla general para entorno de producción (Hosting remoto en la raíz del dominio)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php [QSA,L]
 </IfModule>
-

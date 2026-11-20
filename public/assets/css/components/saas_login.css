@@ -1,0 +1,526 @@
+/**
+ * ============================================================
+ * SaaS Admin Enterprise - Login Styles (CSS3 Puro)
+ * Proyecto P.M.E. — Plataforma SaaS Multi-Tenant
+ * ============================================================
+ * Estándar Enterprise Premium: Glassmorphism, profundidad visual,
+ * micro-resplandores y contraste optimizado WCAG AA/AAA.
+ */
+
+:root {
+    --saas-bg-deep: #070D19;
+    --saas-bg-slate: #0F172A;
+    --saas-card-bg: rgba(15, 23, 42, 0.85);
+    --saas-input-bg: #1E293B;
+    --saas-input-hover: #243049;
+    --saas-primary: #2563EB;
+    --saas-primary-hover: #1D4ED8;
+    --saas-accent: #38BDF8;
+    --saas-accent-glow: rgba(56, 189, 248, 0.35);
+    --saas-primary-glow: rgba(37, 99, 235, 0.4);
+    --saas-border-card: rgba(255, 255, 255, 0.1);
+    --saas-border-input: #334155;
+    --saas-border-input-hover: #475569;
+    --saas-text-white: #FFFFFF;
+    --saas-text-main: #F8FAFC;
+    --saas-text-muted: #94A3B8;
+    --saas-text-dim: #64748B;
+    --saas-danger: #EF4444;
+    --saas-success: #10B981;
+}
+
+/* ============================================================
+   1. FONDO DE LA PÁGINA: PROFUNDIDAD Y RESPLANDOR
+   ============================================================ */
+body.layout--saas-auth {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: var(--saas-bg-deep);
+    font-family: var(--font-family, 'Plus Jakarta Sans', sans-serif);
+    color: var(--saas-text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.saas-login-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.25rem;
+    background-color: var(--saas-bg-deep);
+    /* Malla de profundidad con gradientes radiales y textura sutil de cuadrícula */
+    background-image: 
+        radial-gradient(circle at 12% 15%, rgba(37, 99, 235, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 88% 85%, rgba(29, 78, 216, 0.15) 0%, transparent 48%),
+        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.95) 0%, #070D19 100%),
+        linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    z-index: 1;
+}
+
+/* Glow superior izquierdo */
+.saas-login-wrapper::before {
+    content: "";
+    position: fixed;
+    top: -120px;
+    left: -120px;
+    width: 480px;
+    height: 480px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.28) 0%, rgba(37, 99, 235, 0) 70%);
+    filter: blur(65px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Glow inferior derecho */
+.saas-login-wrapper::after {
+    content: "";
+    position: fixed;
+    bottom: -120px;
+    right: -120px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(29, 78, 216, 0.24) 0%, rgba(37, 99, 235, 0) 70%);
+    filter: blur(70px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ============================================================
+   2. LA TARJETA: GLASSMORPHISM PREMIUM
+   ============================================================ */
+.saas-login-card {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--saas-card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--saas-border-card);
+    border-top: 3px solid var(--saas-primary);
+    border-radius: 18px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 0 40px rgba(37, 99, 235, 0.12);
+    overflow: hidden;
+    z-index: 1;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.saas-login-card:hover {
+    box-shadow: 
+        0 30px 60px -15px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 0 50px rgba(37, 99, 235, 0.2);
+}
+
+/* ============================================================
+   3. HEADER DE LA TARJETA
+   ============================================================ */
+.saas-login-header {
+    padding: 2.25rem 2rem 1.25rem 2rem;
+    text-align: center;
+    position: relative;
+}
+
+/* Pill badge superior con icono de escudo */
+.saas-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(37, 99, 235, 0.14);
+    color: #60A5FA;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 14px rgba(37, 99, 235, 0.2);
+    margin-bottom: 1.25rem;
+}
+
+.saas-badge-pill i {
+    font-size: 0.75rem;
+    color: #38BDF8;
+}
+
+.saas-pulse-dot {
+    width: 7px;
+    height: 7px;
+    background-color: #38BDF8;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #38BDF8;
+    animation: saas-pulse-anim 2s infinite ease-in-out;
+}
+
+@keyframes saas-pulse-anim {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* Logo en círculo blanco */
+.saas-logo-container {
+    width: 76px;
+    height: 76px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem auto;
+    padding: 8px;
+    box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.4),
+        0 0 0 3px rgba(37, 99, 235, 0.35);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.saas-logo-container:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        0 14px 30px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(37, 99, 235, 0.55);
+}
+
+.saas-brand-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.saas-title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--saas-text-white);
+    margin: 0 0 0.35rem 0;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+.saas-subtitle {
+    font-size: 0.85rem;
+    color: var(--saas-text-muted);
+    margin: 0;
+    line-height: 1.45;
+}
+
+/* ============================================================
+   4. CUERPO DEL FORMULARIO E INPUTS
+   ============================================================ */
+.saas-login-body {
+    padding: 1.25rem 2rem 2rem 2rem;
+}
+
+.saas-form-group {
+    margin-bottom: 1.35rem;
+    text-align: left;
+}
+
+.saas-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #CBD5E1;
+    margin-bottom: 0.45rem;
+    letter-spacing: -0.01em;
+}
+
+/* Contenedor relativo para posicionar iconos de forma blindada */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-with-icon .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--saas-text-muted);
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    line-height: 1;
+}
+
+.input-with-icon:focus-within .input-icon {
+    color: #38BDF8;
+}
+
+/* Inputs oscuros estilizados */
+.input-with-icon input.saas-input,
+.saas-input {
+    width: 100% !important;
+    height: 48px !important;
+    background-color: var(--saas-input-bg) !important;
+    border: 1.5px solid var(--saas-border-input) !important;
+    border-radius: 10px !important;
+    color: var(--saas-text-main) !important;
+    font-size: 0.94rem !important;
+    font-family: inherit !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    padding-left: 46px !important;
+    padding-right: 46px !important;
+    box-sizing: border-box !important;
+    transition: 
+        border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.saas-input:hover {
+    border-color: var(--saas-border-input-hover) !important;
+    background-color: var(--saas-input-hover) !important;
+}
+
+.saas-input:focus {
+    outline: none !important;
+    border-color: var(--saas-primary) !important;
+    background-color: var(--saas-input-bg) !important;
+    box-shadow: 
+        0 0 0 3.5px rgba(37, 99, 235, 0.35),
+        0 0 16px rgba(37, 99, 235, 0.2) !important;
+}
+
+.saas-input::placeholder {
+    color: var(--saas-text-dim) !important;
+    font-size: 0.9rem;
+}
+
+/* Normalización de autofill en modo oscuro */
+.saas-input:-webkit-autofill,
+.saas-input:-webkit-autofill:hover, 
+.saas-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #1E293B inset !important;
+    -webkit-text-fill-color: #F8FAFC !important;
+    border-color: var(--saas-primary) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Botón flotante para ver / ocultar contraseña */
+.saas-toggle-pass,
+.input-with-icon .toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--saas-text-dim);
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, transform 0.15s ease;
+    z-index: 3;
+}
+
+.saas-toggle-pass:hover,
+.input-with-icon .toggle-password:hover {
+    color: var(--saas-text-main);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.saas-toggle-pass:focus,
+.input-with-icon .toggle-password:focus {
+    outline: none;
+    color: var(--saas-accent);
+}
+
+/* Botón de envío con gradiente y resplandor activo */
+.saas-btn-submit {
+    width: 100%;
+    height: 50px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 10px !important;
+    font-size: 0.96rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.015em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4), 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 1.5rem;
+}
+
+.saas-btn-submit:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.55), 0 0 20px rgba(56, 189, 248, 0.35);
+}
+
+.saas-btn-submit:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+.saas-btn-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ============================================================
+   5. DETALLES DE SEGURIDAD Y FOOTER
+   ============================================================ */
+.saas-security-note {
+    font-size: 0.73rem;
+    color: var(--saas-text-dim);
+    text-align: center;
+    margin-top: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    line-height: 1.35;
+}
+
+.saas-security-note i {
+    color: var(--saas-success);
+    font-size: 0.8rem;
+}
+
+.saas-login-footer {
+    padding: 1.15rem 2rem;
+    background: rgba(7, 13, 25, 0.7);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+}
+
+.saas-erp-link {
+    color: var(--saas-accent);
+    text-decoration: none !important;
+    font-weight: 600;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.saas-erp-link:hover {
+    color: #93C5FD;
+    transform: translateX(-2px);
+}
+
+.saas-footer-copy {
+    color: var(--saas-text-dim);
+    font-size: 0.72rem;
+}
+
+/* Alerta inline (fallback accesible) */
+.saas-alert {
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.4;
+}
+
+.saas-alert-danger {
+    background-color: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #FCA5A5;
+}
+
+/* ============================================================
+   6. TEMA SWEETALERT2 PARA SAAS ADMIN
+   ============================================================ */
+.saas-swal-dark {
+    background: #0F172A !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 18px !important;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.85),
+        0 0 35px rgba(37, 99, 235, 0.25) !important;
+}
+
+.saas-swal-dark .swal2-title {
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 1.35rem !important;
+    letter-spacing: -0.01em;
+}
+
+.saas-swal-dark .swal2-html-container {
+    color: #94A3B8 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.5;
+}
+
+.saas-swal-dark .swal2-actions {
+    margin-top: 1.5rem;
+}
+
+/* ============================================================
+   7. ADAPTABILIDAD RESPONSIVA (MOBILE-FIRST)
+   ============================================================ */
+@media (max-width: 480px) {
+    .saas-login-wrapper {
+        padding: 1.5rem 1rem;
+    }
+
+    .saas-login-card {
+        max-width: 100%;
+        border-radius: 14px;
+    }
+
+    .saas-login-header {
+        padding: 1.75rem 1.25rem 1rem 1.25rem;
+    }
+
+    .saas-login-body {
+        padding: 1rem 1.25rem 1.5rem 1.25rem;
+    }
+
+    .saas-login-footer {
+        padding: 1rem 1.25rem;
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+
+    .saas-title {
+        font-size: 1.35rem;
+    }
+
+    .saas-logo-container {
+        width: 68px;
+        height: 68px;
+    }
+}

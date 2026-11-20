@@ -10,8 +10,8 @@ require_once __DIR__ . '/../layouts/head.php';
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
 
-        <!-- Navbar Global (Reutilizado) -->
-        <?php require_once __DIR__ . '/../layouts/navbar.php'; ?>
+        <!-- Navbar SaaS Admin Exclusivo -->
+        <?php require_once __DIR__ . '/layouts/navbar.php'; ?>
 
         <!-- Sidebar SaaS (Nuevo) -->
         <?php require_once __DIR__ . '/layouts/sidebar.php'; ?>
@@ -85,6 +85,53 @@ require_once __DIR__ . '/../layouts/head.php';
                             </div>
                         </div>
 
+                        <!-- Fila 1b: KPIs Secundarios -->
+                        <div class="row mt-3">
+                            <!-- Total Usuarios -->
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-gradient-indigo shadow-sm" style="border-radius: 12px;">
+                                    <div class="inner">
+                                        <h3 id="kpi_total_users">0</h3>
+                                        <p>Usuarios Totales</p>
+                                    </div>
+                                    <div class="icon"><i class="fas fa-users"></i></div>
+                                </div>
+                            </div>
+
+                            <!-- Empresas Activas -->
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-gradient-teal shadow-sm" style="border-radius: 12px;">
+                                    <div class="inner">
+                                        <h3 id="kpi_active_companies">0</h3>
+                                        <p>Empresas Activas</p>
+                                    </div>
+                                    <div class="icon"><i class="fas fa-check-double"></i></div>
+                                </div>
+                            </div>
+
+                            <!-- Empresas Suspendidas -->
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-gradient-orange shadow-sm" style="border-radius: 12px;">
+                                    <div class="inner">
+                                        <h3 id="kpi_suspended_companies">0</h3>
+                                        <p>Empresas Suspendidas</p>
+                                    </div>
+                                    <div class="icon"><i class="fas fa-ban"></i></div>
+                                </div>
+                            </div>
+
+                            <!-- Ingresos del Mes -->
+                            <div class="col-lg-3 col-6">
+                                <div class="small-box bg-gradient-purple shadow-sm" style="border-radius: 12px;">
+                                    <div class="inner">
+                                        <h3 id="kpi_month_revenue">$0</h3>
+                                        <p>Ingresos del Mes</p>
+                                    </div>
+                                    <div class="icon"><i class="fas fa-chart-bar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Fila 2: Gráfico y Pagos -->
                         <div class="row mt-3">
                             <div class="col-lg-7">
@@ -141,7 +188,8 @@ require_once __DIR__ . '/../layouts/head.php';
         import SaasDashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/saas_admin/dashboard_controller.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
-            await App.bootstrap();
+            const ok = await App.bootstrap();
+            if (!ok) return;
             SaasDashboardController.init();
         });
     </script>

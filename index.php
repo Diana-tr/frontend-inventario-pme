@@ -360,32 +360,58 @@ switch ($path) {
 
 
     //RUTAS DEL PANEL SAAS ADMIN
+    case 'saas-admin':
+    case 'saas-admin/login':
+    case 'saas-admin/login.php':
+        require_once __DIR__ . '/app/views/saas_admin/login.php';
+        break;
+
     case 'saas-admin/dashboard':
         require_once __DIR__ . '/app/views/saas_admin/dashboard.php';
         break;
+
     case 'saas-admin/tenants':
         require_once __DIR__ . '/app/views/saas_admin/tenants.php';
+        break;
+
+    case 'saas-admin/planes':
+    case 'saas-admin/suscripciones':
+        require_once __DIR__ . '/app/views/saas_admin/planes.php';
+        break;
+
+    case 'saas-admin/empresa-detalle':
+        require_once __DIR__ . '/app/views/saas_admin/empresa_detalle.php';
+        break;
+
+    case 'saas-admin/versiones':
+        require_once __DIR__ . '/app/views/saas_admin/versiones.php';
+        break;
+
+    case 'saas-admin/equipo':
+    case 'saas-admin/equipo/listar':
+        require_once __DIR__ . '/app/views/saas_admin/equipo/listar.php';
+        break;
+
+    case 'saas-admin/equipo/gestionar':
+    case 'saas-admin/equipo/crear':
+        require_once __DIR__ . '/app/views/saas_admin/equipo/gestionar.php';
+        break;
+
+    case 'saas-admin/auditoria':
+        require_once __DIR__ . '/app/views/saas_admin/auditoria.php';
         break;
 
 
 
 
     default:
-
-        // Evitar procesar archivos estáticos o directos por error
-
-        if (file_exists(__DIR__ . '/' . $path) && is_file(__DIR__ . '/' . $path)) {
-
+        // Permitir únicamente la entrega de recursos estáticos reales alojados en /public/
+        if (strpos($path, 'public/') === 0 && file_exists(__DIR__ . '/' . $path) && is_file(__DIR__ . '/' . $path)) {
             return false;
-
         }
 
-
-
         http_response_code(404);
-
         echo "404 - Página no encontrada: " . htmlspecialchars($path);
-
         break;
 
 }

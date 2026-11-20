@@ -27,7 +27,13 @@ const SaasDashboardController = (() => {
         $("#kpi_mrr").text(formatCurrency(data.mrr));
         $("#kpi_total_companies").text(data.total_companies || 0);
         $("#kpi_active_trials").text(data.active_trials || 0);
-        $("#kpi_active_subscriptions").text(data.active_subscriptions || 0);
+        $("#kpi_active_subscriptions").text(data.active_paid_subscriptions || 0);
+
+        // KPIs Secundarios
+        $("#kpi_total_users").text(data.total_users || 0);
+        $("#kpi_active_companies").text(data.active_companies || 0);
+        $("#kpi_suspended_companies").text(data.suspended_companies || 0);
+        $("#kpi_month_revenue").text(formatCurrency(data.current_month_revenue));
 
         // Renderizar Tabla de Últimos Pagos (si el backend los devuelve)
         if (data.recent_payments) {
@@ -66,13 +72,21 @@ const SaasDashboardController = (() => {
     }
 
     pagos.forEach((p) => {
-      tbody.append(`
-        <tr>
-          <td class="font-weight-bold text-dark">${p.subscription__company__business_name || "N/A"}</td>
-          <td class="text-success font-weight-bold">${formatCurrency(p.amount)}</td>
-          <td class="text-muted small">${new Date(p.payment_date).toLocaleDateString()}</td>
-        </tr>
-      `);
+      const companyName = p.subscription__company__business_name || p.company_name || "N/A";
+      const tr = document.createElement("tr");
+      const tdName = document.createElement("td");
+      tdName.className = "font-weight-bold text-dark";
+      tdName.textContent = companyName;
+      const tdAmount = document.createElement("td");
+      tdAmount.className = "text-success font-weight-bold";
+      tdAmount.textContent = formatCurrency(p.amount);
+      const tdDate = document.createElement("td");
+      tdDate.className = "text-muted small";
+      tdDate.textContent = p.payment_date ? new Date(p.payment_date).toLocaleDateString() : "---";
+      tr.appendChild(tdName);
+      tr.appendChild(tdAmount);
+      tr.appendChild(tdDate);
+      tbody.append(tr);
     });
   }
 
@@ -88,18 +102,20 @@ const SaasDashboardController = (() => {
       type: "doughnut",
       data: {
         labels: [
-          "Suscripciones Activas",
+          "Suscripciones Pagadas",
           "En Prueba (Trial)",
-          "Empresas Totales",
+          "Empresas Activas",
+          "Empresas Suspendidas",
         ],
         datasets: [
           {
             data: [
-              data.active_subscriptions || 0,
+              data.active_paid_subscriptions || 0,
               data.active_trials || 0,
-              data.total_companies || 0,
+              data.active_companies || 0,
+              data.suspended_companies || 0,
             ],
-            backgroundColor: ["#10B981", "#F59E0B", "#3B82F6"],
+            backgroundColor: ["#10B981", "#F59E0B", "#3B82F6", "#EF4444"],
             borderWidth: 2,
             borderColor: "#ffffff",
           },
@@ -115,13 +131,13 @@ const SaasDashboardController = (() => {
     });
   }
 
-  return {
+  return Object.freeze({
     init: () => {
       // En un panel de Superadmin, el permiso está a nivel de Backend (is_superuser).
       // En el frontend, solo validamos que el usuario tenga la sesión activa.
       cargarMetricas();
     },
-  };
+  });
 })();
 
 export default SaasDashboardController;

@@ -3,6 +3,7 @@ import NotificationService from "../../core/notification.js";
 import SecurityManager from "../../core/security.js";
 import DataTableHelper from "../../utils/DataTableHelper.js";
 import Storage from "../../storage/storage.js";
+import Config from "../../config/config.js";
 
 const SaaSAdminTenantController = (() => {
   const TABLE_ID = "tbl_saas_tenants";
@@ -149,6 +150,9 @@ const SaaSAdminTenantController = (() => {
 
     return `
       <div class="btn-group btn-group-sm">
+        <a href="${Config.BASE_PATH}/saas-admin/empresa-detalle?id=${id}" class="btn btn-outline-secondary" title="Ver Detalle Completo">
+          <i class="fas fa-eye"></i>
+        </a>
         <button type="button" class="btn btn-outline-info btn-impersonate" 
                 title="Entrar como Soporte" data-id="${id}" data-name="${name}">
           <i class="fas fa-user-secret"></i>
@@ -287,44 +291,46 @@ const SaaSAdminTenantController = (() => {
             return;
           }
 
-          //3. Guardar el token ORIGINAL del Superadmin antes de sobreescribir
-          const originalAdminToken = Storage.getAccessToken();
-          const originalRefreshToken = Storage.getRefreshToken();
+          // 1. Guardar copia de seguridad completa del contexto administrativo antes de impersonar
+          Storage.saveImpersonationBackup({
+            admin_access_token: Storage.getAccessToken(),
+            admin_refresh_token: Storage.getRefreshToken(),
+            admin_user: Storage.getUser(),
+            admin_permissions: Storage.getPermissions(),
+            admin_roles: Storage.getRoles(),
+            company_id: companyId,
+            company_name: companyName,
+            target_user: targetUser,
+          });
 
-          //4. Guardar el token de soporte y la nueva empresa
-          Storage.saveTokens(supportToken, null); // Sin refresh token
+          // 2. Limpiar caché previo de contexto para evitar permisos residuales
+          sessionStorage.removeItem("inventariopme_security_context");
+
+          // 3. Guardar el token de soporte temporal y la empresa activa confinada
+          Storage.saveTokens(supportToken, "");
           Storage.saveActiveCompanyId(companyId);
 
-          //5. Actualizar el usuario (mapeamos al formato del frontend)
+          // 4. Actualizar usuario al usuario impersonado
           if (targetUser) {
             Storage.saveUser({
               id_user: targetUser.id_user,
               username: targetUser.username,
               email: targetUser.email,
-              first_name: targetUser.full_name?.split(" ")[0] || "",
-              last_name:
-                targetUser.full_name?.split(" ").slice(1).join(" ") || "",
-              is_superuser: false, // El usuario impersonado NO es superuser
+              first_name: targetUser.full_name?.split(" ")[0] || targetUser.username,
+              last_name: targetUser.full_name?.split(" ").slice(1).join(" ") || "",
+              is_superuser: false,
+              is_staff: false,
             });
           }
-
-          //6. Guardar sesión de soporte en sessionStorage
-          sessionStorage.setItem("is_impersonating", "true");
-          sessionStorage.setItem("admin_original_token", originalAdminToken);
-          sessionStorage.setItem(
-            "admin_original_refresh",
-            originalRefreshToken,
-          ); // Corregido el nombre de la variable
-          sessionStorage.setItem("impersonating_company_name", companyName);
 
           NotificationService.toastSuccess(
             `Entrando a ${companyName} como soporte...`,
           );
 
-          //7. Redirigir al dashboard
+          // 5. Redirigir al dashboard del ERP
           setTimeout(() => {
-            window.location.href = "/frontend-inventario-pme/dashboard";
-          }, 1000);
+            window.location.href = `${Config.BASE_PATH}/dashboard`;
+          }, 800);
         } else {
           NotificationService.error(
             NotificationService.getApiErrorMessage(response),

@@ -27,6 +27,88 @@ require_once __DIR__ . '/../layouts/head.php';
                 <div class="container-fluid">
 
                     <!-- ═══════════════════════════════════════════════
+                         HERO BANNER — Bienvenida y Accesos Rápidos
+                         ═══════════════════════════════════════════════ -->
+                    <div class="row mb-4" id="dashboard-hero-row">
+                        <div class="col-12">
+                            <div class="hero-banner shadow-sm" role="region" aria-label="Bienvenida y accesos rápidos">
+                                <div class="hero-banner__overlay" aria-hidden="true"></div>
+                                <div class="hero-banner__content">
+                                    
+                                    <!-- A. Área de Bienvenida -->
+                                    <div class="hero-banner__welcome">
+                                        <div class="hero-banner__badge" role="status">
+                                            <span class="hero-banner__pulse-dot" aria-hidden="true"></span>
+                                            <span id="hero-company-name">Panel de Control Operativo</span>
+                                        </div>
+                                        <h1 class="hero-banner__title">
+                                            <span id="hero-greeting">Bienvenido</span>, <span id="hero-user-name" class="hero-banner__highlight">Usuario</span>
+                                        </h1>
+                                        <p class="hero-banner__datetime mb-0">
+                                            <i class="far fa-calendar-alt mr-1" aria-hidden="true"></i>
+                                            <span id="hero-live-clock">--</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- B. Área de Accesos Rápidos -->
+                                    <div class="hero-banner__actions" role="toolbar" aria-label="Accesos rápidos del sistema">
+                                        
+                                        <!-- 1. Punto de Venta (POS) -->
+                                        <a href="<?php echo $URL; ?>/ventas/pos" 
+                                           class="hero-action-btn" 
+                                           data-permission="sales.create" 
+                                           role="button"
+                                           title="Abrir terminal de Punto de Venta">
+                                            <div class="hero-action-btn__icon">
+                                                <i class="fas fa-cash-register" aria-hidden="true"></i>
+                                            </div>
+                                            <span class="hero-action-btn__text">Punto de Venta (POS)</span>
+                                        </a>
+
+                                        <!-- 2. Registrar Venta -->
+                                        <a href="<?php echo $URL; ?>/ventas/crear" 
+                                           class="hero-action-btn" 
+                                           data-permission="sales.create" 
+                                           role="button"
+                                           title="Crear nueva factura de venta">
+                                            <div class="hero-action-btn__icon">
+                                                <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                                            </div>
+                                            <span class="hero-action-btn__text">Registrar Venta</span>
+                                        </a>
+
+                                        <!-- 3. Abrir Caja -->
+                                        <a href="<?php echo $URL; ?>/caja" 
+                                           class="hero-action-btn" 
+                                           data-permission-any="cash.open,cash.create,cash.view" 
+                                           role="button"
+                                           title="Gestionar turno y apertura de caja">
+                                            <div class="hero-action-btn__icon">
+                                                <i class="fas fa-box-open" aria-hidden="true"></i>
+                                            </div>
+                                            <span class="hero-action-btn__text">Abrir Caja</span>
+                                        </a>
+
+                                        <!-- 4. Nuevo Producto -->
+                                        <a href="<?php echo $URL; ?>/productos/crear" 
+                                           class="hero-action-btn" 
+                                           data-permission="products.create" 
+                                           role="button"
+                                           title="Registrar nuevo producto en catálogo">
+                                            <div class="hero-action-btn__icon">
+                                                <i class="fas fa-box" aria-hidden="true"></i>
+                                            </div>
+                                            <span class="hero-action-btn__text">Nuevo Producto</span>
+                                        </a>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════════════════════════════════
                          FILA 1 — KPI Cards Consolidadas (6 tarjetas)
                          ═══════════════════════════════════════════════ -->
                     <div class="row" id="dashboard-kpi-row">
@@ -286,7 +368,8 @@ require_once __DIR__ . '/../layouts/head.php';
         import DashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/dashboard/dashboard.js?v=<?php echo time(); ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
-            await App.bootstrap();
+            const ok = await App.bootstrap();
+            if (!ok) return;
             DashboardController.init();
         });
     </script>

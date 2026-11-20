@@ -38,6 +38,11 @@ const NavbarController = (() => {
   }
 
   async function init() {
+    // Si estamos en el entorno SaaS Admin, no ejecutar la lógica de caja ni multiempresa del ERP
+    if (typeof window !== "undefined" && window.location.pathname.includes("saas-admin")) {
+      return;
+    }
+
     if (isInitialized) return;
     isInitialized = true;
 
@@ -66,7 +71,7 @@ const NavbarController = (() => {
     renderUserData(user);
     await initCompanySwitcher();
     await checkNavbarCajaStatus();
-    initNotifications();
+    // Las notificaciones centralizadas y versiones son gestionadas integralmente por NotificationFeedController
 
     // Escuchar eventos globales de apertura/cierre de caja para sincronizar en tiempo real
     window.addEventListener("cash_session_updated", async () => {
@@ -75,7 +80,7 @@ const NavbarController = (() => {
 
     // Escuchar eventos globales de publicación/actualización de versiones
     window.addEventListener("versions_updated", async () => {
-      await loadNotifications(true);
+      window.dispatchEvent(new CustomEvent("refresh_notifications"));
     });
   }
 

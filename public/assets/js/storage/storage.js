@@ -14,6 +14,7 @@ const Storage = (() => {
     PERMISSIONS: "inventariopme_permissions",
     ACTIONS: "inventariopme_actions",
     ROLES: "inventariopme_roles",
+    CONTRACTED_MODULES: "inventariopme_contracted_modules",
     ACTIVE_COMPANY_ID: "inventariopme_active_company_id",
     ACTIVE_COMPANY: "inventariopme_active_company",
     USER_COMPANIES: "inventariopme_user_companies",
@@ -103,6 +104,18 @@ const Storage = (() => {
   };
 
   /* ===========================
+       Módulos Contratados (Plan)
+    =========================== */
+
+  const saveContractedModules = (modules) => {
+    save(KEYS.CONTRACTED_MODULES, modules);
+  };
+
+  const getContractedModules = () => {
+    return read(KEYS.CONTRACTED_MODULES);
+  };
+
+  /* ===========================
        Multiempresa / Tenants
     =========================== */
 
@@ -139,6 +152,85 @@ const Storage = (() => {
   };
 
   /* ===========================
+       Gestión Segura de Impersonación
+    =========================== */
+
+  const IMPERSONATION_BACKUP_KEY = "inventariopme_admin_backup";
+
+  const saveImpersonationBackup = (backup) => {
+    try {
+      sessionStorage.setItem(IMPERSONATION_BACKUP_KEY, JSON.stringify(backup));
+      sessionStorage.setItem("is_impersonating", "true");
+      sessionStorage.setItem("impersonating_company_name", backup.company_name || "");
+      sessionStorage.setItem("impersonating_company_id", String(backup.company_id || ""));
+    } catch (e) {
+      console.error("[STORAGE] Fallo al guardar backup de impersonación:", e);
+    }
+  };
+
+  const getImpersonationBackup = () => {
+    try {
+      const data = sessionStorage.getItem(IMPERSONATION_BACKUP_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const isImpersonating = () => {
+    return sessionStorage.getItem("is_impersonating") === "true";
+  };
+
+  const restoreFromImpersonation = () => {
+    const backup = getImpersonationBackup();
+    if (!backup) {
+      return false;
+    }
+
+    try {
+      // 1. Restaurar tokens del Superadmin
+      if (backup.admin_access_token) {
+        localStorage.setItem(KEYS.ACCESS_TOKEN, backup.admin_access_token);
+      }
+      if (backup.admin_refresh_token && backup.admin_refresh_token !== "null") {
+        localStorage.setItem(KEYS.REFRESH_TOKEN, backup.admin_refresh_token);
+      } else {
+        localStorage.removeItem(KEYS.REFRESH_TOKEN);
+      }
+
+      // 2. Restaurar usuario admin
+      if (backup.admin_user) {
+        saveUser(backup.admin_user);
+      }
+
+      // 3. Restaurar roles y permisos
+      if (backup.admin_roles) {
+        saveRoles(backup.admin_roles);
+      }
+      if (backup.admin_permissions) {
+        savePermissions(backup.admin_permissions);
+      }
+
+      // 4. Limpiar contexto de empresa cliente
+      localStorage.removeItem(KEYS.ACTIVE_COMPANY_ID);
+      localStorage.removeItem(KEYS.ACTIVE_COMPANY);
+      localStorage.removeItem(KEYS.USER_COMPANIES);
+
+      // 5. Limpiar caché de sesión de soporte
+      sessionStorage.removeItem("inventariopme_security_context");
+      sessionStorage.removeItem("is_impersonating");
+      sessionStorage.removeItem("impersonating_company_name");
+      sessionStorage.removeItem("impersonating_company_id");
+      sessionStorage.removeItem(IMPERSONATION_BACKUP_KEY);
+
+      return true;
+    } catch (e) {
+      console.error("[STORAGE] Error restaurando sesión de Superadmin:", e);
+      return false;
+    }
+  };
+
+  /* ===========================
        Limpieza
     =========================== */
 
@@ -169,12 +261,20 @@ const Storage = (() => {
     saveRoles,
     getRoles,
 
+    saveContractedModules,
+    getContractedModules,
+
     saveActiveCompanyId,
     getActiveCompanyId,
     saveActiveCompany,
     getActiveCompany,
     saveUserCompanies,
     getUserCompanies,
+
+    saveImpersonationBackup,
+    getImpersonationBackup,
+    isImpersonating,
+    restoreFromImpersonation,
 
     clear,
   });

@@ -1,0 +1,167 @@
+/**
+ * ============================================================
+ * Inventario P.M.E. — Sistema Centralizado de Notificaciones
+ * notifications.css
+ * ============================================================
+ */
+
+/* Campanita y Badge animado */
+.notification-bell-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.notification-bell-btn:hover {
+  transform: scale(1.08);
+}
+
+.notification-badge-pulse {
+  animation: notif-pulse 2s infinite;
+}
+
+@keyframes notif-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* Dropdown de la campanita en Navbar */
+.notification-dropdown-menu {
+  width: 380px !important;
+  max-width: 90vw !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.notification-dropdown-header {
+  padding: 12px 16px;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-dropdown-footer {
+  padding: 10px 16px;
+  background-color: #F8FAFC;
+  border-top: 1px solid #E2E8F0;
+  text-align: center;
+}
+
+.notification-item-card {
+  display: block;
+  padding: 12px 16px;
+  border-bottom: 1px solid #F1F5F9;
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: background-color 0.15s ease, border-left-color 0.15s ease;
+  position: relative;
+}
+
+.notification-item-card:hover {
+  background-color: #F8FAFC;
+}
+
+.notification-item-card.is-unread {
+  background-color: #F0FDF4;
+  border-left: 3px solid #10B981;
+}
+
+.notification-item-card.is-unread.priority-critical {
+  background-color: #FEF2F2;
+  border-left: 3px solid #EF4444;
+}
+
+.notification-item-card.is-unread.priority-warning {
+  background-color: #FFFBEB;
+  border-left: 3px solid #F59E0B;
+}
+
+.notification-unread-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #10B981;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 6px;
+}
+
+.notification-item-card.priority-critical .notification-unread-dot {
+  background-color: #EF4444;
+}
+
+.notification-item-card.priority-warning .notification-unread-dot {
+  background-color: #F59E0B;
+}
+
+/* Categorías funcionales */
+.notif-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.notif-cat-INVENTORY { background-color: #ECFDF5; color: #047857; }
+.notif-cat-SALES { background-color: #EFF6FF; color: #1D4ED8; }
+.notif-cat-PURCHASES { background-color: #F5F3FF; color: #6D28D9; }
+.notif-cat-CASH { background-color: #FFFBEB; color: #B45309; }
+.notif-cat-FINANCE { background-color: #EEF2FF; color: #4338CA; }
+.notif-cat-SECURITY { background-color: #FFF1F2; color: #BE123C; }
+.notif-cat-SUBSCRIPTION { background-color: #FEF3C7; color: #92400E; }
+.notif-cat-SYSTEM { background-color: #F1F5F9; color: #334155; }
+.notif-cat-CUSTOMERS { background-color: #F0FDFA; color: #0F766E; }
+.notif-cat-SUPPLIERS { background-color: #FAF5FF; color: #7E22CE; }
+
+/* Modal Centro de Notificaciones */
+#modalNotificationCenter .modal-dialog {
+  max-width: 800px;
+}
+
+#modalNotificationCenter .modal-content {
+  border-radius: 16px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+#modalNotificationCenter .modal-header {
+  background-color: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  border-radius: 16px 16px 0 0;
+  padding: 16px 24px;
+}
+
+#modalNotificationCenter .nav-tabs {
+  border-bottom: 2px solid #E2E8F0;
+}
+
+#modalNotificationCenter .nav-tabs .nav-link {
+  border: none;
+  color: #64748B;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+#modalNotificationCenter .nav-tabs .nav-link.active {
+  color: #2563EB;
+  border-bottom: 2px solid #2563EB;
+  background: transparent;
+}
