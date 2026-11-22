@@ -37,7 +37,7 @@ const Config = Object.freeze({
   //   simplemente actualizamos esta URL aqui.
   API_BASE_URL: isLocalhost
     ? "http://127.0.0.1:8000"
-    : "http://127.0.0.1:8000",
+    : "https://inventario-p-m-e-back-end.onrender.com",
 });
 
 export default Config;

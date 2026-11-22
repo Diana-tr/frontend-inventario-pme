@@ -6,6 +6,7 @@ import { escapeHtml } from "../../core/utils.js";
 const CajaIndexController = (() => {
   let currentSessionId = null;
   let currentExpectedBalance = 0;
+  let movimientosSesionCache = [];
 
   function formatCurrency(amount) {
     return new Intl.NumberFormat("es-CO", {
@@ -18,6 +19,7 @@ const CajaIndexController = (() => {
   function formatDate(isoString) {
     if (!isoString) return "---";
     const d = new Date(isoString);
+    if (Number.isNaN(d.getTime())) return String(isoString);
     return d.toLocaleString("es-CO");
   }
 
@@ -41,6 +43,170 @@ const CajaIndexController = (() => {
     }
   }
 
+  async function cargarCuentasFiltro() {
+    const select = $("#filtro_cuenta");
+    if (!select.length) return;
+
+    try {
+      const mod = await import("../../services/finanzas_service.js");
+      const FinanzasService = mod.default;
+      if (!FinanzasService || typeof FinanzasService.listarCuentas !== "function") return;
+
+      const resp = await FinanzasService.listarCuentas();
+      if (resp && resp.success && resp.data) {
+        const currentVal = select.val();
+        select.find("option:not(:first)").remove();
+        const accounts = Array.isArray(resp.data) ? resp.data : (resp.data.results || []);
+        accounts.forEach((acc) => {
+          const id = acc.id_financial_account ?? acc.id ?? "";
+          const name = acc.name || acc.account_name || "Cuenta";
+          if (id !== "") {
+            select.append(`<option value="${escapeHtml(String(id))}">${escapeHtml(name)}</option>`);
+          }
+        });
+        if (currentVal) {
+          select.val(currentVal);
+        }
+      }
+    } catch (err) {
+      console.warn("Cuentas filtro no disponibles:", err);
+    }
+  }
+
+  function obtenerFechaLocalYYYYMMDD(rawDate) {
+    if (!rawDate) return "";
+    if (typeof rawDate === "string" && /^\d{4}-\d{2}-\d{2}/.test(rawDate)) {
+      return rawDate.slice(0, 10);
+    }
+    const d = new Date(rawDate);
+    if (Number.isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function extraerCuentaIdMovimiento(m) {
+    if (!m || typeof m !== "object") return "";
+    if (m.financial_account_id !== undefined && m.financial_account_id !== null && m.financial_account_id !== "") {
+      return String(m.financial_account_id);
+    }
+    if (m.id_financial_account !== undefined && m.id_financial_account !== null && m.id_financial_account !== "") {
+      return String(m.id_financial_account);
+    }
+    if (m.account_id !== undefined && m.account_id !== null && m.account_id !== "") {
+      return String(m.account_id);
+    }
+    if (typeof m.account === "object" && m.account !== null) {
+      const nestedId = m.account.id_financial_account ?? m.account.id ?? "";
+      return nestedId !== "" ? String(nestedId) : "";
+    }
+    if (m.account !== undefined && m.account !== null && m.account !== "") {
+      return String(m.account);
+    }
+    return "";
+  }
+
+  function esMovimientoRetiro(m) {
+    const movType = String(m.movement_type || m.type || "").toUpperCase();
+    const category = String(m.category || "").toUpperCase();
+    const desc = String(m.description || "").toUpperCase();
+    return (
+      movType === "RETIRO" ||
+      movType === "WITHDRAWAL" ||
+      category.includes("RETIRO") ||
+      desc.includes("RETIRO")
+    );
+  }
+
+  function esMovimientoEgreso(m) {
+    const movType = String(m.movement_type || m.type || "").toUpperCase();
+    return movType === "OUT" || movType === "OUTFLOW" || movType === "EXPENSE" || esMovimientoRetiro(m);
+  }
+
+  function esMovimientoIngreso(m) {
+    const movType = String(m.movement_type || m.type || "").toUpperCase();
+    return movType === "IN" || movType === "INFLOW" || movType === "INCOME" || movType === "DEPOSIT";
+  }
+
+  function aplicarFiltrosMovimientos(movimientos) {
+    const cuenta = String($("#filtro_cuenta").val() || "").trim();
+    const tipo = String($("#filtro_tipo").val() || "").trim().toUpperCase();
+    const fechaInicio = String($("#filtro_fecha_inicio").val() || "").trim();
+    const fechaFin = String($("#filtro_fecha_fin").val() || "").trim();
+
+    return (movimientos || []).filter((m) => {
+      if (cuenta) {
+        const accId = extraerCuentaIdMovimiento(m);
+        if (!accId || accId !== cuenta) return false;
+      }
+
+      if (tipo) {
+        if (tipo === "INFLOW" || tipo === "IN") {
+          if (!esMovimientoIngreso(m)) return false;
+        } else if (tipo === "OUTFLOW") {
+          if (!esMovimientoEgreso(m)) return false;
+        } else if (tipo === "OUT" || tipo === "RETIRO") {
+          if (!esMovimientoRetiro(m)) return false;
+        }
+      }
+
+      if (fechaInicio || fechaFin) {
+        const movDateStr = obtenerFechaLocalYYYYMMDD(m.created_at || m.movement_date || m.date);
+        if (!movDateStr) return false;
+        if (fechaInicio && movDateStr < fechaInicio) return false;
+        if (fechaFin && movDateStr > fechaFin) return false;
+      }
+
+      return true;
+    });
+  }
+
+  function renderFilasMovimientos(movs, emptyMessage = "No hay movimientos en esta sesión.") {
+    const tbody = $("#tabla_movimientos tbody");
+    if (!tbody.length) return;
+    tbody.empty();
+
+    if (!movs || movs.length === 0) {
+      tbody.html(`<tr><td colspan="6" class="text-center text-muted py-3">${escapeHtml(emptyMessage)}</td></tr>`);
+      return;
+    }
+
+    movs.forEach((m) => {
+      const isOut = esMovimientoEgreso(m);
+      const colorClass = isOut ? "text-danger" : "text-success";
+      const sign = isOut ? "-" : "+";
+      const typeLabel = isOut ? (esMovimientoRetiro(m) ? "Retiro" : "Egreso") : "Ingreso";
+
+      const isCash = m.is_cash !== false;
+      const channelIcon = isCash
+        ? '<i class="fas fa-money-bill-wave mr-1 text-success"></i>Efectivo'
+        : '<i class="fas fa-credit-card mr-1 text-info"></i>Electrónico';
+      const channelBadgeClass = isCash ? "badge-success" : "badge-info";
+      const paymentLabel = m.payment_method || (isCash ? "Efectivo" : "Electrónico");
+
+      tbody.append(`
+        <tr>
+          <td>${escapeHtml(formatDate(m.created_at || m.movement_date || m.date))}</td>
+          <td><span class="badge ${isOut ? "badge-danger" : "badge-success"}">${escapeHtml(typeLabel)}</span></td>
+          <td>${escapeHtml(m.description || m.reference || "---")}</td>
+          <td>
+            <span class="badge ${channelBadgeClass} px-2 py-1" style="font-size: 0.75rem;">
+              ${channelIcon}
+            </span>
+          </td>
+          <td class="small text-muted">${escapeHtml(paymentLabel)}</td>
+          <td class="text-right font-weight-bold ${colorClass}">${sign}${formatCurrency(m.amount)}</td>
+        </tr>
+      `);
+    });
+  }
+
+  function refrescarVistaFiltrada() {
+    const filtrados = aplicarFiltrosMovimientos(movimientosSesionCache);
+    renderFilasMovimientos(filtrados, "No hay movimientos que coincidan con los filtros.");
+  }
+
   async function checkCurrentSession() {
     $("#caja_loader").show();
     $("#caja_cerrada_view").hide();
@@ -49,7 +215,7 @@ const CajaIndexController = (() => {
     try {
       const response = await CajaService.obtenerSesionActual(true);
       if (response && response.success && response.data) {
-        renderAbierta(response.data);
+        await renderAbierta(response.data);
       } else {
         if (response && response.status === 404) {
           renderCerrada();
@@ -72,7 +238,7 @@ const CajaIndexController = (() => {
     cargarCajasRegistradoras();
   }
 
-  function renderAbierta(session) {
+  async function renderAbierta(session) {
     currentSessionId = session.id_cash_session;
     currentExpectedBalance = parseFloat(session.expected_balance || 0);
     const registerName = session.cash_register_name || "Principal";
@@ -82,7 +248,7 @@ const CajaIndexController = (() => {
     $("#current_start_time").text(formatDate(session.start_time));
     $("#current_opening_balance").text(formatCurrency(session.opening_balance));
     $("#current_expected_balance").text(formatCurrency(session.expected_balance));
-    
+
     // Actualizar Navbar con caja abierta
     actualizarNavbarCaja(true, registerName);
 
@@ -90,17 +256,19 @@ const CajaIndexController = (() => {
     $("#close_expected_balance").text(formatCurrency(session.expected_balance));
 
     $("#caja_abierta_view").show();
-    cargarMovimientos(currentSessionId);
+    await cargarCuentasFiltro();
+    await cargarMovimientos(currentSessionId);
   }
+
   async function cargarCajasRegistradoras() {
     try {
       const resp = await CajaService.listarCajasRegistradoras();
       const select = $("#cash_register_id");
       select.empty().append('<option value="">Seleccione una caja...</option>');
-      
+
       if (resp && resp.success && resp.data) {
         const results = resp.data.results || resp.data;
-        results.forEach(reg => {
+        results.forEach((reg) => {
           if (reg.is_active) {
             select.append(new Option(reg.name, reg.id_cash_register));
           }
@@ -140,55 +308,56 @@ const CajaIndexController = (() => {
 
   async function cargarMovimientos(sessionId) {
     const tbody = $("#tabla_movimientos tbody");
-    tbody.html('<tr><td colspan="6" class="text-center">Cargando movimientos...</td></tr>');
-    
+    tbody.html('<tr><td colspan="6" class="text-center py-3">Cargando movimientos...</td></tr>');
+
     try {
       const resp = await CajaService.listarMovimientos(sessionId);
-      tbody.empty();
-      
+
       if (resp && resp.success && resp.data) {
-        const movs = resp.data;
+        const movs = Array.isArray(resp.data)
+          ? resp.data
+          : (Array.isArray(resp.data.results) ? resp.data.results : (Array.isArray(resp.data.movements) ? resp.data.movements : []));
+        movimientosSesionCache = movs;
+
         if (movs.length === 0) {
-          tbody.html('<tr><td colspan="6" class="text-center text-muted">No hay movimientos en esta sesión.</td></tr>');
+          renderFilasMovimientos([], "No hay movimientos en esta sesión.");
           return;
         }
 
-        movs.forEach(m => {
-          const isOut = m.movement_type === "OUT";
-          const colorClass = isOut ? "text-danger" : "text-success";
-          const sign = isOut ? "-" : "+";
-          const typeLabel = isOut ? "Retiro" : "Ingreso";
-
-          const isCash = m.is_cash !== false;
-          const channelIcon = isCash
-            ? '<i class="fas fa-money-bill-wave mr-1 text-success"></i>Efectivo'
-            : '<i class="fas fa-credit-card mr-1 text-info"></i>Electrónico';
-          const channelBadgeClass = isCash ? "badge-success" : "badge-info";
-          const paymentLabel = m.payment_method || (isCash ? "Efectivo" : "Electrónico");
-          
-          tbody.append(`
-            <tr>
-              <td>${formatDate(m.created_at)}</td>
-              <td><span class="badge ${isOut ? 'badge-danger' : 'badge-success'}">${typeLabel}</span></td>
-              <td>${m.description || m.reference || "---"}</td>
-              <td>
-                <span class="badge ${channelBadgeClass} px-2 py-1" style="font-size: 0.75rem;">
-                  ${channelIcon}
-                </span>
-              </td>
-              <td class="small text-muted">${paymentLabel}</td>
-              <td class="text-right font-weight-bold ${colorClass}">${sign}${formatCurrency(m.amount)}</td>
-            </tr>
-          `);
-        });
+        refrescarVistaFiltrada();
+      } else {
+        movimientosSesionCache = [];
+        renderFilasMovimientos([], "No hay movimientos en esta sesión.");
       }
     } catch (e) {
       console.error(e);
-      tbody.html('<tr><td colspan="6" class="text-center text-danger">Error al cargar movimientos.</td></tr>');
+      tbody.html('<tr><td colspan="6" class="text-center text-danger py-3">Error al cargar movimientos.</td></tr>');
     }
   }
 
   function setupEvents() {
+    // Aplicar filtros de movimientos (clic o cambio directo en controles)
+    $(document).off("click", "#btn_aplicar_filtros").on("click", "#btn_aplicar_filtros", function (e) {
+      e.preventDefault();
+      refrescarVistaFiltrada();
+    });
+
+    $(document)
+      .off("change", "#filtro_cuenta, #filtro_tipo, #filtro_fecha_inicio, #filtro_fecha_fin")
+      .on("change", "#filtro_cuenta, #filtro_tipo, #filtro_fecha_inicio, #filtro_fecha_fin", function () {
+        refrescarVistaFiltrada();
+      });
+
+    // Limpiar filtros de movimientos
+    $(document).off("click", "#btn_limpiar_filtros").on("click", "#btn_limpiar_filtros", function (e) {
+      e.preventDefault();
+      $("#filtro_cuenta").val("");
+      $("#filtro_tipo").val("");
+      $("#filtro_fecha_inicio").val("");
+      $("#filtro_fecha_fin").val("");
+      renderFilasMovimientos(movimientosSesionCache, "No hay movimientos en esta sesión.");
+    });
+
     // Arrastre de saldo de cierre anterior (Carry-over) al cambiar de caja
     $("#cash_register_id").on("change", async function () {
       const regId = $(this).val();
@@ -243,7 +412,7 @@ const CajaIndexController = (() => {
         if (resp && resp.success) {
           NotificationService.toastSuccess("Caja abierta correctamente.");
           window.dispatchEvent(new CustomEvent("cash_session_updated"));
-          checkCurrentSession();
+          await checkCurrentSession();
         }
       } catch (err) {
         NotificationService.close();
@@ -311,7 +480,7 @@ const CajaIndexController = (() => {
         if (resp && resp.success) {
           NotificationService.toastSuccess("Movimiento registrado.");
           $("#modalMovimientoCaja").modal("hide");
-          checkCurrentSession(); 
+          await checkCurrentSession();
         }
       } catch (err) {
         NotificationService.close();
@@ -339,11 +508,11 @@ const CajaIndexController = (() => {
     });
 
     // Diferencia dinámica en cierre
-    $("#close_counted_balance").on("input", function() {
+    $("#close_counted_balance").on("input", function () {
       const counted = parseFloat($(this).val()) || 0;
       const diff = counted - currentExpectedBalance;
       const diffSpan = $("#close_difference");
-      
+
       diffSpan.text(formatCurrency(diff));
       if (diff < 0) {
         diffSpan.removeClass("text-dark text-success").addClass("text-danger");
@@ -387,7 +556,7 @@ const CajaIndexController = (() => {
         if (resp && resp.success) {
           NotificationService.toastSuccess("Caja cerrada correctamente.");
           $("#modalCerrarCaja").modal("hide");
-          
+
           const difference = parseFloat(resp.data.difference || 0);
           let diffMsg = `Diferencia auditada: ${formatCurrency(difference)}`;
           if (difference === 0) {
@@ -400,7 +569,7 @@ const CajaIndexController = (() => {
           NotificationService.info(diffMsg, "Resultado del Arqueo y Cierre");
 
           window.dispatchEvent(new CustomEvent("cash_session_updated"));
-          checkCurrentSession();
+          await checkCurrentSession();
         }
       } catch (err) {
         NotificationService.close();
