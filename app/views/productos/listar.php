@@ -125,6 +125,56 @@ require_once __DIR__ . '/../layouts/head.php';
 
                                 </div>
 
+                                <!-- Barra de Filtros para Listado de Productos -->
+                                <div class="px-3 pt-3 pb-2 bg-light border-bottom">
+                                    <div class="form-row align-items-end">
+                                        <div class="col-xl-2 col-md-3 col-sm-6 mb-2">
+                                            <label for="filtro_codigo_producto" class="small font-weight-bold text-muted mb-1 text-nowrap">Código</label>
+                                            <input type="text" id="filtro_codigo_producto" class="form-control form-control-sm" placeholder="Buscar código...">
+                                        </div>
+                                        <div class="col-xl-3 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_nombre_producto" class="small font-weight-bold text-muted mb-1 text-nowrap">Nombre</label>
+                                            <input type="text" id="filtro_nombre_producto" class="form-control form-control-sm" placeholder="Buscar nombre...">
+                                        </div>
+                                        <div class="col-xl-3 col-md-5 col-sm-6 mb-2">
+                                            <label for="filtro_categoria_producto" class="small font-weight-bold text-muted mb-1 text-nowrap">Categoría</label>
+                                            <select id="filtro_categoria_producto" class="form-control form-control-sm">
+                                                <option value="">Todas</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_unidad_producto" class="small font-weight-bold text-muted mb-1 text-nowrap">Unidad</label>
+                                            <select id="filtro_unidad_producto" class="form-control form-control-sm">
+                                                <option value="">Todas</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_precio_compra_producto" class="small font-weight-bold text-muted mb-1 text-nowrap">Precio Compra</label>
+                                            <input type="number" id="filtro_precio_compra_producto" class="form-control form-control-sm" step="0.01" min="0" placeholder="Ej: 25000">
+                                        </div>
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_precio_venta_producto" class="small font-weight-bold text-muted mb-1 text-nowrap">Precio Venta</label>
+                                            <input type="number" id="filtro_precio_venta_producto" class="form-control form-control-sm" step="0.01" min="0" placeholder="Ej: 35000">
+                                        </div>
+                                        <div class="col-xl-2 col-md-6 col-sm-6 mb-2">
+                                            <label for="filtro_estado_producto" class="small font-weight-bold text-muted mb-1 text-nowrap">Estado</label>
+                                            <select id="filtro_estado_producto" class="form-control form-control-sm">
+                                                <option value="">Todos</option>
+                                                <option value="Activo">Activo</option>
+                                                <option value="Inactivo">Inactivo</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-xl-2 col-md-6 col-sm-6 mb-2 d-flex align-items-end">
+                                            <button type="button" id="btn_aplicar_filtros_productos" class="btn btn-primary btn-sm font-weight-bold flex-fill mr-1 text-nowrap">
+                                                <i class="fas fa-filter mr-1"></i> Filtrar
+                                            </button>
+                                            <button type="button" id="btn_limpiar_filtros_productos" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="card-body">
 
                                     <table
@@ -240,7 +290,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             data-dismiss="modal"
                             aria-label="Close"
                         >
-                            <span aria-hidden="true">&times;</span>
+                            <span aria-hidden="true">×</span>
                         </button>
 
                     </div>
@@ -905,7 +955,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             data-dismiss="modal"
                             aria-label="Close"
                         >
-                            <span aria-hidden="true">&times;</span>
+                            <span aria-hidden="true">×</span>
                         </button>
 
                     </div>
@@ -1226,6 +1276,13 @@ require_once __DIR__ . '/../layouts/head.php';
         ?>
 
     </div>
+
+    <style>
+        #tbl_productos_wrapper .dt-buttons,
+        #tbl_productos_wrapper .dataTables_filter {
+            display: none !important;
+        }
+    </style>
 
     <!-- Select2 JS -->
     <script

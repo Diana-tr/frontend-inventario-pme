@@ -28,6 +28,16 @@ const UsuarioListController = (() => {
   const EDIT_MODAL_ID = "modalEditarUsuario";
   const EDIT_FORM_ID = "formEditarUsuario";
 
+  const FILTER_IDS = {
+    fullName: "filtro_nombre_completo",
+    username: "filtro_usuario",
+    email: "filtro_correo",
+    role: "filtro_rol",
+    status: "filtro_estado",
+    applyBtn: "btn_aplicar_filtros_usuarios",
+    clearBtn: "btn_limpiar_filtros_usuarios",
+  };
+
   // ───────────────────────────────────────────
   // Helpers de creación de celdas
   // ───────────────────────────────────────────
@@ -160,6 +170,117 @@ const UsuarioListController = (() => {
   }
 
   // ───────────────────────────────────────────
+  // Filtros de Listado de Usuarios
+  // ───────────────────────────────────────────
+
+  function getFilters() {
+    return {
+      full_name:
+        document.getElementById(FILTER_IDS.fullName)?.value?.trim() || "",
+      username:
+        document.getElementById(FILTER_IDS.username)?.value?.trim() || "",
+      email: document.getElementById(FILTER_IDS.email)?.value?.trim() || "",
+      role: document.getElementById(FILTER_IDS.role)?.value?.trim() || "",
+      status: document.getElementById(FILTER_IDS.status)?.value?.trim() || "",
+    };
+  }
+
+  function filterUsersLocally(users, filters) {
+    return users.filter((user) => {
+      const fullNameParts = [user.first_name, user.last_name]
+        .filter(Boolean)
+        .join(" ");
+      const fullName = (user.name || fullNameParts || "").toLowerCase();
+      const username = (user.username || "").toLowerCase();
+      const email = (user.email || "").toLowerCase();
+      const rolesText = (
+        user.roles?.length
+          ? user.roles.map((r) => r.role_name).join(", ")
+          : ""
+      ).toLowerCase();
+      const isActive = Boolean(user.is_active);
+
+      if (filters.full_name && !fullName.includes(filters.full_name.toLowerCase())) {
+        return false;
+      }
+
+      if (filters.username && !username.includes(filters.username.toLowerCase())) {
+        return false;
+      }
+
+      if (filters.email && !email.includes(filters.email.toLowerCase())) {
+        return false;
+      }
+
+      if (filters.role && !rolesText.includes(filters.role.toLowerCase())) {
+        return false;
+      }
+
+      if (filters.status === "Activo" && !isActive) {
+        return false;
+      }
+
+      if (filters.status === "Inactivo" && isActive) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  function setupFiltersListener() {
+    const applyBtn = document.getElementById(FILTER_IDS.applyBtn);
+    const clearBtn = document.getElementById(FILTER_IDS.clearBtn);
+
+    if (applyBtn) {
+      applyBtn.addEventListener("click", () => {
+        loadUsers();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        const fullNameEl = document.getElementById(FILTER_IDS.fullName);
+        const usernameEl = document.getElementById(FILTER_IDS.username);
+        const emailEl = document.getElementById(FILTER_IDS.email);
+        const roleEl = document.getElementById(FILTER_IDS.role);
+        const statusEl = document.getElementById(FILTER_IDS.status);
+
+        if (fullNameEl) fullNameEl.value = "";
+        if (usernameEl) usernameEl.value = "";
+        if (emailEl) emailEl.value = "";
+        if (roleEl) roleEl.value = "";
+        if (statusEl) statusEl.value = "";
+
+        loadUsers();
+      });
+    }
+
+    [FILTER_IDS.fullName, FILTER_IDS.username, FILTER_IDS.email].forEach(
+      (inputId) => {
+        const inputEl = document.getElementById(inputId);
+        if (inputEl) {
+          inputEl.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              loadUsers();
+            }
+          });
+        }
+      },
+    );
+
+    [FILTER_IDS.role, FILTER_IDS.status].forEach((selectId) => {
+      const selectEl = document.getElementById(selectId);
+      if (selectEl) {
+        selectEl.addEventListener("change", () => {
+          loadUsers();
+        });
+      }
+    });
+  }
+
+  // ───────────────────────────────────────────
   // Manejo del Modal de Detalles
   // ───────────────────────────────────────────
 
@@ -173,7 +294,6 @@ const UsuarioListController = (() => {
   }
 
   function setupViewDetailsListener() {
-    // Usamos delegación de eventos en la tabla mediante jQuery para DataTables
     $(`#${TABLE_ID}`)
       .off("click", ".btn-view-user")
       .on("click", ".btn-view-user", async function () {
@@ -181,7 +301,6 @@ const UsuarioListController = (() => {
 
         if (!userId) return;
 
-        // Estado inicial del modal (Mostrar loader y ocultar contenido)
         $("#user_modal_loader").show();
         $("#user_modal_content").hide();
         $("#modalDetalleUsuario").modal("show");
@@ -192,19 +311,16 @@ const UsuarioListController = (() => {
           if (response && response.success && response.data) {
             const user = response.data;
 
-            // Nombre completo
             const fullNameParts = [user.first_name, user.last_name]
               .filter(Boolean)
               .join(" ");
             const fullName = fullNameParts || "Sin nombre";
 
-            // Roles
             const roleName =
               user.roles && user.roles.length > 0
                 ? user.roles.map((r) => r.role_name).join(", ")
                 : "Sin rol asignado";
 
-            // Inyectar datos en los elementos del modal
             $("#detail_full_name").text(fullName);
             $("#detail_username").text(`@${user.username || "sin_usuario"}`);
             $("#detail_email").text(user.email || "No registrado");
@@ -214,13 +330,11 @@ const UsuarioListController = (() => {
             $("#detail_created_at").text(formatDate(user.created_at));
             $("#detail_updated_at").text(formatDate(user.updated_at));
 
-            // Badge de Estado
             const badgeHtml = user.is_active
               ? '<span class="badge badge-success px-3 py-1 shadow-sm">Activo</span>'
               : '<span class="badge badge-danger px-3 py-1 shadow-sm">Inactivo</span>';
             $("#detail_status_badge").html(badgeHtml);
 
-            // Ocultar spinner y mostrar contenido con efecto suave
             $("#user_modal_loader").hide();
             $("#user_modal_content").fadeIn();
           } else {
@@ -238,7 +352,6 @@ const UsuarioListController = (() => {
   // ───────────────────────────────────────────
 
   function setupEditUserListener() {
-    // 1. Cargar datos en el modal de edición
     $(`#${TABLE_ID}`)
       .off("click", ".btn-edit-user")
       .on("click", ".btn-edit-user", async function () {
@@ -270,7 +383,6 @@ const UsuarioListController = (() => {
             $("#edit_phone_number").val(user.phone_number || "");
             $("#edit_is_active").prop("checked", Boolean(user.is_active));
 
-            // Cargar roles en Select2
             const userRoles = user.roles
               ? user.roles.map((r) => r.id_role)
               : [];
@@ -293,12 +405,11 @@ const UsuarioListController = (() => {
         }
       });
 
-    // 2. Procesar la actualización enviando PATCH
     $(`#${EDIT_FORM_ID}`)
       .off("submit")
       .on("submit", async function (e) {
         e.preventDefault();
-        const $form = $(this); // Referencia jQuery al formulario actual
+        const $form = $(this);
 
         if (!this.checkValidity()) {
           e.stopPropagation();
@@ -309,7 +420,6 @@ const UsuarioListController = (() => {
         const userId = $form.find("#edit_user_id").val();
         const submitBtn = $form.find("#btn_guardar_edicion");
 
-        // Capturar valores BUSCANDO DENTRO DEL FORMULARIO DE EDICIÓN
         const firstName = $form.find("#edit_first_name").val()?.trim() || "";
         const lastName = $form.find("#edit_last_name").val()?.trim() || "";
         const username = $form.find("#edit_username").val()?.trim() || "";
@@ -324,13 +434,12 @@ const UsuarioListController = (() => {
           .map((val) => parseInt(val, 10))
           .filter((id) => !isNaN(id));
 
-        // Construcción del payload
         const payload = {
           first_name: firstName,
           last_name: lastName,
           username: username,
           email: email,
-          document_number: documentNumber, // Garantiza que viaja el string no vacío
+          document_number: documentNumber,
           is_active: $form.find("#edit_is_active").is(":checked"),
           roles: rolesIds,
         };
@@ -346,7 +455,6 @@ const UsuarioListController = (() => {
             .prop("disabled", true)
             .html('<i class="fas fa-spinner fa-spin mr-1"></i>Guardando...');
 
-          // IMPORTANTE: Revisa en la consola de Chrome qué imprime este log antes de salir
           console.log(
             "[USUARIOS] Payload final a enviar:",
             JSON.stringify(payload, null, 2),
@@ -402,7 +510,6 @@ const UsuarioListController = (() => {
 
         if (!userId) return;
 
-        // Alerta formateada con el username
         NotificationService.warning(
           `¿Deseas ${actionWord} al usuario @${username}?`,
           `Confirmación de ${actionWord}`,
@@ -439,15 +546,10 @@ const UsuarioListController = (() => {
   // DataTable con paginación server-side
   // ───────────────────────────────────────────
 
-  /**
-   * Mapa de columnas DataTables → campos de ordering del backend.
-   * Solo las columnas ordenables tienen mapping.
-   */
   const COLUMN_ORDERING_MAP = {
-    1: "first_name", // Nombre completo → ordena por first_name
+    1: "first_name",
     2: "username",
     3: "email",
-    // 4: roles (no ordenable en backend)
     5: "is_active",
   };
 
@@ -466,7 +568,7 @@ const UsuarioListController = (() => {
       pageLength: 10,
       processing: true,
       serverSide: true,
-      searchDelay: 500, // Debounce de 500ms para evitar ráfagas de peticiones
+      searchDelay: 500,
 
       dom: DataTableHelper.DEFAULT_DOM,
 
@@ -477,24 +579,18 @@ const UsuarioListController = (() => {
 
       language: DataTableHelper.LANGUAGE_ES,
 
-      // Columna N° y Acciones no son ordenables
       columnDefs: [
         { orderable: false, targets: [0, 4, 6] },
         { className: "text-center", targets: [0, 5, 6] },
       ],
 
-      /**
-       * ajax: función personalizada que conecta DataTables con
-       * nuestro UsuarioService paginado del backend.
-       */
       ajax: async function (data, callback) {
         try {
-          // Calcular página (DataTables envía 'start' y 'length')
           const page = Math.floor(data.start / data.length) + 1;
           const pageSize = data.length;
           const search = data.search?.value || "";
+          const filters = getFilters();
 
-          // Calcular ordering
           let ordering = "";
           if (data.order && data.order.length > 0) {
             const orderCol = data.order[0].column;
@@ -505,18 +601,38 @@ const UsuarioListController = (() => {
             }
           }
 
-          const response = await UsuarioService.listarUsuariosPaginados({
+          const queryParams = {
             page,
             page_size: pageSize,
             search,
             ordering,
-          });
+          };
+
+          if (filters.full_name) queryParams.full_name = filters.full_name;
+          if (filters.username) queryParams.username = filters.username;
+          if (filters.email) queryParams.email = filters.email;
+          if (filters.role) queryParams.role = filters.role;
+          if (filters.status) {
+            queryParams.is_active = filters.status === "Activo";
+          }
+
+          const response =
+            await UsuarioService.listarUsuariosPaginados(queryParams);
 
           if (response?.success && response.data) {
-            const users = response.data.results || [];
-            const totalRecords = response.data.count || 0;
+            const rawUsers = response.data.results || [];
+            const users = filterUsersLocally(rawUsers, filters);
+            const hasActiveFilters = Boolean(
+              filters.full_name ||
+                filters.username ||
+                filters.email ||
+                filters.role ||
+                filters.status,
+            );
+            const totalRecords = hasActiveFilters
+              ? users.length
+              : response.data.count || 0;
 
-            // Transformar los datos al formato que DataTables espera
             const rows = users.map((user, index) => {
               const fullNameParts = [user.first_name, user.last_name]
                 .filter(Boolean)
@@ -534,7 +650,7 @@ const UsuarioListController = (() => {
               const actions = buildActionsHtml(user);
 
               return [
-                data.start + index + 1, // N°
+                data.start + index + 1,
                 fullName,
                 user.username || "Sin usuario",
                 user.email || "Sin correo",
@@ -551,7 +667,6 @@ const UsuarioListController = (() => {
               data: rows,
             });
 
-            // Procesar permisos en la tabla recién renderizada
             SecurityManager.processDomPermissions();
           } else {
             callback({
@@ -578,9 +693,6 @@ const UsuarioListController = (() => {
     });
   }
 
-  /**
-   * Construye el HTML de botones de acciones para una fila.
-   */
   function buildActionsHtml(user) {
     const userId = user.id_user ?? "";
     const username = user.username ?? "usuario";
@@ -607,12 +719,8 @@ const UsuarioListController = (() => {
     `;
   }
 
-  /**
-   * Recarga los datos de la tabla del servidor obligando la actualización completa.
-   */
   function loadUsers() {
     if (dataTableInstance) {
-      // El 'true' borra el caché interno de DataTables y vuelve a consultar a la API
       dataTableInstance.ajax.reload(null, true);
     }
   }
@@ -630,12 +738,7 @@ const UsuarioListController = (() => {
 
         select.empty();
 
-        // Mostrar roles activos o los que ya tiene el usuario
         roles.forEach((role) => {
-          // Incluso si está inactivo, si un usuario lo tiene, lo dejamos en el select por compatibilidad.
-          // Para eso, agregamos todos y cuando se edite un usuario se seleccionará correctamente.
-          // Pero idealmente mostramos activos para nuevas asignaciones, pero el usuario ya lo podría tener.
-          // Para simplificar, listaremos solo activos para que al guardar solo se guarden activos.
           if (role.is_active) {
             const option = new Option(
               role.role_name,
@@ -660,6 +763,7 @@ const UsuarioListController = (() => {
     }
 
     cargarRoles();
+    setupFiltersListener();
     initDataTable();
     setupViewDetailsListener();
     setupEditUserListener();
