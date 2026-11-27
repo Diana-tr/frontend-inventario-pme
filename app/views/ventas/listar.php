@@ -50,7 +50,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card-header d-flex align-items-center">
                                     <h3 class="card-title font-weight-bold">Historial de Ventas</h3>
                                     <div class="card-tools ml-auto">
-                                        <a href="<?php echo $URL; ?>/ventas/crear" class="btn btn-primary btn-sm" data-permission="sales.create">
+                                        <a href="<?php echo $URL; ?>/ventas/crear" class="btn btn-primary btn-sm" data-permission="sales.create" data-write-action="true">
                                             <i class="fas fa-plus mr-1"></i> Registrar Nueva Venta
                                         </a>
                                     </div>

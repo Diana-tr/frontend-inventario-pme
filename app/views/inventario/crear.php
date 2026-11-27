@@ -103,6 +103,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                     <form
                                         id="form_crear_inventario"
                                         novalidate
+                                        data-write-action="true"
                                     >
 
                                         <!-- Sección de Datos Principales -->
@@ -225,6 +226,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                                 type="submit"
                                                 class="btn btn-primary"
                                                 id="btn_guardar_inventario"
+                                                data-write-action="true"
                                             >
                                                 <i class="fas fa-save mr-1"></i>
                                                 Registrar Configuración

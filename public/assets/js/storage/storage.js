@@ -18,6 +18,7 @@ const Storage = (() => {
     ACTIVE_COMPANY_ID: "inventariopme_active_company_id",
     ACTIVE_COMPANY: "inventariopme_active_company",
     USER_COMPANIES: "inventariopme_user_companies",
+    SUBSCRIPTION_STATUS: "inventariopme_subscription_status",
   });
 
   /* ===========================
@@ -152,6 +153,35 @@ const Storage = (() => {
   };
 
   /* ===========================
+       Estado de Suscripción (SaaS)
+    =========================== */
+
+  const saveSubscriptionStatus = (statusData) => {
+    try {
+      sessionStorage.setItem(KEYS.SUBSCRIPTION_STATUS, JSON.stringify(statusData));
+    } catch {
+      // fallback
+    }
+  };
+
+  const getSubscriptionStatus = () => {
+    try {
+      const val = sessionStorage.getItem(KEYS.SUBSCRIPTION_STATUS);
+      return val ? JSON.parse(val) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const clearSubscriptionStatus = () => {
+    try {
+      sessionStorage.removeItem(KEYS.SUBSCRIPTION_STATUS);
+    } catch {
+      // fallback
+    }
+  };
+
+  /* ===========================
        Gestión Segura de Impersonación
     =========================== */
 
@@ -282,6 +312,10 @@ const Storage = (() => {
     getImpersonationBackup,
     isImpersonating,
     restoreFromImpersonation,
+
+    saveSubscriptionStatus,
+    getSubscriptionStatus,
+    clearSubscriptionStatus,
 
     clear,
   });

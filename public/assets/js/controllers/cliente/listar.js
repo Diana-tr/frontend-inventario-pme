@@ -382,11 +382,11 @@ const ClienteListController = (() => {
           <i class="fas fa-eye"></i>
         </button>
         <button type="button" class="btn btn-outline-warning btn-sm btn-edit-customer"
-                title="Editar cliente" data-customer-id="${clienteId}" data-permission="customers.update">
+                title="Editar cliente" data-customer-id="${clienteId}" data-permission="customers.update" data-write-action="true">
           <i class="fas fa-edit"></i>
         </button>
         <button type="button" class="btn ${toggleClass} btn-sm btn-toggle-status"
-                title="${toggleTitle}" data-customer-id="${clienteId}" data-customer-name="${clienteName}" data-status="${isActive}" data-permission="customers.delete">
+                title="${toggleTitle}" data-customer-id="${clienteId}" data-customer-name="${clienteName}" data-status="${isActive}" data-permission="customers.delete" data-write-action="true">
           <i class="fas ${toggleIcon}"></i>
         </button>
       </div>

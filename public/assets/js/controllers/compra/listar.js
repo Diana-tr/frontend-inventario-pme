@@ -249,7 +249,7 @@ const CompraListController = (() => {
 
         container.append(`
           <button type="button" class="btn btn-outline-success btn-sm btn-pay-purchase font-weight-bold ml-2" 
-            data-id="${compra.id_purchase}" data-total="${compra.total}" data-pending="${compra.pending_balance}" data-permission="purchases.update">
+            data-id="${compra.id_purchase}" data-total="${compra.total}" data-pending="${compra.pending_balance}" data-permission="purchases.update" data-write-action="true">
             <i class="fas fa-hand-holding-usd mr-1"></i> ${buttonLabel}
           </button>
         `);
@@ -827,7 +827,7 @@ const CompraListController = (() => {
     if (compra.status === "DRAFT" || compra.status === "PENDING") {
       cancelBtn = `
         <button type="button" class="btn btn-outline-danger btn-sm btn-action-purchase"
-                title="Cancelar compra" data-action="cancel" data-id="${compraId}" data-permission="purchases.update">
+                title="Cancelar compra" data-action="cancel" data-id="${compraId}" data-permission="purchases.update" data-write-action="true">
           <i class="fas fa-ban"></i>
         </button>
       `;

@@ -52,7 +52,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                     <h3 class="card-title"><i class="fas fa-plus-circle mr-1"></i> Registrar Nueva Compra</h3>
                                 </div>
                                 
-                                <form id="form_crear_compra" autocomplete="off" novalidate>
+                                <form id="form_crear_compra" autocomplete="off" novalidate data-write-action="true">
                                     <div class="card-body">
                                         <!-- SECCIÓN 1: DATOS BÁSICOS -->
                                         <h5 class="font-weight-bold text-muted border-bottom pb-2 mb-4">1. Datos Básicos</h5>
@@ -140,7 +140,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                         <a href="<?php echo $URL; ?>/compras" class="btn btn-secondary mr-2">
                                             <i class="fas fa-times-circle mr-1"></i> Cancelar
                                         </a>
-                                        <button type="submit" id="btn_guardar_compra" class="btn btn-primary font-weight-bold">
+                                        <button type="submit" id="btn_guardar_compra" class="btn btn-primary font-weight-bold" data-write-action="true">
                                             <i class="fas fa-save mr-1"></i> Guardar Compra
                                         </button>
                                     </div>

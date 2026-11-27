@@ -112,6 +112,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                             href="<?php echo $URL; ?>/productos/crear"
                                             class="btn btn-primary btn-sm"
                                             data-permission="products.create"
+                                            data-write-action="true"
                                         >
                                             <i class="fas fa-plus mr-1"></i>
                                             Registrar Nuevo Producto
@@ -959,6 +960,7 @@ require_once __DIR__ . '/../layouts/head.php';
                     <form
                         id="formEditarProducto"
                         novalidate
+                        data-write-action="true"
                     >
 
                         <div class="modal-body">
@@ -1249,6 +1251,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 type="submit"
                                 id="btn_guardar_edicion"
                                 class="btn btn-warning btn-sm font-weight-bold"
+                                data-write-action="true"
                             >
                                 <i class="fas fa-save mr-1"></i>
                                 Guardar Cambios

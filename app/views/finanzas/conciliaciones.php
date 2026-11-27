@@ -44,7 +44,7 @@ require_once __DIR__ . '/../layouts/head.php';
                     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
                         <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                             <h5 class="card-title font-weight-bold text-dark mb-0"><i class="fas fa-clipboard-check text-primary mr-2"></i> Períodos de Conciliación</h5>
-                            <button type="button" class="btn btn-primary btn-sm font-weight-bold shadow-sm" id="btn_abrir_modal_conciliacion" style="border-radius: 8px;">
+                            <button type="button" class="btn btn-primary btn-sm font-weight-bold shadow-sm" id="btn_abrir_modal_conciliacion" style="border-radius: 8px;" data-write-action="true">
                                 <i class="fas fa-plus mr-1"></i> Iniciar Conciliación
                             </button>
                         </div>
@@ -88,7 +88,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="formNuevaConciliacion">
+                    <form id="formNuevaConciliacion" data-write-action="true">
                         <div class="modal-body p-4">
                             <div class="form-group">
                                 <label class="small font-weight-bold text-muted">Cuenta a Conciliar <span class="text-danger">*</span></label>
@@ -121,7 +121,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer bg-light py-2" style="border-radius: 0 0 12px 12px;">
                             <button type="button" class="btn btn-secondary font-weight-bold px-4" data-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary font-weight-bold px-4" id="btn_submit_conciliacion">Registrar Conciliación</button>
+                            <button type="submit" class="btn btn-primary font-weight-bold px-4" id="btn_submit_conciliacion" data-write-action="true">Registrar Conciliación</button>
                         </div>
                     </form>
                 </div>

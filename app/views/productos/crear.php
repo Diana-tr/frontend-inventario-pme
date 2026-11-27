@@ -105,6 +105,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                     action="#"
                                     method="POST"
                                     autocomplete="off"
+                                    data-write-action="true"
                                 >
 
                                     <div class="card-body">
@@ -435,6 +436,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                         <button
                                             type="submit"
                                             class="btn btn-primary"
+                                            data-write-action="true"
                                         >
                                             <i
                                                 class="fas fa-save mr-1"

@@ -104,11 +104,11 @@ const DashboardController = (() => {
       userNameEl.textContent = displayName;
     }
 
-    // 3. Nombre de la empresa activa
+    // 3. Nombre de la empresa activa (prioriza trade_name igual que el Navbar)
     if (companyNameEl) {
       const company = getActiveCompanyData();
       const companyName = company
-        ? (company.business_name || company.trade_name || company.name || null)
+        ? (company.trade_name || company.business_name || company.name || null)
         : null;
       companyNameEl.textContent = companyName
         ? `Panel de Control Operativo — ${companyName}`
@@ -211,6 +211,10 @@ const DashboardController = (() => {
 
     if (typeof window !== "undefined") {
       window.addEventListener("beforeunload", destroyLiveClock, { once: true });
+      // Escuchar eventos de cambio de empresa para actualizar el Hero Banner en tiempo real
+      window.addEventListener("company_changed", () => {
+        renderHeroWelcome();
+      });
     }
 
     console.log("[DASHBOARD] Cargando datos del sistema...");

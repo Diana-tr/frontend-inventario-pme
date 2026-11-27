@@ -75,7 +75,7 @@ require_once __DIR__ . '/../layouts/head.php';
             <!-- Contenido Principal -->
             <section class="content">
                 <div class="container-fluid" style="max-width: 1400px;">
-                    <form id="formCrearRol" novalidate autocomplete="off">
+                    <form id="formCrearRol" novalidate autocomplete="off" data-write-action="true">
                         <div class="row">
                             
                             <!-- Columna Izquierda: Información Básica del Rol -->
@@ -123,7 +123,7 @@ require_once __DIR__ . '/../layouts/head.php';
 
                                         <!-- Botones de Acción de la Columna -->
                                         <div class="pt-3 border-top mt-3">
-                                            <button type="submit" id="btn_guardar_rol" class="btn btn-primary btn-block font-weight-bold shadow-sm py-2 mb-2">
+                                            <button type="submit" id="btn_guardar_rol" class="btn btn-primary btn-block font-weight-bold shadow-sm py-2 mb-2" data-write-action="true">
                                                 <i class="fas fa-save mr-1"></i> Guardar Rol
                                             </button>
                                             <a href="<?php echo $URL; ?>/roles" class="btn btn-outline-secondary btn-block font-weight-bold">

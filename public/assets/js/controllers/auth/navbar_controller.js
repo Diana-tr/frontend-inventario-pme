@@ -9,7 +9,10 @@ import Config from "../../config/config.js";
 import AuthService from "../../services/auth_service.js";
 import CajaService from "../../services/caja_service.js";
 import CompanyInfoService from "../../services/company_info_service.js";
+import SubscriptionService from "../../services/subscription_service.js";
 import SystemService from "../../services/system_service.js";
+import SecurityManager from "../../core/security.js";
+import NotificationService from "../../core/notification.js";
 import Storage from "../../storage/storage.js";
 
 const Swal = typeof window !== "undefined" && window.Swal ? window.Swal : {
@@ -80,6 +83,20 @@ const NavbarController = (() => {
     await initCompanySwitcher();
     await checkNavbarCajaStatus();
     checkImpersonationMode();
+    await checkSubscriptionStatus();
+
+    // Comprobar si existe un toast de bienvenida pendiente tras login exitoso
+    try {
+      const pendingWelcomeToast = sessionStorage.getItem("pme_welcome_toast");
+      if (pendingWelcomeToast) {
+        sessionStorage.removeItem("pme_welcome_toast");
+        setTimeout(() => {
+          NotificationService.toastSuccess(pendingWelcomeToast);
+        }, 350);
+      }
+    } catch (e) {
+      console.warn("[NAVBAR] Error consumiendo toast de bienvenida:", e);
+    }
     // Las notificaciones centralizadas y versiones son gestionadas integralmente por NotificationFeedController
 
     // Escuchar eventos globales de apertura/cierre de caja para sincronizar en tiempo real
@@ -90,6 +107,16 @@ const NavbarController = (() => {
     // Escuchar eventos globales de publicación/actualización de versiones
     window.addEventListener("versions_updated", async () => {
       window.dispatchEvent(new CustomEvent("refresh_notifications"));
+    });
+
+    // Escuchar evento de expiración de suscripción emitido por ApiClient
+    window.addEventListener("subscription_expired", async () => {
+      await checkSubscriptionStatus(true);
+    });
+
+    // Escuchar cambio de empresa activa
+    window.addEventListener("company_changed", async () => {
+      await checkSubscriptionStatus(true);
     });
   }
 
@@ -368,6 +395,94 @@ const NavbarController = (() => {
     }
   }
 
+  /**
+   * ============================================================
+   * CONTROL DE ESTADO DE SUSCRIPCIÓN Y BANNER PERSISTENTE
+   * ============================================================
+   */
+  async function checkSubscriptionStatus(forceRefresh = false) {
+    if (typeof window !== "undefined" && window.location.pathname.includes("saas-admin")) {
+      return;
+    }
+
+    const banner = document.getElementById("subscription-status-banner");
+    const statusBadge = document.getElementById("sub-banner-status-badge");
+    const daysOverdueSpan = document.getElementById("sub-banner-days-overdue");
+    const actionsContainer = document.getElementById("sub-banner-actions");
+
+    try {
+      const statusData = await SubscriptionService.obtenerEstadoSuscripcion(forceRefresh);
+
+      if (statusData && (statusData.is_read_only === true || statusData.can_write === false)) {
+        if (banner) {
+          banner.classList.remove("d-none");
+        }
+        if (statusBadge) {
+          statusBadge.textContent = statusData.status_display || "Vencida";
+        }
+        if (daysOverdueSpan) {
+          const days = Number(statusData.days_overdue || 0);
+          daysOverdueSpan.textContent =
+            days > 0 ? `hace ${days} día${days === 1 ? "" : "s"}` : "recientemente";
+        }
+
+        // Renderizado dinámico de canales de soporte o texto plano
+        if (actionsContainer) {
+          actionsContainer.innerHTML = "";
+          const whatsappUrl = statusData.contact_whatsapp;
+          const emailUrl = statusData.contact_email;
+          let hasAction = false;
+
+          if (whatsappUrl) {
+            const waBtn = document.createElement("a");
+            waBtn.href = whatsappUrl;
+            waBtn.target = "_blank";
+            waBtn.rel = "noopener noreferrer";
+            waBtn.className = "btn btn-sm btn-success font-weight-bold px-3 py-1 shadow-sm mr-2";
+            waBtn.style.borderRadius = "20px";
+            waBtn.style.backgroundColor = "#10B981";
+            waBtn.style.borderColor = "#10B981";
+            waBtn.innerHTML = '<i class="fab fa-whatsapp mr-1 text-white"></i> Contactar Soporte';
+            actionsContainer.appendChild(waBtn);
+            hasAction = true;
+          }
+
+          if (emailUrl) {
+            const mailBtn = document.createElement("a");
+            mailBtn.href = emailUrl;
+            mailBtn.className = "btn btn-sm btn-primary font-weight-bold px-3 py-1 shadow-sm";
+            mailBtn.style.borderRadius = "20px";
+            mailBtn.style.backgroundColor = "#2563EB";
+            mailBtn.style.borderColor = "#2563EB";
+            mailBtn.innerHTML = '<i class="fas fa-envelope mr-1 text-white"></i> Enviar Email';
+            actionsContainer.appendChild(mailBtn);
+            hasAction = true;
+          }
+
+          if (!hasAction) {
+            const infoSpan = document.createElement("span");
+            infoSpan.className = "small font-weight-bold";
+            infoSpan.style.color = "#92400E";
+            infoSpan.innerHTML = '<i class="fas fa-info-circle mr-1"></i> Contacta a tu administrador para renovar.';
+            actionsContainer.appendChild(infoSpan);
+          }
+        }
+
+        // Aplicar bloqueo de DOM a todos los elementos con data-write-action
+        SecurityManager.processDomPermissions();
+        return;
+      }
+
+      // Suscripción vigente y válida
+      if (banner) {
+        banner.classList.add("d-none");
+      }
+      SecurityManager.processDomPermissions();
+    } catch (error) {
+      console.warn("[NAVBAR] Error verificando estado de suscripción:", error);
+    }
+  }
+
   function renderUserData(user) {
     const displayName =
       user.first_name && user.last_name
@@ -567,6 +682,7 @@ const NavbarController = (() => {
       sessionStorage.removeItem("inventariopme_security_context");
       CompanyInfoService.invalidarCache();
       CajaService.invalidarSesionActual();
+      SubscriptionService.invalidarEstado();
 
       // 3. Forzar refresco de contexto de seguridad con el nuevo X-Company-ID
       await AuthService.fetchSecurityContext(true);

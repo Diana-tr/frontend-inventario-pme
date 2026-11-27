@@ -51,7 +51,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <!-- /.card-header -->
 
                                 <!-- Formulario inicio -->
-                                <form id="form_crear_caja" action="#" method="POST" autocomplete="off" novalidate>
+                                <form id="form_crear_caja" action="#" method="POST" autocomplete="off" novalidate data-write-action="true">
                                     <div class="card-body p-4">
                                         <div class="row">
 
@@ -90,7 +90,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                         <a href="<?php echo $URL; ?>/caja" class="btn font-weight-bold px-4 py-2 mr-2 text-white shadow-sm" style="background-color: #64748B; border: none; border-radius: 8px;">
                                             <i class="fas fa-times-circle mr-1"></i> Cancelar
                                         </a>
-                                        <button type="submit" class="btn font-weight-bold px-4 py-2 text-white shadow-sm" style="background-color: #2563EB; border: none; border-radius: 8px;">
+                                        <button type="submit" class="btn font-weight-bold px-4 py-2 text-white shadow-sm" style="background-color: #2563EB; border: none; border-radius: 8px;" data-write-action="true">
                                             <i class="fas fa-save mr-1"></i> Guardar Caja
                                         </button>
                                     </div>

@@ -32,13 +32,13 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <option value="quarter">Este Trimestre</option>
                                 <option value="year">Este Año</option>
                             </select>
-                            <button type="button" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold mr-2" id="btn_modal_transferencia" style="border-radius: 8px;">
+                            <button type="button" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold mr-2" id="btn_modal_transferencia" style="border-radius: 8px;" data-write-action="true">
                                 <i class="fas fa-exchange-alt mr-1"></i> Transferir
                             </button>
-                            <button type="button" class="btn btn-success btn-sm shadow-sm font-weight-bold mr-2" id="btn_modal_movimiento" style="border-radius: 8px;">
+                            <button type="button" class="btn btn-success btn-sm shadow-sm font-weight-bold mr-2" id="btn_modal_movimiento" style="border-radius: 8px;" data-write-action="true">
                                 <i class="fas fa-plus mr-1"></i> Registrar Movimiento
                             </button>
-                            <button type="button" class="btn btn-primary btn-sm shadow-sm font-weight-bold" id="btn_modal_nueva_cuenta" style="border-radius: 8px;">
+                            <button type="button" class="btn btn-primary btn-sm shadow-sm font-weight-bold" id="btn_modal_nueva_cuenta" style="border-radius: 8px;" data-write-action="true">
                                 <i class="fas fa-university mr-1"></i> Nueva Cuenta
                             </button>
                         </div>
@@ -203,7 +203,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="formCuentaFinanciera">
+                    <form id="formCuentaFinanciera" data-write-action="true">
                         <input type="hidden" id="cuenta_id" value="">
                         <div class="modal-body p-4">
                             <div class="form-group">
@@ -246,7 +246,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer bg-light py-2" style="border-radius: 0 0 12px 12px;">
                             <button type="button" class="btn btn-secondary font-weight-bold px-4" data-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary font-weight-bold px-4" id="btn_guardar_cuenta">Guardar Cuenta</button>
+                            <button type="submit" class="btn btn-primary font-weight-bold px-4" id="btn_guardar_cuenta" data-write-action="true">Guardar Cuenta</button>
                         </div>
                     </form>
                 </div>
@@ -265,7 +265,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="formMovimientoFinanciero">
+                    <form id="formMovimientoFinanciero" data-write-action="true">
                         <div class="modal-body p-4">
                             <div class="row">
                                 <div class="col-md-6 form-group">
@@ -324,7 +324,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer bg-light py-2" style="border-radius: 0 0 12px 12px;">
                             <button type="button" class="btn btn-secondary font-weight-bold px-4" data-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-success font-weight-bold px-4" id="btn_guardar_movimiento">Registrar Movimiento</button>
+                            <button type="submit" class="btn btn-success font-weight-bold px-4" id="btn_guardar_movimiento" data-write-action="true">Registrar Movimiento</button>
                         </div>
                     </form>
                 </div>
@@ -343,7 +343,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="formTransferencia">
+                    <form id="formTransferencia" data-write-action="true">
                         <div class="modal-body p-4">
                             <div class="row">
                                 <div class="col-md-6 form-group">
@@ -383,7 +383,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer bg-light py-2" style="border-radius: 0 0 12px 12px;">
                             <button type="button" class="btn btn-secondary font-weight-bold px-4" data-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary font-weight-bold px-4" id="btn_ejecutar_transferencia">Ejecutar Transferencia</button>
+                            <button type="submit" class="btn btn-primary font-weight-bold px-4" id="btn_ejecutar_transferencia" data-write-action="true">Ejecutar Transferencia</button>
                         </div>
                     </form>
                 </div>

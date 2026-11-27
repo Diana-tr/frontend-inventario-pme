@@ -56,7 +56,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             </h3>
                         </div>
 
-                        <form id="form_crear_venta" autocomplete="off" novalidate>
+                        <form id="form_crear_venta" autocomplete="off" novalidate data-write-action="true">
                             <div class="card-body p-4">
                                 <!-- SECCIÓN 1: DATOS BÁSICOS -->
                                 <div class="mb-4">
@@ -193,7 +193,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <a href="<?php echo $URL; ?>/ventas" class="btn btn-secondary mr-2 px-4 font-weight-bold" style="border-radius: 6px;">
                                     <i class="fas fa-times-circle mr-1"></i> Cancelar
                                 </a>
-                                <button type="submit" id="btn_guardar_venta" class="btn btn-primary px-4 font-weight-bold shadow-sm" style="border-radius: 6px;">
+                                <button type="submit" id="btn_guardar_venta" class="btn btn-primary px-4 font-weight-bold shadow-sm" style="border-radius: 6px;" data-write-action="true">
                                     <i class="fas fa-save mr-1"></i> Guardar Venta
                                 </button>
                             </div>

@@ -101,6 +101,7 @@ const RoleListController = (() => {
     editButton.title = "Editar rol";
     editButton.dataset.roleId = role.id_role ?? "";
     editButton.dataset.permission = "roles.update";
+    editButton.dataset.writeAction = "true";
     editButton.innerHTML = '<i class="fas fa-edit"></i>';
 
     // Botón Desactivar / Activar
@@ -114,6 +115,7 @@ const RoleListController = (() => {
     toggleButton.dataset.roleId = role.id_role ?? "";
     toggleButton.dataset.status = isActive ? "true" : "false";
     toggleButton.dataset.permission = "roles.update";
+    toggleButton.dataset.writeAction = "true";
     toggleButton.innerHTML = isActive
       ? '<i class="fas fa-user-slash"></i>'
       : '<i class="fas fa-user-check"></i>';
@@ -605,11 +607,11 @@ const RoleListController = (() => {
           <i class="fas fa-eye"></i>
         </button>
         <button type="button" class="btn btn-outline-warning btn-sm btn-edit-role"
-                title="Editar rol" data-role-id="${roleId}" data-permission="roles.update">
+                title="Editar rol" data-role-id="${roleId}" data-permission="roles.update" data-write-action="true">
           <i class="fas fa-edit"></i>
         </button>
         <button type="button" class="btn ${toggleClass} btn-sm btn-toggle-status"
-              title="${toggleTitle}" data-role-id="${roleId}" data-role-name="${roleName}" data-status="${isActive}" data-permission="roles.delete">
+              title="${toggleTitle}" data-role-id="${roleId}" data-role-name="${roleName}" data-status="${isActive}" data-permission="roles.delete" data-write-action="true">
           <i class="fas ${toggleIcon}"></i>
         </button>
       </div>

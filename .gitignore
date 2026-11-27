@@ -1,0 +1,7 @@
+# Backups pesados de vendor
+public/assets/vendor/*.bak.zip
+*.bak.zip
+
+# Archivos temporales de análisis
+adminlte_audit_data.json
+breakdown_summary.json

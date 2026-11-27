@@ -11,7 +11,7 @@ $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $isLocal = (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false);
 
 // Versión centralizada de la aplicación para cache-busting determinista
-$APP_VERSION = '1.15.2';
+$APP_VERSION = '1.15.3';
 
 if ($isLocal) {
     // Entorno local (XAMPP en subcarpeta /frontend-inventario-pme)

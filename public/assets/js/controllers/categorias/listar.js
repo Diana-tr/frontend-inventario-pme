@@ -486,11 +486,11 @@ const CategoryListController = (() => {
           <i class="fas fa-eye"></i>
         </button>
         <button type="button" class="btn btn-outline-warning btn-sm btn-edit-category"
-                title="Editar categoría" data-category-id="${categoryId}" data-permission="categories.update">
+                title="Editar categoría" data-category-id="${categoryId}" data-permission="categories.update" data-write-action="true">
           <i class="fas fa-edit"></i>
         </button>
         <button type="button" class="btn ${toggleClass} btn-sm btn-toggle-status"
-                title="${toggleTitle}" data-category-id="${categoryId}" data-category-name="${categoryName}" data-status="${isActive}" data-permission="categories.delete">
+                title="${toggleTitle}" data-category-id="${categoryId}" data-category-name="${categoryName}" data-status="${isActive}" data-permission="categories.delete" data-write-action="true">
           <i class="fas ${toggleIcon}"></i>
         </button>
       </div>

@@ -105,6 +105,7 @@ const UsuarioListController = (() => {
     editButton.title = "Editar usuario";
     editButton.dataset.userId = user.id_user ?? "";
     editButton.dataset.permission = "users.update";
+    editButton.dataset.writeAction = "true";
     editButton.innerHTML = '<i class="fas fa-edit"></i>';
 
     // Botón Desactivar / Activar
@@ -118,6 +119,7 @@ const UsuarioListController = (() => {
     toggleButton.dataset.userId = user.id_user ?? "";
     toggleButton.dataset.status = isActive ? "true" : "false";
     toggleButton.dataset.permission = "users.delete";
+    toggleButton.dataset.writeAction = "true";
     toggleButton.innerHTML = isActive
       ? '<i class="fas fa-user-slash"></i>'
       : '<i class="fas fa-user-check"></i>';
@@ -708,11 +710,11 @@ const UsuarioListController = (() => {
           <i class="fas fa-eye"></i>
         </button>
         <button type="button" class="btn btn-outline-warning btn-sm btn-edit-user"
-                title="Editar usuario" data-user-id="${userId}" data-permission="users.update">
+                title="Editar usuario" data-user-id="${userId}" data-permission="users.update" data-write-action="true">
           <i class="fas fa-edit"></i>
         </button>
         <button type="button" class="btn ${toggleClass} btn-sm btn-toggle-status"
-              title="${toggleTitle}" data-user-id="${userId}" data-username="${username}" data-status="${isActive}" data-permission="users.delete">
+              title="${toggleTitle}" data-user-id="${userId}" data-username="${username}" data-status="${isActive}" data-permission="users.delete" data-write-action="true">
           <i class="fas ${toggleIcon}"></i>
         </button>
       </div>

@@ -121,7 +121,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                     </h3>
                                 </div>
                                 <div class="card-body p-4">
-                                    <form id="form_pos_sale" autocomplete="off">
+                                    <form id="form_pos_sale" autocomplete="off" data-write-action="true">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-secondary">Cliente</label>
                                             <div class="input-group">
@@ -193,10 +193,10 @@ require_once __DIR__ . '/../layouts/head.php';
                                             <span id="pos_change_display" class="change-display">$0.00</span>
                                         </div>
 
-                                        <button type="submit" class="btn btn-success btn-lg btn-block font-weight-bold shadow-sm py-2 mb-2" id="btn_process_sale" style="border-radius: 8px;">
+                                        <button type="submit" class="btn btn-success btn-lg btn-block font-weight-bold shadow-sm py-2 mb-2" id="btn_process_sale" style="border-radius: 8px;" data-write-action="true">
                                             <i class="fas fa-check-circle mr-2"></i> Procesar Venta (F2)
                                         </button>
-                                        <button type="button" class="btn btn-outline-secondary btn-block font-weight-bold" id="btn_cancel_pos" style="border-radius: 8px;">
+                                        <button type="button" class="btn btn-outline-secondary btn-block font-weight-bold" id="btn_cancel_pos" style="border-radius: 8px;" data-write-action="true">
                                             <i class="fas fa-times mr-2"></i> Cancelar (ESC)
                                         </button>
                                     </form>

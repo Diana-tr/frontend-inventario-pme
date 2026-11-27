@@ -382,11 +382,11 @@ const ProveedorListController = (() => {
           <i class="fas fa-eye"></i>
         </button>
         <button type="button" class="btn btn-outline-warning btn-sm btn-edit-supplier"
-                title="Editar proveedor" data-supplier-id="${proveedorId}" data-permission="suppliers.update">
+                title="Editar proveedor" data-supplier-id="${proveedorId}" data-permission="suppliers.update" data-write-action="true">
           <i class="fas fa-edit"></i>
         </button>
         <button type="button" class="btn ${toggleClass} btn-sm btn-toggle-status"
-                title="${toggleTitle}" data-supplier-id="${proveedorId}" data-suppliers-name="${proveedorName}" data-status="${isActive}" data-permission="suppliers.delete">
+                title="${toggleTitle}" data-supplier-id="${proveedorId}" data-suppliers-name="${proveedorName}" data-status="${isActive}" data-permission="suppliers.delete" data-write-action="true">
           <i class="fas ${toggleIcon}"></i>
         </button>
       </div>

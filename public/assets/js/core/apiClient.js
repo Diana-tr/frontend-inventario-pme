@@ -209,9 +209,88 @@ const ApiClient = (() => {
 
       // Manejo Global de 403 (Forbidden)
       if (response.status === 403) {
-        // El usuario está autenticado pero sus roles/permisos fueron revocados o no alcanzan
-        // Despachamos un evento para que el Frontend actualice su contexto sin hacer logout
-        window.dispatchEvent(new CustomEvent("security_forbidden"));
+        const isSubscriptionExpired =
+          result.code === "SUBSCRIPTION_EXPIRED" ||
+          result.error_code === "SUBSCRIPTION_EXPIRED" ||
+          (result.data && (result.data.is_read_only === true || result.data.status === "EXPIRED"));
+
+        const isSubscriptionRequired =
+          result.code === "SUBSCRIPTION_REQUIRED" ||
+          result.error_code === "SUBSCRIPTION_REQUIRED" ||
+          (result.data && result.data.status === "NO_SUBSCRIPTION");
+
+        if (isSubscriptionExpired || isSubscriptionRequired) {
+          // Despachar evento para sincronizar contexto frontend
+          window.dispatchEvent(
+            new CustomEvent("subscription_expired", { detail: result })
+          );
+
+          // Notificación comprensible con throttling defensivo para evitar loops repetitivos
+          if (!window._subscriptionExpiredNotificationActive) {
+            window._subscriptionExpiredNotificationActive = true;
+            setTimeout(() => {
+              window._subscriptionExpiredNotificationActive = false;
+            }, 6000);
+
+            const Swal = typeof window !== "undefined" && window.Swal ? window.Swal : null;
+            const isRequired = isSubscriptionRequired;
+            const title = isRequired ? "Suscripción Requerida" : "Suscripción Vencida (Modo Lectura)";
+            const detailHelp = isRequired
+              ? '<i class="fas fa-lock mr-1 text-warning"></i> Tu empresa no posee un plan activo. Para registrar operaciones comerciales debes contratar un plan.'
+              : '<i class="fas fa-lock mr-1 text-warning"></i> Las operaciones de escritura se encuentran bloqueadas. Puedes continuar consultando tu información histórica.';
+            const msg =
+              result.message ||
+              (isRequired
+                ? "Tu empresa no cuenta con una suscripción activa."
+                : "Tu suscripción ha vencido. Tu cuenta está en modo lectura.");
+
+            const whatsappUrl = result.data?.contact_whatsapp;
+            const emailUrl = result.data?.contact_email;
+
+            let confirmButtonText = null;
+            let actionHandler = null;
+
+            if (whatsappUrl) {
+              confirmButtonText = '<i class="fab fa-whatsapp mr-1"></i> Contactar Soporte';
+              actionHandler = () => window.open(whatsappUrl, "_blank");
+            } else if (emailUrl) {
+              confirmButtonText = '<i class="fas fa-envelope mr-1"></i> Enviar Email';
+              actionHandler = () => { window.location.href = emailUrl; };
+            }
+
+            if (Swal) {
+              const swalOptions = {
+                icon: "warning",
+                title: title,
+                html: `
+                  <div class="text-left" style="font-size: 0.95rem;">
+                    <p class="mb-2">${msg}</p>
+                    <p class="text-muted small mb-0">${detailHelp}</p>
+                  </div>
+                `,
+                showCancelButton: Boolean(confirmButtonText),
+                confirmButtonColor: whatsappUrl ? "#10B981" : "#2563EB",
+                cancelButtonColor: "#64748B",
+                cancelButtonText: "Entendido",
+              };
+
+              if (confirmButtonText) {
+                swalOptions.confirmButtonText = confirmButtonText;
+              }
+
+              Swal.fire(swalOptions).then((swalRes) => {
+                if (swalRes.isConfirmed && typeof actionHandler === "function") {
+                  actionHandler();
+                }
+              });
+            } else if (typeof window !== "undefined" && typeof window.alert === "function") {
+              window.alert(`${msg}\nContacta a tu administrador para activar o renovar tu plan.`);
+            }
+          }
+        } else {
+          // El usuario está autenticado pero sus roles/permisos fueron revocados o no alcanzan
+          window.dispatchEvent(new CustomEvent("security_forbidden"));
+        }
       }
 
       const isOk = response.ok;

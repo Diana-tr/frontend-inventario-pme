@@ -61,7 +61,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <h3 class="card-title font-weight-bold mb-0" style="color: #0F172A;">Apertura de Caja</h3>
                             </div>
                             <div class="card-body p-4">
-                                <form id="form_abrir_caja">
+                                <form id="form_abrir_caja" data-write-action="true">
                                     <div class="form-group mb-3">
                                         <label for="cash_register_id" class="font-weight-bold small text-uppercase" style="color: #1E293B; letter-spacing: 0.3px;">Caja Registradora</label>
                                         <div class="input-group">
@@ -101,7 +101,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                             <textarea class="form-control border-left-0 shadow-none" id="opening_notes" rows="2" placeholder="Observaciones adicionales..." style="border-radius: 0 8px 8px 0; border: 1px solid #CBD5E1; color: #0F172A;"></textarea>
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-success btn-block font-weight-bold py-2 shadow-sm text-white" style="background-color: #059669; border: none; border-radius: 8px;" data-permission="cash.open">
+                                    <button type="submit" class="btn btn-success btn-block font-weight-bold py-2 shadow-sm text-white" style="background-color: #059669; border: none; border-radius: 8px;" data-permission="cash.open" data-write-action="true">
                                         <i class="fas fa-lock-open mr-1"></i> Abrir Caja
                                     </button>
                                 </form>
@@ -194,10 +194,10 @@ require_once __DIR__ . '/../layouts/head.php';
                                             <button class="btn btn-info btn-block font-weight-bold py-2 shadow-sm text-white mb-2" id="btn_modal_resumen_turno" style="background-color: #0284C7; border: none; border-radius: 8px;">
                                                 <i class="fas fa-chart-pie mr-1"></i> Resumen Financiero del Turno
                                             </button>
-                                            <button class="btn btn-warning btn-block font-weight-bold py-2 shadow-sm text-white mb-2" id="btn_modal_movimiento" data-permission="cash.movement" style="background-color: #F59E0B; border: none; border-radius: 8px;">
+                                            <button class="btn btn-warning btn-block font-weight-bold py-2 shadow-sm text-white mb-2" id="btn_modal_movimiento" data-permission="cash.movement" data-write-action="true" style="background-color: #F59E0B; border: none; border-radius: 8px;">
                                                 <i class="fas fa-exchange-alt mr-1"></i> Registrar Movimiento
                                             </button>
-                                            <button class="btn btn-danger btn-block font-weight-bold py-2 shadow-sm text-white" id="btn_modal_cerrar" data-permission="cash.close" style="background-color: #DC2626; border: none; border-radius: 8px;">
+                                            <button class="btn btn-danger btn-block font-weight-bold py-2 shadow-sm text-white" id="btn_modal_cerrar" data-permission="cash.close" data-write-action="true" style="background-color: #DC2626; border: none; border-radius: 8px;">
                                                 <i class="fas fa-lock mr-1"></i> Realizar Cierre de Caja
                                             </button>
                                         </div>
@@ -286,7 +286,7 @@ require_once __DIR__ . '/../layouts/head.php';
     <div class="modal fade" id="modalMovimientoCaja" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
-                <form id="form_movimiento_caja">
+                <form id="form_movimiento_caja" data-write-action="true">
                     <div class="modal-header border-0 py-3" style="background-color: #FFFBEB;">
                         <h5 class="modal-title font-weight-bold text-warning"><i class="fas fa-exchange-alt mr-2"></i>Registrar Movimiento</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -338,7 +338,7 @@ require_once __DIR__ . '/../layouts/head.php';
                     </div>
                     <div class="modal-footer border-0 bg-light py-3" style="border-radius: 0 0 12px 12px;">
                         <button type="button" class="btn btn-secondary font-weight-bold px-4" data-dismiss="modal" style="border-radius: 8px;">Cancelar</button>
-                        <button type="submit" class="btn btn-warning font-weight-bold px-4 text-white shadow-sm" style="background-color: #F59E0B; border: none; border-radius: 8px;"><i class="fas fa-save mr-1"></i> Guardar</button>
+                        <button type="submit" class="btn btn-warning font-weight-bold px-4 text-white shadow-sm" style="background-color: #F59E0B; border: none; border-radius: 8px;" data-write-action="true"><i class="fas fa-save mr-1"></i> Guardar</button>
                     </div>
                 </form>
             </div>
@@ -349,7 +349,7 @@ require_once __DIR__ . '/../layouts/head.php';
     <div class="modal fade" id="modalCerrarCaja" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
-                <form id="form_cerrar_caja">
+                <form id="form_cerrar_caja" data-write-action="true">
                     <div class="modal-header border-0 py-3 text-white" style="background-color: #DC2626; border-radius: 12px 12px 0 0;">
                         <div>
                             <h5 class="modal-title font-weight-bold mb-0"><i class="fas fa-lock mr-2"></i>Cierre de Caja y Arqueo Físico</h5>
@@ -494,7 +494,7 @@ require_once __DIR__ . '/../layouts/head.php';
                     </div>
                     <div class="modal-footer border-0 bg-light py-3" style="border-radius: 0 0 12px 12px;">
                         <button type="button" class="btn btn-secondary font-weight-bold px-4" data-dismiss="modal" style="border-radius: 8px;">Cancelar</button>
-                        <button type="submit" class="btn btn-danger font-weight-bold px-4 shadow-sm" style="background-color: #DC2626; border: none; border-radius: 8px;"><i class="fas fa-check mr-1"></i> Confirmar Cierre de Caja</button>
+                        <button type="submit" class="btn btn-danger font-weight-bold px-4 shadow-sm" style="background-color: #DC2626; border: none; border-radius: 8px;" data-write-action="true"><i class="fas fa-check mr-1"></i> Confirmar Cierre de Caja</button>
                     </div>
                 </form>
             </div>

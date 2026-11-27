@@ -178,11 +178,11 @@ const VentaListController = (() => {
     if (venta.status === "PENDING" || venta.status === "DRAFT") {
       container.append(`
         <button type="button" class="btn btn-success btn-sm btn-action-sale font-weight-bold" 
-          data-action="complete" data-id="${venta.id_sale}" data-permission="sales.update">
+          data-action="complete" data-id="${venta.id_sale}" data-permission="sales.update" data-write-action="true">
           <i class="fas fa-check-circle mr-1"></i> Completar Venta
         </button>
         <button type="button" class="btn btn-danger btn-sm btn-action-sale font-weight-bold ml-2" 
-          data-action="cancel" data-id="${venta.id_sale}" data-permission="sales.update">
+          data-action="cancel" data-id="${venta.id_sale}" data-permission="sales.update" data-write-action="true">
           <i class="fas fa-times-circle mr-1"></i> Cancelar
         </button>
       `);
@@ -403,7 +403,7 @@ const VentaListController = (() => {
     if (venta.status === "PENDING" || venta.status === "DRAFT") {
       cancelBtn = `
         <button type="button" class="btn btn-outline-danger btn-sm btn-action-sale"
-                title="Cancelar venta" data-action="cancel" data-id="${ventaId}" data-permission="sales.update">
+                title="Cancelar venta" data-action="cancel" data-id="${ventaId}" data-permission="sales.update" data-write-action="true">
           <i class="fas fa-ban"></i>
         </button>
       `;
