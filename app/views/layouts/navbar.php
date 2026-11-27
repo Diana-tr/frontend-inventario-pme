@@ -178,6 +178,52 @@ require_once __DIR__ . '/../../config/app.php';
 </nav>
 <!-- /.navbar -->
 
+<!-- BANNER PERSISTENTE DE SUSCRIPCIÓN EXPIRADA / MODO SOLO LECTURA -->
+<style>
+    #subscription-status-banner {
+        transition: margin-left 0.3s ease-in-out;
+        margin-left: 250px;
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background: linear-gradient(90deg, #FFFBEB 0%, #FEF3C7 100%);
+        border-bottom: 2px solid #F59E0B !important;
+    }
+    body.sidebar-collapse #subscription-status-banner,
+    body.sidebar-mini.sidebar-collapse #subscription-status-banner {
+        margin-left: 4.6rem !important;
+    }
+    body.layout-top-nav #subscription-status-banner {
+        margin-left: 0 !important;
+    }
+    @media (max-width: 767.98px) {
+        #subscription-status-banner {
+            margin-left: 0 !important;
+        }
+    }
+</style>
+<div id="subscription-status-banner" class="alert alert-warning text-dark border-0 rounded-0 mb-0 shadow-sm d-none">
+    <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between py-2 px-3" style="gap: 8px;">
+        <div class="d-flex align-items-center my-1" style="flex: 1 1 300px; min-width: 250px;">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-circle mr-3 shadow-sm flex-shrink-0" style="width: 36px; height: 36px; background: #FDE68A; color: #D97706; font-size: 1.15rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </span>
+            <div>
+                <div class="font-weight-bold" style="font-size: 0.92rem; color: #92400E;">
+                    <span id="sub-banner-status-badge" class="badge badge-warning text-dark font-weight-bold mr-1 px-2 py-1" style="background-color: #FCD34D;">Vencida</span>
+                    Modo Solo Lectura: Tu cuenta se encuentra en modo restringido.
+                </div>
+                <div class="small mt-1" style="color: #B45309;" id="sub-banner-message">
+                    Tu suscripción ha vencido <span id="sub-banner-days-overdue" class="font-weight-bold">hace días</span>. Las operaciones de escritura (crear, editar, eliminar) están deshabilitadas.
+                </div>
+            </div>
+        </div>
+        <div class="my-1 d-flex align-items-center flex-shrink-0" id="sub-banner-actions">
+            <!-- Acciones dinámicas de contacto / renovación inyectadas por NavbarController -->
+        </div>
+    </div>
+</div>
+
 <!-- Inicialización limpia mediante el controlador -->
 <script type="module">
     import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js?v=<?php echo $APP_VERSION; ?>';

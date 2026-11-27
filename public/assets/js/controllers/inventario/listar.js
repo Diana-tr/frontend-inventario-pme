@@ -282,6 +282,7 @@ const InventarioListController = (() => {
                     title="Registrar Entrada"
                     data-inventory-id="${inventoryId}"
                     data-permission="inventory.movement"
+                    data-write-action="true"
                 >
                     <i class="fas fa-plus"></i>
                 </button>
@@ -293,6 +294,7 @@ const InventarioListController = (() => {
                     title="Registrar Salida"
                     data-inventory-id="${inventoryId}"
                     data-permission="inventory.movement"
+                    data-write-action="true"
                 >
                     <i class="fas fa-minus"></i>
                 </button>
@@ -304,6 +306,7 @@ const InventarioListController = (() => {
                     title="Ajuste Manual"
                     data-inventory-id="${inventoryId}"
                     data-permission="inventory.movement"
+                    data-write-action="true"
                 >
                     <i class="fas fa-sliders-h"></i>
                 </button>
@@ -315,6 +318,7 @@ const InventarioListController = (() => {
                     title="Editar Umbrales"
                     data-inventory-id="${inventoryId}"
                     data-permission="inventory.update"
+                    data-write-action="true"
                 >
                     <i class="fas fa-cog"></i>
                 </button>

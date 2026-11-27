@@ -52,7 +52,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card-header d-flex align-items-center">
                                     <h3 class="card-title font-weight-bold">Historial de Movimientos</h3>
                                     <div class="card-tools ml-auto">
-                                        <button type="button" class="btn btn-primary btn-sm" id="btn_nuevo_movimiento">
+                                        <button type="button" class="btn btn-primary btn-sm" id="btn_nuevo_movimiento" data-write-action="true">
                                             <i class="fas fa-plus mr-1"></i> Registrar Movimiento
                                         </button>
                                     </div>
@@ -92,7 +92,7 @@ require_once __DIR__ . '/../layouts/head.php';
         <div class="modal fade" id="modalRegistrarMovimiento" tabindex="-1" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <form id="formRegistrarMovimiento" novalidate>
+                    <form id="formRegistrarMovimiento" novalidate data-write-action="true">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title"><i class="fas fa-exchange-alt mr-2"></i>Registrar Movimiento de Inventario</h5>
                             <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
@@ -177,7 +177,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>
-                            <button type="submit" class="btn btn-primary" id="btn_guardar_movimiento" disabled><i class="fas fa-save mr-1"></i>Confirmar Movimiento</button>
+                            <button type="submit" class="btn btn-primary" id="btn_guardar_movimiento" disabled data-write-action="true"><i class="fas fa-save mr-1"></i>Confirmar Movimiento</button>
                         </div>
                     </form>
                 </div>

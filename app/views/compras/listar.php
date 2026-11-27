@@ -50,7 +50,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card-header d-flex align-items-center">
                                     <h3 class="card-title font-weight-bold">Historial de Compras</h3>
                                     <div class="card-tools ml-auto">
-                                        <a href="<?php echo $URL; ?>/compras/crear" class="btn btn-primary btn-sm" data-permission="purchases.create">
+                                        <a href="<?php echo $URL; ?>/compras/crear" class="btn btn-primary btn-sm" data-permission="purchases.create" data-write-action="true">
                                             <i class="fas fa-plus mr-1"></i> Registrar Nueva Compra
                                         </a>
                                     </div>
@@ -288,7 +288,7 @@ require_once __DIR__ . '/../layouts/head.php';
     <div class="modal fade" id="modalPagarCompra" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
-                <form id="form_pagar_compra">
+                <form id="form_pagar_compra" data-write-action="true">
                     <div class="modal-header border-0 py-3 text-white" style="background-color: #059669; border-radius: 12px 12px 0 0;">
                         <h5 class="modal-title font-weight-bold"><i class="fas fa-hand-holding-usd mr-2"></i>Registrar Pago a Proveedor</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
@@ -362,7 +362,7 @@ require_once __DIR__ . '/../layouts/head.php';
                     </div>
                     <div class="modal-footer border-0 bg-light py-3" style="border-radius: 0 0 12px 12px;">
                         <button type="button" class="btn btn-secondary font-weight-bold px-4" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm" style="background-color: #059669; border: none;"><i class="fas fa-check mr-1"></i> Confirmar Pago</button>
+                        <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm" style="background-color: #059669; border: none;" data-write-action="true"><i class="fas fa-check mr-1"></i> Confirmar Pago</button>
                     </div>
                 </form>
             </div>

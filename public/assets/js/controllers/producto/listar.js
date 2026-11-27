@@ -995,6 +995,7 @@ const ProductoListController = (() => {
                     title="Editar producto"
                     data-product-id="${productId}"
                     data-permission="products.update"
+                    data-write-action="true"
                 >
                     <i class="fas fa-edit"></i>
                 </button>
@@ -1008,6 +1009,7 @@ const ProductoListController = (() => {
                     data-product-name="${productName}"
                     data-status="${isActive}"
                     data-permission="products.delete"
+                    data-write-action="true"
                 >
                     <i class="fas ${toggleIcon}"></i>
                 </button>

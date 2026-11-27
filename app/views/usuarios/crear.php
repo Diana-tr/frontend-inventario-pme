@@ -53,7 +53,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <!-- /.card-header -->
 
                                 <!-- Formulario inicio -->
-                                <form id="form_crear_usuario" action="#" method="POST" autocomplete="off">
+                                <form id="form_crear_usuario" action="#" method="POST" autocomplete="off" data-write-action="true">
                                     <div class="card-body">
                                         <div class="row">
 
@@ -163,7 +163,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                         <a href="index.php" class="btn btn-secondary mr-2">
                                             <i class="fas fa-times-circle mr-1"></i> Cancelar
                                         </a>
-                                        <button type="submit" class="btn btn-primary">
+                                        <button type="submit" class="btn btn-primary" data-write-action="true">
                                             <i class="fas fa-save mr-1"></i> Guardar Usuario
                                         </button>
                                     </div>

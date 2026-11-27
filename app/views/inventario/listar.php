@@ -150,7 +150,7 @@ require_once __DIR__ . '/../layouts/head.php';
         <div class="modal fade" id="modalEntradaInventario" tabindex="-1" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form id="formEntradaInventario" novalidate>
+                    <form id="formEntradaInventario" novalidate data-write-action="true">
                         <div class="modal-header bg-success text-white">
                             <h5 class="modal-title"><i class="fas fa-plus-circle mr-2"></i>Registrar Entrada</h5>
                             <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
@@ -185,7 +185,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>
-                            <button type="submit" class="btn btn-success" id="btn_guardar_entrada"><i class="fas fa-save mr-1"></i>Registrar Entrada</button>
+                            <button type="submit" class="btn btn-success" id="btn_guardar_entrada" data-write-action="true"><i class="fas fa-save mr-1"></i>Registrar Entrada</button>
                         </div>
                     </form>
                 </div>
@@ -198,7 +198,7 @@ require_once __DIR__ . '/../layouts/head.php';
         <div class="modal fade" id="modalSalidaInventario" tabindex="-1" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form id="formSalidaInventario" novalidate>
+                    <form id="formSalidaInventario" novalidate data-write-action="true">
                         <div class="modal-header bg-warning text-dark">
                             <h5 class="modal-title"><i class="fas fa-minus-circle mr-2"></i>Registrar Salida</h5>
                             <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
@@ -227,7 +227,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>
-                            <button type="submit" class="btn btn-warning text-dark" id="btn_guardar_salida"><i class="fas fa-save mr-1"></i>Registrar Salida</button>
+                            <button type="submit" class="btn btn-warning text-dark" id="btn_guardar_salida" data-write-action="true"><i class="fas fa-save mr-1"></i>Registrar Salida</button>
                         </div>
                     </form>
                 </div>
@@ -240,7 +240,7 @@ require_once __DIR__ . '/../layouts/head.php';
         <div class="modal fade" id="modalAjusteInventario" tabindex="-1" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form id="formAjusteInventario" novalidate>
+                    <form id="formAjusteInventario" novalidate data-write-action="true">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title"><i class="fas fa-sliders-h mr-2"></i>Ajuste Manual</h5>
                             <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
@@ -266,7 +266,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>
-                            <button type="submit" class="btn btn-primary" id="btn_guardar_ajuste"><i class="fas fa-save mr-1"></i>Registrar Ajuste</button>
+                            <button type="submit" class="btn btn-primary" id="btn_guardar_ajuste" data-write-action="true"><i class="fas fa-save mr-1"></i>Registrar Ajuste</button>
                         </div>
                     </form>
                 </div>
@@ -279,7 +279,7 @@ require_once __DIR__ . '/../layouts/head.php';
         <div class="modal fade" id="modalEditarUmbrales" tabindex="-1" aria-hidden="true" data-backdrop="static">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form id="formEditarUmbrales" novalidate>
+                    <form id="formEditarUmbrales" novalidate data-write-action="true">
                         <div class="modal-header bg-dark text-white">
                             <h5 class="modal-title"><i class="fas fa-cog mr-2"></i>Editar Umbrales</h5>
                             <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
@@ -315,7 +315,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>
-                            <button type="submit" class="btn btn-dark" id="btn_guardar_umbrales"><i class="fas fa-save mr-1"></i>Guardar Cambios</button>
+                            <button type="submit" class="btn btn-dark" id="btn_guardar_umbrales" data-write-action="true"><i class="fas fa-save mr-1"></i>Guardar Cambios</button>
                         </div>
                     </form>
                 </div>

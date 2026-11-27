@@ -12,8 +12,152 @@
 
 import Storage from "../storage/storage.js";
 import Routes from "./routes.js";
+import Config from "../config/config.js";
 
 const SecurityManager = (() => {
+
+  /**
+   * Determina si la empresa activa se encuentra en MODO DE SOLO LECTURA.
+   * Aplica cuando la suscripción ha expirado, está cancelada o no autoriza escritura.
+   * Regla de negocio: Los permisos administrativos no anulan el bloqueo por suscripción vencida.
+   * @returns {boolean}
+   */
+  const isReadOnlyMode = () => {
+    // Si estamos en entorno SaaS Admin, no aplica el modo lectura de inquilinos
+    if (typeof window !== "undefined" && window.location.pathname.includes("saas-admin")) {
+      return false;
+    }
+
+    const subStatus = Storage.getSubscriptionStatus();
+    if (!subStatus) return false;
+
+    return subStatus.is_read_only === true || subStatus.can_write === false;
+  };
+
+  /**
+   * Indica si la empresa activa tiene autorización operativa para realizar escrituras.
+   * @returns {boolean}
+   */
+  const canWrite = () => {
+    return !isReadOnlyMode();
+  };
+
+  /**
+   * Muestra un diálogo explicativo y responsive informando que la cuenta está en modo lectura
+   * y ofreciendo el botón directo para renovar el plan comercial.
+   * @param {string} [actionName]
+   */
+  const notifyReadOnlyBlocked = (actionName = "esta acción") => {
+    const Swal = typeof window !== "undefined" && window.Swal ? window.Swal : null;
+    const renewUrl = `${Config.BASE_PATH || ""}/saas-admin/planes`;
+
+    if (Swal) {
+      Swal.fire({
+        icon: "warning",
+        title: "Modo de Solo Lectura",
+        html: `
+          <div class="text-left" style="font-size: 0.95rem;">
+            <p class="mb-2">La suscripción de tu empresa se encuentra <strong>vencida</strong>. La cuenta está operando en <strong>modo de solo lectura</strong>.</p>
+            <p class="text-muted small mb-0"><i class="fas fa-lock mr-1 text-warning"></i> No es posible realizar operaciones de escritura (${actionName}) hasta que se renueve o regularice el plan de suscripción.</p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonColor: "#4F46E5",
+        cancelButtonColor: "#64748B",
+        confirmButtonText: '<i class="fas fa-sync-alt mr-1"></i> Renovar Plan',
+        cancelButtonText: "Entendido",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = renewUrl;
+        }
+      });
+    } else if (typeof window !== "undefined" && typeof window.alert === "function") {
+      window.alert("Tu suscripción ha vencido. Tu cuenta está en modo de solo lectura.");
+    }
+  };
+
+  let isObserverSetup = false;
+
+  /**
+   * Configura interceptores globales de eventos y observador de mutaciones del DOM
+   * para proteger de manera continua elementos creados dinámicamente mediante JS o AJAX.
+   */
+  const setupDynamicObserver = () => {
+    if (isObserverSetup || typeof window === "undefined" || !document.body) return;
+    isObserverSetup = true;
+
+    // 1. Escuchar apertura de modales de Bootstrap / AdminLTE
+    if (typeof $ !== "undefined") {
+      $(document).on("shown.bs.modal show.bs.modal", () => {
+        processDomPermissions();
+      });
+    }
+
+    // 2. MutationObserver defensivo para nuevos nodos insertados en el DOM
+    let mutationThrottle = null;
+    try {
+      const observer = new MutationObserver((mutations) => {
+        let hasAddedNodes = false;
+        for (const m of mutations) {
+          if (m.addedNodes && m.addedNodes.length > 0) {
+            hasAddedNodes = true;
+            break;
+          }
+        }
+        if (hasAddedNodes) {
+          if (mutationThrottle) clearTimeout(mutationThrottle);
+          mutationThrottle = setTimeout(() => {
+            processDomPermissions();
+            mutationThrottle = null;
+          }, 120);
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    } catch (e) {
+      console.warn("[SecurityManager] MutationObserver no disponible:", e);
+    }
+
+    // 3. Interceptor en fase de captura para clics sobre elementos data-write-action
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (!isReadOnlyMode()) return;
+
+        const target = e.target.closest && e.target.closest('[data-write-action="true"]');
+        if (target) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          notifyReadOnlyBlocked("crear, editar o eliminar registros");
+        }
+      },
+      true
+    );
+
+    // 4. Interceptor en fase de captura para envíos de formularios data-write-action
+    document.addEventListener(
+      "submit",
+      (e) => {
+        if (!isReadOnlyMode()) return;
+
+        const form =
+          (e.target.closest && e.target.closest('form[data-write-action="true"]')) ||
+          (e.target.hasAttribute && e.target.hasAttribute("data-write-action") ? e.target : null);
+
+        if (form) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          notifyReadOnlyBlocked("guardar este formulario");
+        }
+      },
+      true
+    );
+  };
 
   /**
    * Obtiene los permisos efectivos desde el Storage.
@@ -218,6 +362,59 @@ const SecurityManager = (() => {
         }
       }
     });
+
+    // ──────────────────────────────────────────────────────────
+    // CONTROL DE MODO DE SOLO LECTURA (Suscripción Vencida)
+    // ──────────────────────────────────────────────────────────
+    const readOnly = isReadOnlyMode();
+    const writeElements = document.querySelectorAll('[data-write-action="true"]');
+
+    if (readOnly) {
+      writeElements.forEach((el) => {
+        el.setAttribute("data-read-only-locked", "true");
+        el.title = "Acción no disponible: la suscripción ha vencido (modo de solo lectura).";
+
+        if (el.tagName === "BUTTON" || el.tagName === "INPUT" || el.tagName === "SELECT" || el.tagName === "TEXTAREA") {
+          el.disabled = true;
+          el.classList.add("disabled");
+        } else if (el.tagName === "A") {
+          el.classList.add("disabled");
+          el.style.pointerEvents = "none";
+          el.style.opacity = "0.65";
+          el.style.cursor = "not-allowed";
+        } else if (el.tagName === "FORM") {
+          // Deshabilitar botones de submit dentro del formulario
+          const submitBtns = el.querySelectorAll('button[type="submit"], input[type="submit"]');
+          submitBtns.forEach((btn) => {
+            btn.disabled = true;
+            btn.classList.add("disabled");
+            btn.title = "Formulario deshabilitado en modo solo lectura.";
+          });
+        }
+      });
+    } else {
+      // Restaurar elementos previamente bloqueados si la suscripción está vigente
+      const lockedElements = document.querySelectorAll('[data-read-only-locked="true"]');
+      lockedElements.forEach((el) => {
+        el.removeAttribute("data-read-only-locked");
+        if (el.getAttribute("title") && el.getAttribute("title").includes("solo lectura")) {
+          el.removeAttribute("title");
+        }
+
+        if (el.tagName === "BUTTON" || el.tagName === "INPUT" || el.tagName === "SELECT" || el.tagName === "TEXTAREA") {
+          el.disabled = false;
+          el.classList.remove("disabled");
+        } else if (el.tagName === "A") {
+          el.classList.remove("disabled");
+          el.style.pointerEvents = "";
+          el.style.opacity = "";
+          el.style.cursor = "";
+        }
+      });
+    }
+
+    // Inicializar observador dinámico en primer escaneo
+    setupDynamicObserver();
   };
 
   /**
@@ -237,6 +434,15 @@ const SecurityManager = (() => {
     }
   };
 
+  // Auto-inicializar observadores cuando el DOM esté listo
+  if (typeof document !== "undefined") {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupDynamicObserver);
+    } else {
+      setupDynamicObserver();
+    }
+  }
+
   return Object.freeze({
     getPermissions,
     getActions,
@@ -247,6 +453,10 @@ const SecurityManager = (() => {
     canExport,
     hasAnyPermission,
     hasAllPermissions,
+    isReadOnlyMode,
+    canWrite,
+    notifyReadOnlyBlocked,
+    setupDynamicObserver,
     processDomPermissions,
     redirectIfUnauthorized,
   });

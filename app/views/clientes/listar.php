@@ -50,7 +50,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <div class="card-header d-flex align-items-center">
                                     <h3 class="card-title font-weight-bold">Listado de Clientes</h3>
                                     <div class="card-tools ml-auto">
-                                        <a href="<?php echo $URL; ?>/clientes/crear" class="btn btn-primary btn-sm" data-permission="customers.create">
+                                        <a href="<?php echo $URL; ?>/clientes/crear" class="btn btn-primary btn-sm" data-permission="customers.create" data-write-action="true">
                                             <i class="fas fa-plus mr-1"></i> Registrar Nuevo Cliente
                                         </a>
                                     </div>
@@ -181,7 +181,7 @@ require_once __DIR__ . '/../layouts/head.php';
                     </button>
                 </div>
 
-                <form id="formEditarCliente" novalidate>
+                <form id="formEditarCliente" novalidate data-write-action="true">
                     <div class="modal-body">
                         <!-- Spinner de carga inicial -->
                         <div id="edit_customer_modal_loader" class="text-center py-5">
@@ -276,7 +276,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
                             <i class="fas fa-times mr-1"></i>Cancelar
                         </button>
-                        <button type="submit" id="btn_guardar_edicion" class="btn btn-warning btn-sm font-weight-bold">
+                        <button type="submit" id="btn_guardar_edicion" class="btn btn-warning btn-sm font-weight-bold" data-write-action="true">
                             <i class="fas fa-save mr-1"></i>Guardar Cambios
                         </button>
                     </div>

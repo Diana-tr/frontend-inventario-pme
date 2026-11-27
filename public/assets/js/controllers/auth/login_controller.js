@@ -181,9 +181,17 @@ const LoginController = (() => {
       }
     }
 
-    await NotificationService.toastSuccess(welcomeMessage);
+    // Guardar el mensaje de bienvenida en sessionStorage para que sea mostrado
+    // de forma persistente y elegante al cargar el Dashboard (NavbarController)
+    sessionStorage.setItem("pme_welcome_toast", welcomeMessage);
 
-    redirectAfterLogin();
+    // Toast de confirmación inmediata en la pantalla de login
+    await NotificationService.toastSuccess("Inicio de sesión exitoso. Ingresando...");
+
+    // Breve pausa para que el usuario perciba la confirmación antes de la redirección
+    setTimeout(() => {
+      redirectAfterLogin();
+    }, 600);
   }
 
   /**
