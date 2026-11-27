@@ -180,6 +180,140 @@ const Utils = (() => {
     }
   };
 
+  /**
+   * Limpia los estados de error de validación visuales en un formulario.
+   * Remueve las clases `.is-invalid` y los contenedores `.invalid-feedback`.
+   * @param {HTMLFormElement|HTMLElement|string} formOrSelector
+   */
+  const clearFormErrors = (formOrSelector) => {
+    const form = typeof formOrSelector === "string" ? document.querySelector(formOrSelector) : formOrSelector;
+    if (!form) return;
+
+    form.querySelectorAll(".is-invalid").forEach((el) => {
+      el.classList.remove("is-invalid");
+      el.removeAttribute("aria-invalid");
+    });
+
+    form.querySelectorAll(".invalid-feedback.dynamic-feedback").forEach((el) => {
+      el.remove();
+    });
+
+    const nonFieldAlert = form.querySelector(".form-non-field-errors");
+    if (nonFieldAlert) {
+      nonFieldAlert.remove();
+    }
+  };
+
+  /**
+   * Mapea los errores de validación devueltos por DRF a los campos de un formulario.
+   * Maneja tanto errores de campo como `non_field_errors` o `detail`.
+   * @param {HTMLFormElement|HTMLElement|string} formOrSelector
+   * @param {Object|string} errors - Diccionario de errores retornado por DRF o ApiClient
+   * @returns {{ nonFieldErrors: string[], hasErrors: boolean }}
+   */
+  const setFormErrors = (formOrSelector, errors) => {
+    const form = typeof formOrSelector === "string" ? document.querySelector(formOrSelector) : formOrSelector;
+    if (!form || !errors) return { nonFieldErrors: [], hasErrors: false };
+
+    clearFormErrors(form);
+
+    const nonFieldErrors = [];
+
+    // Si errors es string
+    if (typeof errors === "string") {
+      nonFieldErrors.push(errors);
+    } else if (typeof errors === "object") {
+      for (const [field, messages] of Object.entries(errors)) {
+        const msgList = Array.isArray(messages) ? messages : [messages];
+        const combinedMsg = msgList.map((m) => (typeof m === "object" ? JSON.stringify(m) : String(m))).join(" ");
+
+        if (field === "non_field_errors" || field === "detail" || field === "error" || field === "__all__") {
+          nonFieldErrors.push(combinedMsg);
+          continue;
+        }
+
+        // Buscar elemento por name o id con selectores seguros
+        let input = null;
+        try {
+          const safeField = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(field) : field.replace(/["\\]/g, "\\$&");
+          input =
+            form.querySelector(`[name="${safeField}"]`) ||
+            form.querySelector(`[name="${safeField}[]"]`) ||
+            form.querySelector(`#${safeField}`) ||
+            form.querySelector(`#id_${safeField}`);
+        } catch {
+          input = null;
+        }
+
+        if (input) {
+          input.classList.add("is-invalid");
+          input.setAttribute("aria-invalid", "true");
+
+          let feedbackEl = input.parentElement.querySelector(`.invalid-feedback[data-field="${field}"]`);
+          if (!feedbackEl) {
+            feedbackEl = document.createElement("div");
+            feedbackEl.className = "invalid-feedback dynamic-feedback";
+            feedbackEl.setAttribute("data-field", field);
+            // Si está dentro de un input-group, insertar después del input-group
+            if (input.parentElement.classList.contains("input-group")) {
+              input.parentElement.insertAdjacentElement("afterend", feedbackEl);
+            } else {
+              input.insertAdjacentElement("afterend", feedbackEl);
+            }
+          }
+          feedbackEl.textContent = combinedMsg;
+
+          // Limpieza automática al editar o corregir el campo
+          const onUserEdit = () => {
+            input.classList.remove("is-invalid");
+            input.removeAttribute("aria-invalid");
+            if (feedbackEl) {
+              feedbackEl.remove();
+            }
+            input.removeEventListener("input", onUserEdit);
+            input.removeEventListener("change", onUserEdit);
+          };
+          input.addEventListener("input", onUserEdit);
+          input.addEventListener("change", onUserEdit);
+        } else {
+          // Si el campo no existe en el DOM, tratar como non_field_error
+          nonFieldErrors.push(`${field}: ${combinedMsg}`);
+        }
+      }
+    }
+
+    if (nonFieldErrors.length > 0) {
+      const alert = document.createElement("div");
+      alert.className = "alert alert-danger alert-dismissible fade show form-non-field-errors";
+      alert.setAttribute("role", "alert");
+      alert.setAttribute("aria-live", "assertive");
+      
+      const closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.className = "close";
+      closeBtn.setAttribute("data-dismiss", "alert");
+      closeBtn.setAttribute("aria-label", "Cerrar");
+      closeBtn.innerHTML = '<span aria-hidden="true">&times;</span>';
+      alert.appendChild(closeBtn);
+
+      const ul = document.createElement("ul");
+      ul.className = "mb-0 pl-3";
+      nonFieldErrors.forEach((err) => {
+        const li = document.createElement("li");
+        li.textContent = err;
+        ul.appendChild(li);
+      });
+
+      alert.appendChild(ul);
+      form.prepend(alert);
+    }
+
+    return {
+      nonFieldErrors,
+      hasErrors: true,
+    };
+  };
+
   return Object.freeze({
     escapeHtml,
     formatCurrency,
@@ -192,6 +326,8 @@ const Utils = (() => {
     debounce,
     throttle,
     attachSearchControl,
+    clearFormErrors,
+    setFormErrors,
   });
 })();
 
@@ -207,6 +343,8 @@ export const {
   debounce,
   throttle,
   attachSearchControl,
+  clearFormErrors,
+  setFormErrors,
 } = Utils;
 
 export default Utils;

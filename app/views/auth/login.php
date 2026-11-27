@@ -179,7 +179,7 @@ require_once __DIR__ . '/../../config/app.php';
                 </form>
 
                 <footer class="login-footer">
-                    <p>Inventario P.M.E v1.13.0 • &copy; <?php echo date('Y'); ?></p>
+                    <p>Inventario P.M.E <span id="app-version-login" class="app-version-display">v1.15.0</span> • &copy; <?php echo date('Y'); ?></p>
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
                         <a href="#" class="support-link"><i class="fa-regular fa-circle-question" aria-hidden="true"></i> Soporte y Ayuda</a>
                         <a href="<?php echo $URL; ?>/saas-admin" class="support-link" style="opacity: 0.75; font-size: 0.75rem;" title="Portal exclusivo para personal administrativo">

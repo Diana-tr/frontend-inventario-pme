@@ -5,16 +5,30 @@
  * ============================================================
  *
  * Servicio centralizado de notificaciones mediante SweetAlert2.
- *
- * Soporta de manera híbrida la librería local precargada en AdminLTE
- * con fallback transparente al módulo ESM.
+ * Consume exclusivamente la librería local empaquetada en AdminLTE
+ * evitando dependencias externas por red o violaciones de CSP.
  */
 
-import SwalFallback from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
-
 const NotificationService = (() => {
-  const getSwal = () =>
-    (typeof window !== "undefined" && window.Swal) || SwalFallback;
+  const getSwal = () => {
+    if (typeof window !== "undefined" && window.Swal) {
+      return window.Swal;
+    }
+    // Fallback defensivo offline local
+    return {
+      fire: async (opts) => {
+        if (typeof window !== "undefined" && typeof window.alert === "function") {
+          window.alert(`${opts.title || ""}\n${opts.text || ""}`);
+        }
+        return { isConfirmed: true, isDismissed: false };
+      },
+      mixin: () => ({
+        fire: async (opts) => {
+          console.log(`[TOAST ${opts.icon || "info"}]: ${opts.title || ""}`);
+        },
+      }),
+    };
+  };
 
   const getToast = () =>
     getSwal().mixin({

@@ -31,42 +31,60 @@ const LogoutController = (() => {
     try {
       console.log("[LOGOUT] Cerrando sesión...");
 
+      if (Storage.isImpersonating()) {
+        console.log("[LOGOUT] Finalizando sesión de soporte técnico...");
+        const restored = Storage.restoreFromImpersonation();
+        if (!restored) {
+          Storage.clear();
+          window.location.replace(`${Config.BASE_PATH}/saas-admin/login`);
+          return;
+        }
+        window.location.replace(`${Config.BASE_PATH}/saas-admin/dashboard`);
+        return;
+      }
+
       /**
        * Primero notificamos al backend.
        */
       const response = await AuthService.logout();
-
       console.log("[LOGOUT] Respuesta backend:", response);
 
       /**
        * Independientemente de la respuesta del backend,
        * limpiamos la sesión local.
-       *
-       * Esto evita dejar al usuario con tokens inválidos
-       * almacenados.
        */
       Storage.clear();
       sessionStorage.removeItem("inventariopme_security_context");
 
       console.log("[LOGOUT] Sesión local eliminada.");
 
-      /**
-       * Redirigimos al login.
-       */
-      const loginPath = Config.BASE_PATH + Config.LOGIN_PATH;
+      const isSaaS = typeof window !== "undefined" && window.location.pathname.includes("saas-admin");
+      const loginPath = isSaaS
+        ? `${Config.BASE_PATH}/saas-admin/login`
+        : `${Config.BASE_PATH}${Config.LOGIN_PATH}`;
 
       window.location.replace(loginPath);
     } catch (error) {
       console.error("[LOGOUT] Error durante el cierre de sesión:", error);
 
-      /**
-       * Incluso ante un error de red, eliminamos
-       * las credenciales locales.
-       */
+      if (Storage.isImpersonating()) {
+        const restored = Storage.restoreFromImpersonation();
+        if (!restored) {
+          Storage.clear();
+          window.location.replace(`${Config.BASE_PATH}/saas-admin/login`);
+          return;
+        }
+        window.location.replace(`${Config.BASE_PATH}/saas-admin/dashboard`);
+        return;
+      }
+
       Storage.clear();
       sessionStorage.removeItem("inventariopme_security_context");
 
-      const loginPath = Config.BASE_PATH + Config.LOGIN_PATH;
+      const isSaaS = typeof window !== "undefined" && window.location.pathname.includes("saas-admin");
+      const loginPath = isSaaS
+        ? `${Config.BASE_PATH}/saas-admin/login`
+        : `${Config.BASE_PATH}${Config.LOGIN_PATH}`;
 
       window.location.replace(loginPath);
     }

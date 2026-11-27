@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../config/app.php';
 require_once __DIR__ . '/../layouts/head.php';
@@ -364,8 +361,8 @@ require_once __DIR__ . '/../layouts/head.php';
 
     <!-- Script al final del archivo PHP -->
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo time(); ?>";
-        import DashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/dashboard/dashboard.js?v=<?php echo time(); ?>";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo $APP_VERSION; ?>";
+        import DashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/dashboard/dashboard.js?v=<?php echo $APP_VERSION; ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             const ok = await App.bootstrap();

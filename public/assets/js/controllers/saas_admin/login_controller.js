@@ -50,10 +50,16 @@ const SaasLoginController = (() => {
   function showAlert(message, type = "danger") {
     if (!alertElement) return;
     alertElement.className = `saas-alert saas-alert-${type}`;
-    alertElement.innerHTML = `
-      <i class="fas fa-${type === 'danger' ? 'circle-exclamation' : 'circle-info'} mt-1"></i>
-      <div>${message}</div>
-    `;
+    alertElement.innerHTML = "";
+
+    const icon = document.createElement("i");
+    icon.className = `fas fa-${type === "danger" ? "circle-exclamation" : "circle-info"} mt-1 mr-2`;
+
+    const textDiv = document.createElement("div");
+    textDiv.textContent = message;
+
+    alertElement.appendChild(icon);
+    alertElement.appendChild(textDiv);
     alertElement.removeAttribute("hidden");
   }
 

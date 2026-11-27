@@ -9,6 +9,27 @@ import Config from "../config/config.js";
 const ApiClient = (() => {
   const BASE_URL = Config.API_BASE_URL || "http://127.0.0.1:8000";
 
+  /**
+   * Catálogo centralizado de estados y errores HTTP estándar
+   * Mapea respuestas hacia códigos y mensajes uniformes de negocio.
+   */
+  const HTTP_ERROR_CATALOG = Object.freeze({
+    400: { code: "VALIDATION_ERROR", message: "Los datos enviados contienen errores de validación." },
+    401: { code: "AUTHENTICATION_REQUIRED", message: "Su sesión ha expirado o no está autenticado." },
+    403: { code: "PERMISSION_DENIED", message: "No cuenta con los permisos necesarios para realizar esta acción." },
+    404: { code: "RESOURCE_NOT_FOUND", message: "El recurso solicitado no fue encontrado en el servidor." },
+    405: { code: "METHOD_NOT_ALLOWED", message: "El método HTTP no está permitido para este recurso." },
+    409: { code: "CONFLICT", message: "Conflicto con el estado actual del recurso (posible registro duplicado)." },
+    413: { code: "PAYLOAD_TOO_LARGE", message: "El tamaño del archivo o contenido enviado excede el límite permitido." },
+    415: { code: "UNSUPPORTED_MEDIA_TYPE", message: "El formato de datos enviado no es compatible con el servidor." },
+    422: { code: "UNPROCESSABLE_ENTITY", message: "La solicitud contiene parámetros que no pudieron ser procesados." },
+    429: { code: "RATE_LIMIT_EXCEEDED", message: "Ha excedido el límite de solicitudes. Por favor espere unos momentos." },
+    500: { code: "INTERNAL_SERVER_ERROR", message: "Ocurrió un error interno en el servidor. Intente más tarde." },
+    502: { code: "BAD_GATEWAY", message: "El servicio intermedio no está disponible temporalmente." },
+    503: { code: "SERVICE_UNAVAILABLE", message: "El servicio se encuentra temporalmente fuera de línea." },
+    504: { code: "GATEWAY_TIMEOUT", message: "El servidor demoró demasiado en responder (Tiempo agotado)." },
+  });
+
   let refreshPromise = null;
 
   const refreshAccessToken = async () => {
@@ -95,9 +116,28 @@ const ApiClient = (() => {
       endpoint.includes("/saas-admin/") ||
       (typeof window !== "undefined" && window.location.pathname.includes("saas-admin"));
 
+    const isGlobalEndpoint =
+      isPublicEndpoint ||
+      endpoint.includes("/auth/") ||
+      endpoint.includes("/security/context/") ||
+      endpoint.includes("/system/") ||
+      endpoint.includes("/versions/");
+
     const activeCompanyId = Storage.getActiveCompanyId();
-    if (activeCompanyId && !isPublicEndpoint && !isSaaSAdminContext) {
+    if (activeCompanyId && !isSaaSAdminContext) {
       headers["X-Company-ID"] = activeCompanyId;
+    } else if (token && !isSaaSAdminContext && !isGlobalEndpoint && !activeCompanyId) {
+      // Principio Fail-Closed: Petición a endpoint tenant-scoped sin empresa activa seleccionada
+      console.warn(`[ApiClient] Fail-Closed interceptado: petición a '${endpoint}' sin X-Company-ID.`);
+      return {
+        ok: false,
+        status: 400,
+        success: false,
+        code: "COMPANY_REQUIRED",
+        message: "No se ha seleccionado una empresa activa para realizar esta operación.",
+        data: null,
+        errors: { company: ["Se requiere seleccionar una empresa activa en el encabezado X-Company-ID."] },
+      };
     }
 
     // Configuración de timeout mediante AbortController si no se proveyó un signal
@@ -146,7 +186,12 @@ const ApiClient = (() => {
           // Si estamos en modo soporte / impersonación, restaurar la sesión original del Superadmin y volver
           if (Storage.isImpersonating()) {
             console.warn("[API] Token de soporte expirado o inválido. Restaurando contexto administrativo...");
-            Storage.restoreFromImpersonation();
+            const restored = Storage.restoreFromImpersonation();
+            if (!restored) {
+              Storage.clear();
+              window.location.replace(`${Config.BASE_PATH}/saas-admin/login`);
+              return { ok: false, status: 401, success: false };
+            }
             window.location.replace(`${Config.BASE_PATH}/saas-admin/dashboard`);
             return { ok: false, status: 401, success: false };
           }
@@ -169,22 +214,41 @@ const ApiClient = (() => {
         window.dispatchEvent(new CustomEvent("security_forbidden"));
       }
 
+      const isOk = response.ok;
+      const catalogEntry = HTTP_ERROR_CATALOG[response.status];
+      const finalCode = result.code || (catalogEntry ? catalogEntry.code : (isOk ? "SUCCESS" : "ERROR"));
+      const finalMessage = result.message || (catalogEntry ? catalogEntry.message : (isOk ? "Operación exitosa" : (response.statusText || "Error en la solicitud")));
+
       return {
-        ok: response.ok,
+        ok: isOk,
         status: response.status,
-        success: result.success !== undefined ? result.success : response.ok,
+        success: result.success !== undefined ? Boolean(result.success) : isOk,
+        code: finalCode,
+        message: finalMessage,
+        data: result.data !== undefined ? result.data : (isOk ? result : null),
+        errors: result.errors !== undefined ? result.errors : (!isOk ? (result.detail ? { detail: result.detail } : (result && Object.keys(result).length > 0 ? result : null)) : null),
         ...result,
+        ok: isOk,
+        status: response.status,
+        success: result.success !== undefined ? Boolean(result.success) : isOk,
+        code: finalCode,
+        message: finalMessage,
       };
     } catch (error) {
       const isAbort = error.name === "AbortError" || (effectiveSignal && effectiveSignal.aborted);
+      const status = isAbort ? 408 : 0;
+      const catalog = HTTP_ERROR_CATALOG[status] || {
+        code: isAbort ? "GATEWAY_TIMEOUT" : "NETWORK_ERROR",
+        message: isAbort ? "Tiempo de espera agotado al conectar con el servidor." : "Error de conexión con el servidor. Verifique su red.",
+      };
       return {
         ok: false,
-        status: isAbort ? 408 : 0,
+        status,
         success: false,
-        code: isAbort ? "TIMEOUT_ERROR" : "NETWORK_ERROR",
-        message: error.message || "Error en la petición de red",
+        code: catalog.code,
+        message: error.message && !isAbort ? error.message : catalog.message,
         data: null,
-        errors: error,
+        errors: { detail: error.message || catalog.message },
       };
     } finally {
       if (timeoutId) {

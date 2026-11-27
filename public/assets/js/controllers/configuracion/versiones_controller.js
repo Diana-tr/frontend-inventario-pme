@@ -82,7 +82,9 @@ const VersionesController = (() => {
   }
 
   function renderKPIs(sysInfo) {
-    const installed = sysInfo?.installed_version || "1.0.0";
+    const sysData = (sysInfo && sysInfo.data && typeof sysInfo.data === "object") ? sysInfo.data : (sysInfo || {});
+    const rawInstalled = sysData.installed_version || sysData.version || sysInfo?.installed_version || "1.0.0";
+    const installed = String(rawInstalled).trim().replace(/^v/i, "");
     $("#kpi_installed_version").text(`v${installed}`);
 
     const published = versionesList.filter((v) => v.status === "PUBLISHED");
@@ -90,18 +92,19 @@ const VersionesController = (() => {
 
     if (published.length > 0) {
       const latest = published[0];
-      $("#kpi_latest_version").text(`v${latest.version}`);
+      const cleanLatest = String(latest.version).trim().replace(/^v/i, "");
+      $("#kpi_latest_version").text(`v${cleanLatest}`);
       if (latest.published_at) {
         $("#kpi_latest_date").html(`<i class="fas fa-calendar-alt mr-1"></i>${new Date(latest.published_at).toLocaleDateString("es-CO")}`);
       }
 
       // Comparar con instalada
-      if (latest.version === installed) {
+      if (cleanLatest === installed) {
         $("#kpi_update_status").text("Al Día").removeClass("text-warning text-danger").addClass("text-success");
         $("#kpi_update_subtext").html('<i class="fas fa-check-circle mr-1 text-success"></i>Su sistema posee la última versión oficial');
       } else {
         $("#kpi_update_status").text("Nueva Versión Disponible").removeClass("text-success").addClass("text-warning");
-        $("#kpi_update_subtext").html(`<i class="fas fa-arrow-up mr-1 text-warning"></i>v${latest.version} lista para consultar`);
+        $("#kpi_update_subtext").html(`<i class="fas fa-arrow-up mr-1 text-warning"></i>v${cleanLatest} lista para consultar`);
       }
     } else {
       $("#kpi_latest_version").text(`v${installed}`);

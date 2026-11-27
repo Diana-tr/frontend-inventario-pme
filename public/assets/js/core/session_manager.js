@@ -88,16 +88,29 @@ const SessionManager = (() => {
    */
   async function forceLogout() {
     stopInactivityMonitor();
-    
+
     try {
-      // Intentamos hacer logout en el backend
+      if (Storage.isImpersonating()) {
+        console.warn("[SESSION] Inactividad en sesión de soporte. Restaurando sesión de Superadmin...");
+        const restored = Storage.restoreFromImpersonation();
+        if (!restored) {
+          Storage.clear();
+          window.location.replace(`${Config.BASE_PATH}/saas-admin/login`);
+          return;
+        }
+        window.location.replace(`${Config.BASE_PATH}/saas-admin/dashboard`);
+        return;
+      }
       await AuthService.logout();
     } catch (e) {
       console.error("[SESSION] Fallo al invalidar sesión en el servidor:", e);
     } finally {
-      // Pero SIEMPRE limpiamos local y redirigimos
       Storage.clear();
-      window.location.replace(Config.BASE_PATH + Config.LOGIN_PATH);
+      const isSaaS = typeof window !== "undefined" && window.location.pathname.includes("saas-admin");
+      const targetLogin = isSaaS
+        ? `${Config.BASE_PATH}/saas-admin/login`
+        : `${Config.BASE_PATH}${Config.LOGIN_PATH}`;
+      window.location.replace(targetLogin);
     }
   }
 

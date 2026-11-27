@@ -20,7 +20,7 @@ const basePath =
 
 const Config = Object.freeze({
   APP_NAME: "Software Inventario P.M.E.",
-  VERSION: "1.0.0",
+  VERSION: "1.15.2",
   ENVIRONMENT: isLocalhost ? "development" : "production",
   DEBUG: isLocalhost,
   REQUEST_TIMEOUT: 30000,
@@ -37,7 +37,7 @@ const Config = Object.freeze({
   //   simplemente actualizamos esta URL aqui.
   API_BASE_URL: isLocalhost
     ? "http://127.0.0.1:8000"
-    : "http://127.0.0.1:8000",
+    : "https://inventario-p-m-e-back-end.onrender.com",
 });
 
 export default Config;

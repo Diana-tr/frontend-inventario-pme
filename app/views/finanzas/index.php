@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../config/app.php';
 require_once __DIR__ . '/../layouts/head.php';
@@ -399,8 +396,8 @@ require_once __DIR__ . '/../layouts/head.php';
     <!-- Chart.js -->
     <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/chart.js/Chart.bundle.min.js"></script>
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo time(); ?>";
-        import FinanceDashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/finanzas/index.js?v=<?php echo time(); ?>";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo $APP_VERSION; ?>";
+        import FinanceDashboardController from "<?php echo $URL; ?>/public/assets/js/controllers/finanzas/index.js?v=<?php echo $APP_VERSION; ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             await App.bootstrap();

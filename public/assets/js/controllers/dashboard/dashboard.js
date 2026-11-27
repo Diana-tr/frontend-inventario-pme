@@ -15,6 +15,28 @@ const DashboardController = (() => {
 
   let clockIntervalId = null;
 
+  // Instancias privadas de Chart.js encapsuladas (evita contaminar el objeto global window)
+  const chartInstances = {
+    bar: null,
+    line: null,
+    pie: null,
+    payment: null,
+  };
+
+  /**
+   * Destruye de forma segura todas las instancias activas de Chart.js
+   */
+  function destroyCharts() {
+    Object.keys(chartInstances).forEach((key) => {
+      if (chartInstances[key]) {
+        try {
+          chartInstances[key].destroy();
+        } catch (e) {}
+        chartInstances[key] = null;
+      }
+    });
+  }
+
   /**
    * Obtiene el saludo adecuado según la hora local del navegador.
    * - 05:00 a 11:59: "Buenos días"
@@ -557,8 +579,9 @@ const DashboardController = (() => {
   // 1. Gráfico de Barras: Ventas vs Compras (Chart.js v2.9.4 compatible)
   function renderBarChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    if (window.myBarChartInstance) {
-      try { window.myBarChartInstance.destroy(); } catch (e) {}
+    if (chartInstances.bar) {
+      try { chartInstances.bar.destroy(); } catch (e) {}
+      chartInstances.bar = null;
     }
 
     const labels = data.map((d) => d.label || d.month || d.mes || "");
@@ -584,7 +607,7 @@ const DashboardController = (() => {
     gradientCompras.addColorStop(0, 'rgba(37, 99, 235, 1)');
     gradientCompras.addColorStop(1, 'rgba(37, 99, 235, 0.5)');
 
-    window.myBarChartInstance = new Chart(ctx, {
+    chartInstances.bar = new Chart(ctx, {
       type: "bar",
       data: {
         labels,
@@ -663,8 +686,9 @@ const DashboardController = (() => {
   // 2. Gráfico de Línea: Ventas últimos 30 días (Chart.js v2.9.4 compatible)
   function renderLineChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    if (window.myLineChartInstance) {
-      try { window.myLineChartInstance.destroy(); } catch (e) {}
+    if (chartInstances.line) {
+      try { chartInstances.line.destroy(); } catch (e) {}
+      chartInstances.line = null;
     }
 
     const labels = data.map((d) => d.label || d.date || d.fecha || d.dia || "");
@@ -680,7 +704,7 @@ const DashboardController = (() => {
     if (emptyMsg) emptyMsg.classList.add("d-none");
     canvas.classList.remove("d-none");
 
-    window.myLineChartInstance = new Chart(canvas.getContext("2d"), {
+    chartInstances.line = new Chart(canvas.getContext("2d"), {
       type: "line",
       data: {
         labels,
@@ -744,8 +768,9 @@ const DashboardController = (() => {
   // 3. Gráfico Doughnut: Stock de Inventario (Chart.js v2.9.4 compatible)
   function renderPieChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    if (window.myPieChartInstance) {
-      try { window.myPieChartInstance.destroy(); } catch (e) {}
+    if (chartInstances.pie) {
+      try { chartInstances.pie.destroy(); } catch (e) {}
+      chartInstances.pie = null;
     }
 
     const labels = data.map((d) => d.label);
@@ -760,7 +785,7 @@ const DashboardController = (() => {
 
     const backgroundColors = labels.map((label) => colorMap[label] || "#2563EB");
 
-    window.myPieChartInstance = new Chart(canvas.getContext("2d"), {
+    chartInstances.pie = new Chart(canvas.getContext("2d"), {
       type: "doughnut",
       data: {
         labels,
@@ -796,8 +821,9 @@ const DashboardController = (() => {
   // 4. Gráfico Doughnut: Métodos de Pago (Chart.js v2.9.4 compatible)
   function renderPaymentMethodsChart(canvas, data) {
     if (!canvas || typeof Chart === "undefined") return;
-    if (window.myPaymentChartInstance) {
-      try { window.myPaymentChartInstance.destroy(); } catch (e) {}
+    if (chartInstances.payment) {
+      try { chartInstances.payment.destroy(); } catch (e) {}
+      chartInstances.payment = null;
     }
 
     const labels = data.map((d) => d.metodo || d.forma_pago || d.label || d.nombre || "");
@@ -813,7 +839,7 @@ const DashboardController = (() => {
     if (emptyMsg) emptyMsg.classList.add("d-none");
     canvas.classList.remove("d-none");
 
-    window.myPaymentChartInstance = new Chart(canvas.getContext("2d"), {
+    chartInstances.payment = new Chart(canvas.getContext("2d"), {
       type: "doughnut",
       data: {
         labels,
@@ -959,7 +985,15 @@ const DashboardController = (() => {
     if (loader) loader.remove();
   }
 
-  return Object.freeze({ init, destroy: destroyLiveClock });
+  /**
+   * Libera recursos de temporizadores y destruye instancias de Chart.js
+   */
+  function destroy() {
+    destroyLiveClock();
+    destroyCharts();
+  }
+
+  return Object.freeze({ init, destroy });
 })();
 
 export default DashboardController;

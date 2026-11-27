@@ -139,9 +139,15 @@ const SaasVersionesController = (() => {
         ? new Date(v.published_at).toLocaleDateString("es-CO", { dateStyle: "medium" })
         : '<span class="text-muted font-italic">No publicada</span>';
 
-      const publisher = v.published_by
-        ? (v.published_by.full_name || v.published_by.username || v.published_by.email)
-        : '<span class="text-muted">---</span>';
+      const publisher =
+        v.published_by_name ||
+        (v.published_by
+          ? (v.published_by.full_name || v.published_by.username || v.published_by.email)
+          : null);
+
+      const publisherHtml = publisher
+        ? `<small class="text-muted font-weight-500">${escapeHtml(publisher)}</small>`
+        : '<span class="text-muted font-italic">---</span>';
 
       const changelogCount = v.changelog_entries ? v.changelog_entries.length : (v.total_changes || 0);
 
@@ -162,7 +168,7 @@ const SaasVersionesController = (() => {
               <i class="fas fa-list-ul mr-1"></i> ${changelogCount} cambio${changelogCount === 1 ? "" : "s"}
             </button>
           </td>
-          <td><small class="text-muted">${escapeHtml(publisher)}</small></td>
+          <td>${publisherHtml}</td>
           <td class="text-right pr-4">
             <div class="btn-group btn-group-sm">
               <button class="btn btn-outline-secondary btn-ver-detalles" data-id="${v.id_version}" title="Ver Detalle">

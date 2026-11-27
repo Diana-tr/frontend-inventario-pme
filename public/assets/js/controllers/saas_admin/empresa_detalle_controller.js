@@ -285,8 +285,12 @@ const EmpresaDetalleController = (() => {
       $("#modalExtendTrialDetail").modal("show");
     });
 
+    let isSubmittingTrial = false;
     document.getElementById("form_extend_trial_detail")?.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (isSubmittingTrial) return;
+
+      const submitBtn = e.target.querySelector("button[type='submit']");
       const days = parseInt(document.getElementById("extend_detail_days").value, 10);
       const reason = document.getElementById("extend_detail_reason").value.trim();
 
@@ -296,6 +300,8 @@ const EmpresaDetalleController = (() => {
       }
 
       try {
+        isSubmittingTrial = true;
+        if (submitBtn) submitBtn.disabled = true;
         NotificationService.loading("Extendiendo período de prueba...");
         const response = await SaaSAdminService.ejecutarAccionEmpresa(empresaId, {
           action: "extend-trial",
@@ -315,6 +321,9 @@ const EmpresaDetalleController = (() => {
         console.error("[DETALLE EMPRESA] Error extend trial:", error);
         NotificationService.close();
         NotificationService.toastError("Error al extender el período de prueba.");
+      } finally {
+        isSubmittingTrial = false;
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
 

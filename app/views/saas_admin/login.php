@@ -31,8 +31,8 @@ require_once __DIR__ . '/../../config/app.php';
     <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/main.css">
 
     <!-- Estilos exclusivos Enterprise SaaS Admin Login -->
-    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/components/saas_login.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/saas_admin/login.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/components/saas_login.css?v=<?php echo $APP_VERSION; ?>">
+    <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/saas_admin/login.css?v=<?php echo $APP_VERSION; ?>">
 </head>
 
 <body class="layout--saas-auth">
@@ -128,8 +128,8 @@ require_once __DIR__ . '/../../config/app.php';
 
     <!-- Script de Inicialización ES6+ -->
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo time(); ?>";
-        import SaasLoginController from "<?php echo $URL; ?>/public/assets/js/controllers/saas_admin/login_controller.js?v=<?php echo time(); ?>";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo $APP_VERSION; ?>";
+        import SaasLoginController from "<?php echo $URL; ?>/public/assets/js/controllers/saas_admin/login_controller.js?v=<?php echo $APP_VERSION; ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             const ok = await App.bootstrap();

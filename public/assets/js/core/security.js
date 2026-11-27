@@ -39,10 +39,18 @@ const SecurityManager = (() => {
    * @returns {boolean}
    */
   const hasAction = (module, action = null) => {
+    // 0. Bypass autorizado para Superusuario
+    const user = Storage.getUser();
+    if (user && user.is_superuser) {
+      return true;
+    }
+
+    if (!module) return false;
+
     const actions = getActions();
     if (!actions) return false;
 
-    if (!action && module.includes(".")) {
+    if (!action && typeof module === "string" && module.includes(".")) {
       const parts = module.split(".");
       module = parts[0];
       action = parts[1];
@@ -65,6 +73,12 @@ const SecurityManager = (() => {
    */
   const hasPermission = (permissionCode) => {
     if (!permissionCode) return false;
+
+    // 0. Bypass autorizado para Superusuario
+    const user = Storage.getUser();
+    if (user && user.is_superuser) {
+      return true;
+    }
 
     // 1. Buscar en permisos CRUD
     const permissions = getPermissions();

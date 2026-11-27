@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../config/app.php';
 require_once __DIR__ . '/../layouts/head.php';
@@ -136,8 +133,8 @@ require_once __DIR__ . '/../layouts/head.php';
 
     <!-- DataTables & Plugins -->
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo time(); ?>";
-        import ConciliacionesController from "<?php echo $URL; ?>/public/assets/js/controllers/finanzas/conciliaciones.js?v=<?php echo time(); ?>";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo $APP_VERSION; ?>";
+        import ConciliacionesController from "<?php echo $URL; ?>/public/assets/js/controllers/finanzas/conciliaciones.js?v=<?php echo $APP_VERSION; ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             await App.bootstrap();

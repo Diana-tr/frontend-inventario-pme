@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../config/app.php';
 require_once __DIR__ . '/../layouts/head.php';
@@ -371,7 +368,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             <div class="col-md-6 form-group">
                                 <label class="font-weight-bold text-dark">Duración (Días) <span class="text-danger">*</span></label>
                                 <input type="number" min="1" class="form-control" id="assign_duration_days" value="30" required style="border-radius: 8px;">
-                                <small class="text-muted">Ej: 30 para mensual, 365 para anual</small>
+                                <small class="text-muted">Ingrese el número de días que durará esta suscripción (prueba o pago).</small>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label class="font-weight-bold text-dark">Estado Inicial <span class="text-danger">*</span></label>

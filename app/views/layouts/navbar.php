@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../config/app.php';
 ?>
 
-<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/components/notifications.css?v=2026">
+<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/components/notifications.css?v=<?php echo $APP_VERSION; ?>">
 
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -43,7 +43,12 @@ require_once __DIR__ . '/../../config/app.php';
                     }
 
                     // Restaurar de manera atómica el contexto administrativo
-                    Storage.restoreFromImpersonation();
+                    const restored = Storage.restoreFromImpersonation();
+                    if (!restored) {
+                        Storage.clear();
+                        window.location.replace("<?php echo $URL; ?>/saas-admin/login");
+                        return;
+                    }
 
                     // Redirigir al panel de administración SaaS
                     window.location.replace("<?php echo $URL; ?>/saas-admin/dashboard");
@@ -175,9 +180,9 @@ require_once __DIR__ . '/../../config/app.php';
 
 <!-- Inicialización limpia mediante el controlador -->
 <script type="module">
-    import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js?v=2026';
-    import LogoutController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js?v=2026';
-    import NotificationFeedController from '<?php echo $URL; ?>/public/assets/js/controllers/notifications/notification_feed_controller.js?v=2026';
+    import NavbarController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/navbar_controller.js?v=<?php echo $APP_VERSION; ?>';
+    import LogoutController from '<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js?v=<?php echo $APP_VERSION; ?>';
+    import NotificationFeedController from '<?php echo $URL; ?>/public/assets/js/controllers/notifications/notification_feed_controller.js?v=<?php echo $APP_VERSION; ?>';
 
     document.addEventListener('DOMContentLoaded', () => {
         NavbarController.init();

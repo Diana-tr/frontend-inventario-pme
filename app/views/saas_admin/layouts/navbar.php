@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../../config/app.php';
 ?>
 
-<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/components/notifications.css?v=2026">
+<link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/css/components/notifications.css?v=<?php echo $APP_VERSION; ?>">
 
 <!-- Navbar SaaS Admin Exclusivo -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -105,7 +105,7 @@ require_once __DIR__ . '/../../../config/app.php';
 <script type="module">
     import Storage from "<?php echo $URL; ?>/public/assets/js/storage/storage.js";
     import AuthService from "<?php echo $URL; ?>/public/assets/js/services/auth_service.js";
-    import NotificationFeedController from "<?php echo $URL; ?>/public/assets/js/controllers/notifications/notification_feed_controller.js?v=2026";
+    import NotificationFeedController from "<?php echo $URL; ?>/public/assets/js/controllers/notifications/notification_feed_controller.js?v=<?php echo $APP_VERSION; ?>";
 
     document.addEventListener("DOMContentLoaded", () => {
         NotificationFeedController.init();

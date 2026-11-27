@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../config/app.php';
         | <i class="fas fa-code mx-1"></i>Desarrollado por: <strong>Diana Vanessa Trujillo</strong> | <strong>Jhan Snaider Sanchez</strong>
     </span>
     <div class="float-right d-none d-sm-inline-block">
-        <b>Version</b> <span id="app-version-text" data-current-version="1.0.0">1.0.0</span>
+        <b>Version</b> <span id="app-version-text" class="app-version-display" data-current-version="1.0.0">1.0.0</span>
     </div>
 </footer>
 
@@ -47,13 +47,3 @@ require_once __DIR__ . '/../../config/app.php';
 <!-- AdminLTE App -->
 <script src="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/dist/js/adminlte.js"></script>
 
-<!-- Inicialización de sesión global y logout -->
-<script type="module">
-    import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-    import LogoutController from "<?php echo $URL; ?>/public/assets/js/controllers/auth/logout_controller.js";
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        await App.bootstrap();
-        LogoutController.init();
-    });
-</script>

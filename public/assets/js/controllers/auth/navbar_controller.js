@@ -5,13 +5,21 @@
  * ============================================================
  */
 
+import Config from "../../config/config.js";
 import AuthService from "../../services/auth_service.js";
 import CajaService from "../../services/caja_service.js";
 import CompanyInfoService from "../../services/company_info_service.js";
 import SystemService from "../../services/system_service.js";
 import Storage from "../../storage/storage.js";
-import SwalFallback from "https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm";
-const Swal = typeof window !== "undefined" && window.Swal ? window.Swal : SwalFallback;
+
+const Swal = typeof window !== "undefined" && window.Swal ? window.Swal : {
+  fire: async (opts) => {
+    if (typeof window !== "undefined" && typeof window.alert === "function") {
+      window.alert(`${opts.title || ""}\n${opts.text || ""}`);
+    }
+    return { isConfirmed: true, isDismissed: false };
+  }
+};
 
 const NavbarController = (() => {
   let isInitialized = false;
@@ -71,6 +79,7 @@ const NavbarController = (() => {
     renderUserData(user);
     await initCompanySwitcher();
     await checkNavbarCajaStatus();
+    checkImpersonationMode();
     // Las notificaciones centralizadas y versiones son gestionadas integralmente por NotificationFeedController
 
     // Escuchar eventos globales de apertura/cierre de caja para sincronizar en tiempo real
@@ -576,6 +585,49 @@ const NavbarController = (() => {
         title: "Error",
         text: "No fue posible cambiar de empresa. Intente nuevamente.",
       });
+    }
+  }
+
+  /**
+   * ============================================================
+   * GESTIÓN DE INDICADOR DE MODO SOPORTE TÉCNICO (IMPERSONACIÓN)
+   * ============================================================
+   */
+  function checkImpersonationMode() {
+    if (!Storage.isImpersonating()) return;
+
+    const companyName = sessionStorage.getItem("impersonating_company_name") || "Empresa";
+    const navbarNav = document.querySelector(".main-header.navbar .navbar-nav:first-child");
+    if (navbarNav && !document.getElementById("nav-impersonation-indicator")) {
+      const li = document.createElement("li");
+      li.id = "nav-impersonation-indicator";
+      li.className = "nav-item d-flex align-items-center ml-2";
+
+      const badge = document.createElement("span");
+      badge.className = "badge badge-warning py-1 px-3 font-weight-bold shadow-sm d-flex align-items-center";
+      badge.style.borderRadius = "20px";
+      badge.style.fontSize = "0.8rem";
+      badge.innerHTML = `<i class="fas fa-user-shield mr-1"></i> Modo Soporte: <span class="ml-1">${escapeHtml(companyName)}</span>`;
+
+      const exitBtn = document.createElement("button");
+      exitBtn.type = "button";
+      exitBtn.className = "btn btn-xs btn-outline-dark font-weight-bold ml-2";
+      exitBtn.style.borderRadius = "12px";
+      exitBtn.innerHTML = '<i class="fas fa-arrow-left mr-1"></i> Salir de Soporte';
+      exitBtn.title = "Finalizar soporte y restaurar cuenta de Superadmin";
+      exitBtn.addEventListener("click", () => {
+        const restored = Storage.restoreFromImpersonation();
+        if (!restored) {
+          Storage.clear();
+          window.location.replace(`${Config.BASE_PATH}/saas-admin/login`);
+          return;
+        }
+        window.location.replace(`${Config.BASE_PATH}/saas-admin/dashboard`);
+      });
+
+      li.appendChild(badge);
+      li.appendChild(exitBtn);
+      navbarNav.appendChild(li);
     }
   }
 

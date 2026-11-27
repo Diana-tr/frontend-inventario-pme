@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../config/app.php';
 require_once __DIR__ . '/../layouts/head.php';
@@ -219,8 +216,8 @@ require_once __DIR__ . '/../layouts/head.php';
 
     <!-- Script de inicialización -->
     <script type="module">
-        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=1.1";
-        import CrearVentaController from "<?php echo $URL; ?>/public/assets/js/controllers/venta/crear.js?v=1.1";
+        import App from "<?php echo $URL; ?>/public/assets/js/core/app.js?v=<?php echo $APP_VERSION; ?>";
+        import CrearVentaController from "<?php echo $URL; ?>/public/assets/js/controllers/venta/crear.js?v=<?php echo $APP_VERSION; ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             await App.bootstrap();

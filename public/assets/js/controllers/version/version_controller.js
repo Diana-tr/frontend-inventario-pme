@@ -4,6 +4,8 @@ import SystemService from "../../services/system_service.js";
 
 const VersionController = (() => {
   const VERSION_ELEMENT_ID = "app-version-text";
+  const VERSION_LOGIN_ID = "app-version-login";
+  const VERSION_CLASS = ".app-version-display";
 
   const CATEGORY_META = {
     FEATURE: { label: "Novedad", badge: "badge-success", icon: "fa-plus-circle" },
@@ -26,10 +28,10 @@ const VersionController = (() => {
 
   /**
    * Inicializa la comprobación de versión instalada y sincronización en la interfaz.
+   * Soporta respuestas directas y estandarizadas (ApiResponse { data: {...} }).
+   * Actualiza el pie de página, pantalla de login y cualquier elemento decorado con .app-version-display.
    */
   async function init() {
-    const versionElement = document.getElementById(VERSION_ELEMENT_ID);
-
     try {
       // Consultar estado global del sistema
       const response = await SystemService.obtenerInfoSistema();
@@ -38,15 +40,40 @@ const VersionController = (() => {
         return;
       }
 
-      const installedVersion = response.latest_version || response.installed_version || response.version || "1.0.0";
+      const payload = (response.data && typeof response.data === "object") ? response.data : response;
+      const rawVersion =
+        payload.latest_version ||
+        payload.version ||
+        payload.installed_version ||
+        response.latest_version ||
+        response.version ||
+        response.installed_version ||
+        "1.0.0";
 
-      // Inyectar versión en el pie de página
+      const cleanVersion = String(rawVersion).trim().replace(/^v/i, "");
+      const formattedVersion = `v${cleanVersion}`;
+
+      // 1. Inyectar versión en el pie de página principal (footer)
+      const versionElement = document.getElementById(VERSION_ELEMENT_ID);
       if (versionElement) {
-        versionElement.textContent = `v${installedVersion}`;
+        versionElement.textContent = formattedVersion;
         versionElement.style.cursor = "pointer";
-        versionElement.title = `Versión del software v${installedVersion}. Haga clic para ver detalles del sistema.`;
+        versionElement.title = `Versión del software ${formattedVersion}. Haga clic para ver detalles del sistema.`;
         versionElement.onclick = () => showUpdateDetailsModal();
       }
+
+      // 2. Inyectar versión en el login si existe
+      const loginVersionEl = document.getElementById(VERSION_LOGIN_ID);
+      if (loginVersionEl) {
+        loginVersionEl.textContent = formattedVersion;
+      }
+
+      // 3. Inyectar versión en cualquier elemento con clase .app-version-display
+      document.querySelectorAll(VERSION_CLASS).forEach((el) => {
+        if (el !== versionElement && el !== loginVersionEl) {
+          el.textContent = formattedVersion;
+        }
+      });
     } catch (error) {
       console.warn("[VERSION CONTROLLER] No fue posible verificar la versión instalada:", error);
     }

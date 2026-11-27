@@ -183,15 +183,15 @@ const Storage = (() => {
 
   const restoreFromImpersonation = () => {
     const backup = getImpersonationBackup();
-    if (!backup) {
+    if (!backup || !backup.admin_access_token) {
+      console.warn("[STORAGE] Backup de impersonación inexistente o inválido. Purgando sesión...");
+      clear();
       return false;
     }
 
     try {
       // 1. Restaurar tokens del Superadmin
-      if (backup.admin_access_token) {
-        localStorage.setItem(KEYS.ACCESS_TOKEN, backup.admin_access_token);
-      }
+      localStorage.setItem(KEYS.ACCESS_TOKEN, backup.admin_access_token);
       if (backup.admin_refresh_token && backup.admin_refresh_token !== "null") {
         localStorage.setItem(KEYS.REFRESH_TOKEN, backup.admin_refresh_token);
       } else {
@@ -201,14 +201,20 @@ const Storage = (() => {
       // 2. Restaurar usuario admin
       if (backup.admin_user) {
         saveUser(backup.admin_user);
+      } else {
+        localStorage.removeItem(KEYS.USER);
       }
 
       // 3. Restaurar roles y permisos
       if (backup.admin_roles) {
         saveRoles(backup.admin_roles);
+      } else {
+        localStorage.removeItem(KEYS.ROLES);
       }
       if (backup.admin_permissions) {
         savePermissions(backup.admin_permissions);
+      } else {
+        localStorage.removeItem(KEYS.PERMISSIONS);
       }
 
       // 4. Limpiar contexto de empresa cliente
@@ -226,6 +232,7 @@ const Storage = (() => {
       return true;
     } catch (e) {
       console.error("[STORAGE] Error restaurando sesión de Superadmin:", e);
+      clear();
       return false;
     }
   };

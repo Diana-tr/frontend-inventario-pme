@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../../config/app.php';
 require_once __DIR__ . '/../../layouts/head.php';
@@ -279,7 +276,7 @@ require_once __DIR__ . '/../../layouts/head.php';
     <!-- Script de Inicialización -->
     <script type="module">
         import App from "<?php echo $URL; ?>/public/assets/js/core/app.js";
-        import SaasEquipoController from "<?php echo $URL; ?>/public/assets/js/controllers/saas_admin/equipo_controller.js?v=<?php echo time(); ?>";
+        import SaasEquipoController from "<?php echo $URL; ?>/public/assets/js/controllers/saas_admin/equipo_controller.js?v=<?php echo $APP_VERSION; ?>";
 
         document.addEventListener("DOMContentLoaded", async () => {
             const ok = await App.bootstrap();

@@ -76,6 +76,7 @@ const App = (() => {
       if (isSaaSLoginRoute) {
         const canProceed = await AuthGuard.requireSaaSGuest();
         if (!canProceed) return false;
+        VersionController.init();
         isBootstrapped = true;
         return true;
       }
@@ -83,6 +84,7 @@ const App = (() => {
       if (isERPLoginRoute) {
         const canProceed = await AuthGuard.requireGuest();
         if (!canProceed) return false;
+        VersionController.init();
         isBootstrapped = true;
         return true;
       }
