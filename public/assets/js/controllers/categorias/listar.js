@@ -35,6 +35,91 @@ const CategoryListController = (() => {
   }
 
   // ───────────────────────────────────────────
+  // Filtros de Categorías
+  // ───────────────────────────────────────────
+
+  function getCurrentFilters() {
+    const name = ($("#filtro_nombre_categoria").val() || "").trim();
+    const description = ($("#filtro_descripcion_categoria").val() || "").trim();
+    const estado = ($("#filtro_estado_categoria").val() || "").trim();
+
+    let isActive = "";
+    if (estado === "Activo") {
+      isActive = "true";
+    } else if (estado === "Inactivo") {
+      isActive = "false";
+    }
+
+    return {
+      name,
+      description,
+      estado,
+      isActive,
+    };
+  }
+
+  function applyClientFilters(categories, filters) {
+    return categories.filter((category) => {
+      const catName = (category.name || "").toLowerCase();
+      const catDescription = (category.description || "").toLowerCase();
+      const isActive = Boolean(category.is_active);
+
+      if (filters.name && !catName.includes(filters.name.toLowerCase())) {
+        return false;
+      }
+
+      if (
+        filters.description &&
+        !catDescription.includes(filters.description.toLowerCase())
+      ) {
+        return false;
+      }
+
+      if (filters.isActive === "true" && !isActive) {
+        return false;
+      }
+
+      if (filters.isActive === "false" && isActive) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  function setupFiltersListener() {
+    $("#btn_aplicar_filtros_categorias")
+      .off("click")
+      .on("click", function () {
+        loadCategories();
+      });
+
+    $("#filtro_estado_categoria")
+      .off("change")
+      .on("change", function () {
+        loadCategories();
+      });
+
+    $("#filtro_nombre_categoria, #filtro_descripcion_categoria")
+      .off("keypress")
+      .on("keypress", function (e) {
+        if (e.which === 13) {
+          e.preventDefault();
+          loadCategories();
+        }
+      });
+
+    $("#btn_limpiar_filtros_categorias")
+      .off("click")
+      .on("click", function () {
+        $("#filtro_nombre_categoria").val("");
+        $("#filtro_descripcion_categoria").val("");
+        $("#filtro_estado_categoria").val("");
+        loadCategories();
+      });
+  }
+
+  // ───────────────────────────────────────────
   // Manejo del Modal de Detalles
   // ───────────────────────────────────────────
 
@@ -58,18 +143,18 @@ const CategoryListController = (() => {
 
             $("#detail_name").text(category.name || "Sin nombre");
             $("#detail_description").text(category.description || "Sin descripción");
-            
+
             // Obtener nombre del padre si existe
             let parentDisplay = "Ninguna";
             if (category.parent) {
-                try {
-                    const parentResponse = await CategoryService.obtenerCategoriaPorId(category.parent);
-                    if (parentResponse && parentResponse.success && parentResponse.data) {
-                        parentDisplay = parentResponse.data.name;
-                    }
-                } catch (e) {
-                    parentDisplay = `ID: ${category.parent}`;
+              try {
+                const parentResponse = await CategoryService.obtenerCategoriaPorId(category.parent);
+                if (parentResponse && parentResponse.success && parentResponse.data) {
+                  parentDisplay = parentResponse.data.name;
                 }
+              } catch (e) {
+                parentDisplay = `ID: ${category.parent}`;
+              }
             }
             $("#detail_parent_name").text(parentDisplay);
 
@@ -99,29 +184,29 @@ const CategoryListController = (() => {
   // ───────────────────────────────────────────
 
   async function cargarCategoriasPadre(selectedId = null, currentCategoryId = null) {
-    const select = $('#edit_parent_id');
+    const select = $("#edit_parent_id");
     select.empty();
-    select.append(new Option('Seleccionar categoría padre (opcional)', '', true, true));
+    select.append(new Option("Seleccionar categoría padre (opcional)", "", true, true));
 
     try {
-        const response = await CategoryService.listarCategorias();
-        if (response && response.success) {
-            const categorias = Array.isArray(response.data) ? response.data : (response.data.results || []);
-            
-            categorias.forEach(cat => {
-                // No permitir seleccionarse a sí misma como padre
-                if (cat.id_category != currentCategoryId) {
-                    const option = new Option(cat.name, cat.id_category, false, false);
-                    select.append(option);
-                }
-            });
+      const response = await CategoryService.listarCategorias();
+      if (response && response.success) {
+        const categorias = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
-            if (selectedId) {
-                select.val(selectedId).trigger('change');
-            }
+        categorias.forEach((cat) => {
+          // No permitir seleccionarse a sí misma como padre
+          if (cat.id_category != currentCategoryId) {
+            const option = new Option(cat.name, cat.id_category, false, false);
+            select.append(option);
+          }
+        });
+
+        if (selectedId) {
+          select.val(selectedId).trigger("change");
         }
+      }
     } catch (error) {
-        console.error("Error al cargar categorías padre:", error);
+      console.error("Error al cargar categorías padre:", error);
     }
   }
 
@@ -198,7 +283,7 @@ const CategoryListController = (() => {
 
           if (response && response.success) {
             $(`#${EDIT_MODAL_ID}`).modal("hide");
-            loadCategories(); 
+            loadCategories();
             NotificationService.toastSuccess("Categoría actualizada correctamente.");
           } else {
             throw response;
@@ -302,6 +387,7 @@ const CategoryListController = (() => {
           const page = Math.floor(data.start / data.length) + 1;
           const pageSize = data.length;
           const search = data.search?.value || "";
+          const filters = getCurrentFilters();
 
           let ordering = "";
           if (data.order && data.order.length > 0) {
@@ -313,16 +399,28 @@ const CategoryListController = (() => {
             }
           }
 
-          const response = await CategoryService.listarCategoriasPaginadas({
+          const params = {
             page,
             page_size: pageSize,
             search,
             ordering,
-          });
+          };
+
+          if (filters.name) params.name = filters.name;
+          if (filters.description) params.description = filters.description;
+          if (filters.isActive) params.is_active = filters.isActive;
+
+          const response = await CategoryService.listarCategoriasPaginadas(params);
 
           if (response?.success && response.data) {
-            const categories = response.data.results || [];
-            const totalRecords = response.data.count || 0;
+            const rawCategories = response.data.results || [];
+            const categories = applyClientFilters(rawCategories, filters);
+            const hasClientFilters = Boolean(
+              filters.name || filters.description || filters.isActive
+            );
+            const totalRecords = hasClientFilters
+              ? categories.length
+              : response.data.count || 0;
 
             const rows = categories.map((category, index) => {
               const statusBadge = category.is_active
@@ -409,6 +507,7 @@ const CategoryListController = (() => {
     const tbody = document.getElementById(TABLE_BODY_ID);
     if (!tbody) return;
 
+    setupFiltersListener();
     initDataTable();
     setupViewDetailsListener();
     setupEditCategoryListener();

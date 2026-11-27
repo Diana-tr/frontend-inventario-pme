@@ -18,6 +18,29 @@ const ProductoListController = (() => {
     const EDIT_MODAL_ID = "modalEditarProducto";
     const EDIT_FORM_ID = "formEditarProducto";
 
+    const UNIT_TYPES = [
+        { value: "UNIT", label: "Unidad" },
+        { value: "BOX", label: "Caja" },
+        { value: "PACKAGE", label: "Paquete" },
+        { value: "KILOGRAM", label: "Kilogramo" },
+        { value: "GRAM", label: "Gramo" },
+        { value: "METER", label: "Metro" },
+        { value: "LITER", label: "Litro" },
+        { value: "GALLON", label: "Galón" },
+        { value: "ROLL", label: "Rollo" },
+        { value: "PAIR", label: "Par" },
+    ];
+
+    let currentFilters = {
+        code: "",
+        name: "",
+        category: "",
+        unit: "",
+        purchase_price: "",
+        sale_price: "",
+        status: "",
+    };
+
     /**
      * Obtiene el cuerpo de la tabla.
      *
@@ -43,6 +66,214 @@ const ProductoListController = (() => {
             dateStyle: "medium",
             timeStyle: "short",
         });
+    }
+
+    /**
+     * Obtiene los valores actuales de los filtros de la barra superior.
+     */
+    function getFilterValues() {
+        return {
+            code: ($("#filtro_codigo_producto").val() || "").trim(),
+            name: ($("#filtro_nombre_producto").val() || "").trim(),
+            category: ($("#filtro_categoria_producto").val() || "").trim(),
+            unit: ($("#filtro_unidad_producto").val() || "").trim(),
+            purchase_price: ($("#filtro_precio_compra_producto").val() || "").trim(),
+            sale_price: ($("#filtro_precio_venta_producto").val() || "").trim(),
+            status: ($("#filtro_estado_producto").val() || "").trim(),
+        };
+    }
+
+    /**
+     * Aplica filtrado de respaldo en cliente sobre la lista de productos.
+     */
+    function applyClientSideFilters(productos, filters) {
+        if (!Array.isArray(productos)) {
+            return [];
+        }
+
+        return productos.filter((producto) => {
+            if (filters.code) {
+                const codeVal = String(producto.code || "").toLowerCase();
+                if (!codeVal.includes(filters.code.toLowerCase())) {
+                    return false;
+                }
+            }
+
+            if (filters.name) {
+                const nameVal = String(producto.name || "").toLowerCase();
+                if (!nameVal.includes(filters.name.toLowerCase())) {
+                    return false;
+                }
+            }
+
+            if (filters.category) {
+                const selectedCategoryText = (
+                    $("#filtro_categoria_producto option:selected").text() || ""
+                ).trim().toLowerCase();
+
+                let catId = "";
+                if (producto.category && typeof producto.category === "object") {
+                    catId = String(
+                        producto.category.id_category ?? producto.category.id ?? ""
+                    );
+                } else {
+                    catId = String(producto.category ?? "");
+                }
+
+                const catName = String(getCategoryName(producto) || "")
+                    .trim()
+                    .toLowerCase();
+
+                const matchesId = catId === filters.category;
+                const matchesName =
+                    selectedCategoryText &&
+                    selectedCategoryText !== "todas" &&
+                    catName === selectedCategoryText;
+
+                if (!matchesId && !matchesName) {
+                    return false;
+                }
+            }
+
+            if (filters.unit) {
+                const unitVal = String(producto.unit || "").trim();
+                const unitLabel = String(getUnitTypeLabel(producto.unit) || "").trim();
+                if (unitVal !== filters.unit && unitLabel !== filters.unit) {
+                    return false;
+                }
+            }
+
+            if (filters.purchase_price !== "") {
+                const targetPurchase = Number(filters.purchase_price);
+                const actualPurchase = Number(producto.purchase_price);
+                if (
+                    !Number.isNaN(targetPurchase) &&
+                    (Number.isNaN(actualPurchase) || actualPurchase !== targetPurchase)
+                ) {
+                    return false;
+                }
+            }
+
+            if (filters.sale_price !== "") {
+                const targetSale = Number(filters.sale_price);
+                const actualSale = Number(producto.sale_price);
+                if (
+                    !Number.isNaN(targetSale) &&
+                    (Number.isNaN(actualSale) || actualSale !== targetSale)
+                ) {
+                    return false;
+                }
+            }
+
+            if (filters.status) {
+                const isActive = Boolean(producto.is_active);
+                if (filters.status === "Activo" && !isActive) {
+                    return false;
+                }
+                if (filters.status === "Inactivo" && isActive) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    /**
+     * Carga categorías y unidades en los selects de la barra de filtros.
+     */
+    async function loadFilterOptions() {
+        const unitSelect = $("#filtro_unidad_producto");
+        if (unitSelect.length) {
+            unitSelect.empty();
+            unitSelect.append(new Option("Todas", "", true, true));
+            UNIT_TYPES.forEach((unit) => {
+                unitSelect.append(new Option(unit.label, unit.value, false, false));
+            });
+        }
+
+        const categorySelect = $("#filtro_categoria_producto");
+        if (categorySelect.length) {
+            try {
+                const response = await CategoriaService.listarCategorias();
+                const categories = getCategoriesFromResponse(response);
+
+                categorySelect.empty();
+                categorySelect.append(new Option("Todas", "", true, true));
+
+                categories.forEach((category) => {
+                    const catId =
+                        category.id_category ?? category.id ?? "";
+                    const catName =
+                        category.name || category.category_name || "Sin nombre";
+
+                    categorySelect.append(
+                        new Option(catName, catId, false, false)
+                    );
+                });
+            } catch (error) {
+                console.error(
+                    "[PRODUCTOS] Error al cargar categorías en filtros:",
+                    error,
+                );
+            }
+        }
+    }
+
+    /**
+     * Configura los listeners de los botones Filtrar y Limpiar.
+     */
+    function setupFilterListeners() {
+        $("#btn_aplicar_filtros_productos")
+            .off("click")
+            .on("click", function () {
+                currentFilters = getFilterValues();
+                if (dataTableInstance) {
+                    dataTableInstance.ajax.reload(null, true);
+                } else {
+                    initDataTable();
+                }
+            });
+
+        $("#btn_limpiar_filtros_productos")
+            .off("click")
+            .on("click", function () {
+                $("#filtro_codigo_producto").val("");
+                $("#filtro_nombre_producto").val("");
+                $("#filtro_categoria_producto").val("");
+                $("#filtro_unidad_producto").val("");
+                $("#filtro_precio_compra_producto").val("");
+                $("#filtro_precio_venta_producto").val("");
+                $("#filtro_estado_producto").val("");
+
+                currentFilters = {
+                    code: "",
+                    name: "",
+                    category: "",
+                    unit: "",
+                    purchase_price: "",
+                    sale_price: "",
+                    status: "",
+                };
+
+                if (dataTableInstance) {
+                    dataTableInstance.ajax.reload(null, true);
+                } else {
+                    initDataTable();
+                }
+            });
+
+        $(
+            "#filtro_codigo_producto, #filtro_nombre_producto, " +
+            "#filtro_precio_compra_producto, #filtro_precio_venta_producto"
+        )
+            .off("keypress")
+            .on("keypress", function (event) {
+                if (event.which === 13) {
+                    event.preventDefault();
+                    $("#btn_aplicar_filtros_productos").trigger("click");
+                }
+            });
     }
 
     /**
@@ -76,7 +307,7 @@ const ProductoListController = (() => {
                     ) {
                         const producto = response.data;
 
-                         $("#detail_id_product").text(
+                        $("#detail_id_product").text(
                             producto.id_product || "N/A",
                         );
 
@@ -116,10 +347,10 @@ const ProductoListController = (() => {
                             formatCurrency(producto.sale_price),
                         );
                         $("#detail_profit_amount").text(
-                            formatCurrency(producto.profit_amount)
+                            formatCurrency(producto.profit_amount),
                         );
                         $("#detail_profit_margin_percentage").text(
-                            (producto.profit_margin_percentage ?? 0) + "%"
+                            (producto.profit_margin_percentage ?? 0) + "%",
                         );
                         $("#detail_stock").text(
                             producto.stock ?? "N/A",
@@ -134,16 +365,16 @@ const ProductoListController = (() => {
                             ? '<span class="badge bg-danger">Si</span>'
                             : '<span class="badge bg-success">No</span>';
                         $("#detail_is_low_stock").html(lowStockHtml);
-                        
+
                         const overstockHtml = producto.is_overstocked
                             ? '<span class="badge bg-warning text-dark">Si</span>'
                             : '<span class="badge bg-success">No</span>';
                         $("#detail_is_overstocked").html(overstockHtml);
                         $("#detail_created_at").text(
-                            formatDateTime(producto.created_at)
+                            formatDateTime(producto.created_at),
                         );
                         $("#detail_updated_at").text(
-                            formatDateTime(producto.updated_at)
+                            formatDateTime(producto.updated_at),
                         );
 
                         const badgeHtml = producto.is_active
@@ -516,7 +747,7 @@ const ProductoListController = (() => {
     let dataTableInstance = null;
 
     /**
-     * Inicializa DataTables con paginación server-side.
+     * Inicializa DataTables con paginación server-side y filtros.
      */
     function initDataTable() {
         if (dataTableInstance) {
@@ -534,7 +765,6 @@ const ProductoListController = (() => {
             searchDelay: 500,
 
             dom: DataTableHelper.DEFAULT_DOM,
-            buttons: DataTableHelper.getExportButtons("products", [1, 2, 3, 4, 5, 6, 7]),
             language: DataTableHelper.LANGUAGE_ES,
 
             columnDefs: [
@@ -585,21 +815,53 @@ const ProductoListController = (() => {
                         }
                     }
 
+                    const params = {
+                        page,
+                        page_size: pageSize,
+                        search,
+                        ordering,
+                    };
+
+                    if (currentFilters.code) {
+                        params.code = currentFilters.code;
+                    }
+                    if (currentFilters.name) {
+                        params.name = currentFilters.name;
+                    }
+                    if (currentFilters.category) {
+                        params.category = currentFilters.category;
+                    }
+                    if (currentFilters.unit) {
+                        params.unit = currentFilters.unit;
+                    }
+                    if (currentFilters.purchase_price !== "") {
+                        params.purchase_price = currentFilters.purchase_price;
+                    }
+                    if (currentFilters.sale_price !== "") {
+                        params.sale_price = currentFilters.sale_price;
+                    }
+                    if (currentFilters.status) {
+                        params.status = currentFilters.status;
+                        params.is_active = currentFilters.status === "Activo";
+                    }
+
                     const response =
                         await ProductoService
-                            .listarProductosPaginados({
-                                page,
-                                page_size: pageSize,
-                                search,
-                                ordering,
-                            });
+                            .listarProductosPaginados(params);
 
                     if (
                         response?.success
                         && response.data
                     ) {
-                        const productos = response.data.results || [];
-                        const totalRecords = response.data.count || 0;
+                        const rawProductos = response.data.results || [];
+                        const productos = applyClientSideFilters(
+                            rawProductos,
+                            currentFilters,
+                        );
+                        const totalRecords =
+                            productos.length !== rawProductos.length
+                                ? productos.length
+                                : (response.data.count || productos.length);
 
                         const rows = productos.map(
                             (producto, index) => {
@@ -883,20 +1145,7 @@ const ProductoListController = (() => {
             ),
         );
 
-        const unitTypes = [
-            { value: "UNIT", label: "Unidad" },
-            { value: "BOX", label: "Caja" },
-            { value: "PACKAGE", label: "Paquete" },
-            { value: "KILOGRAM", label: "Kilogramo" },
-            { value: "GRAM", label: "Gramo" },
-            { value: "METER", label: "Metro" },
-            { value: "LITER", label: "Litro" },
-            { value: "GALLON", label: "Galón" },
-            { value: "ROLL", label: "Rollo" },
-            { value: "PAIR", label: "Par" },
-        ];
-
-        unitTypes.forEach((type) => {
+        UNIT_TYPES.forEach((type) => {
             const isSelected =
                 type.value === selectedUnit;
 
@@ -1168,6 +1417,8 @@ const ProductoListController = (() => {
     async function init() {
         getTableBody();
 
+        await loadFilterOptions();
+        setupFilterListeners();
         initDataTable();
         setupViewDetailsListener();
         setupEditProductListener();

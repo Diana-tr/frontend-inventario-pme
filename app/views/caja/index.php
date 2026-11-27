@@ -111,7 +111,7 @@ require_once __DIR__ . '/../layouts/head.php';
 
                     <!-- Vista cuando la caja está ABIERTA -->
                     <div id="caja_abierta_view" style="display: none;">
-                        
+
                         <!-- Tarjetas de Resumen KPI Estilo Dashboard -->
                         <div class="row mb-4">
                             <div class="col-xl-3 col-md-6 mb-3">
@@ -211,6 +211,43 @@ require_once __DIR__ . '/../layouts/head.php';
                                     <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                                         <h5 class="card-title font-weight-bold text-dark mb-0"><i class="fas fa-list mr-2 text-secondary"></i> Movimientos de la Sesión</h5>
                                     </div>
+
+                                    <!-- Barra de Filtros Mejorada -->
+                                    <div class="px-3 pt-3 pb-2 bg-light border-bottom">
+                                        <div class="form-row align-items-end">
+                                            <div class="col-xl-3 col-md-6 mb-2">
+                                                <label for="filtro_cuenta" class="small font-weight-bold text-muted mb-1 text-nowrap">Cuenta Financiera</label>
+                                                <select id="filtro_cuenta" class="form-control form-control-sm">
+                                                    <option value="">Todas las cuentas</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-xl-2 col-md-6 mb-2">
+                                                <label for="filtro_tipo" class="small font-weight-bold text-muted mb-1 text-nowrap">Tipo Movimiento</label>
+                                                <select id="filtro_tipo" class="form-control form-control-sm">
+                                                    <option value="">Todos</option>
+                                                    <option value="INFLOW">Ingreso</option>
+                                                    <option value="OUTFLOW">Egreso</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-xl-2 col-md-4 mb-2">
+                                                <label for="filtro_fecha_inicio" class="small font-weight-bold text-muted mb-1 text-nowrap">Desde</label>
+                                                <input type="date" id="filtro_fecha_inicio" class="form-control form-control-sm">
+                                            </div>
+                                            <div class="col-xl-2 col-md-4 mb-2">
+                                                <label for="filtro_fecha_fin" class="small font-weight-bold text-muted mb-1 text-nowrap">Hasta</label>
+                                                <input type="date" id="filtro_fecha_fin" class="form-control form-control-sm">
+                                            </div>
+                                            <div class="col-xl-3 col-md-4 mb-2 d-flex align-items-end">
+                                                <button type="button" id="btn_aplicar_filtros" class="btn btn-primary btn-sm font-weight-bold flex-fill mr-1 text-nowrap">
+                                                    <i class="fas fa-filter mr-1"></i> Filtrar
+                                                </button>
+                                                <button type="button" id="btn_limpiar_filtros" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="card-body p-0 table-responsive" style="max-height: 380px;">
                                         <table class="table table-hover align-items-center mb-0" id="tabla_movimientos">
                                             <thead style="background-color: #172033; color: #FFFFFF;">
@@ -253,7 +290,7 @@ require_once __DIR__ . '/../layouts/head.php';
                     <div class="modal-header border-0 py-3" style="background-color: #FFFBEB;">
                         <h5 class="modal-title font-weight-bold text-warning"><i class="fas fa-exchange-alt mr-2"></i>Registrar Movimiento</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                            <span aria-hidden="true">×</span>
                         </button>
                     </div>
                     <div class="modal-body p-4">
@@ -319,7 +356,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             <small class="text-white-50">Conteo de efectivo y cuadre de turno</small>
                         </div>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                            <span aria-hidden="true">×</span>
                         </button>
                     </div>
                     <div class="modal-body p-4">
@@ -441,7 +478,7 @@ require_once __DIR__ . '/../layouts/head.php';
                             </div>
                             <small class="form-text text-muted mt-1">Total acumulado de efectivo que se entrega al cerrar la gaveta.</small>
                         </div>
-                        
+
                         <!-- Diferencia (solo visible en modo supervisado) -->
                         <div id="close_diff_container" class="form-group p-3 mb-3 d-none" style="background-color: #F8FAFC; border-radius: 8px; border: 1px solid #CBD5E1;">
                             <div class="d-flex justify-content-between font-weight-bold align-items-center">
@@ -449,7 +486,7 @@ require_once __DIR__ . '/../layouts/head.php';
                                 <span id="close_difference" class="h5 mb-0 text-dark">$ 0.00</span>
                             </div>
                         </div>
-                        
+
                         <div class="form-group mb-0">
                             <label class="font-weight-bold small text-uppercase" style="color: #1E293B;">Observaciones de Cierre / Arqueo</label>
                             <textarea class="form-control" id="close_notes" rows="2" placeholder="Opcional. Justifique cualquier eventualidad..." style="border-radius: 8px; border: 1px solid #CBD5E1;"></textarea>
@@ -471,7 +508,7 @@ require_once __DIR__ . '/../layouts/head.php';
                 <div class="modal-header border-0 py-3 text-white" style="background-color: #0284C7; border-radius: 12px 12px 0 0;">
                     <h5 class="modal-title font-weight-bold mb-0"><i class="fas fa-chart-pie mr-2"></i>Auditoría Financiera del Turno Actual</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body p-4">

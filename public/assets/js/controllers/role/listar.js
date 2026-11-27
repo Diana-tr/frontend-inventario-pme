@@ -32,6 +32,7 @@ const RoleListController = (() => {
   const EDIT_FORM_ID = "formEditarRol";
 
   let permissionCatalog = []; // Catálogo en memoria
+  let dataTableInstance = null;
 
   // ───────────────────────────────────────────
   // Helpers de creación de celdas
@@ -149,6 +150,94 @@ const RoleListController = (() => {
     tr.appendChild(createActionsCell(role));
 
     return tr;
+  }
+
+  // ───────────────────────────────────────────
+  // Filtros de Roles
+  // ───────────────────────────────────────────
+
+  function getCurrentFilters() {
+    const roleName = ($("#filtro_nombre_rol").val() || "").trim();
+    const roleDescription = ($("#filtro_descripcion_rol").val() || "").trim();
+    const estado = ($("#filtro_estado_rol").val() || "").trim();
+
+    let isActive = "";
+    if (estado === "Activo") {
+      isActive = "true";
+    } else if (estado === "Inactivo") {
+      isActive = "false";
+    }
+
+    return {
+      roleName,
+      roleDescription,
+      estado,
+      isActive,
+    };
+  }
+
+  function applyClientFilters(roles, filters) {
+    return roles.filter((role) => {
+      const name = (role.role_name || "").toLowerCase();
+      const description = (role.role_description || "").toLowerCase();
+      const isActive = Boolean(role.is_active);
+
+      if (
+        filters.roleName &&
+        !name.includes(filters.roleName.toLowerCase())
+      ) {
+        return false;
+      }
+
+      if (
+        filters.roleDescription &&
+        !description.includes(filters.roleDescription.toLowerCase())
+      ) {
+        return false;
+      }
+
+      if (filters.isActive === "true" && !isActive) {
+        return false;
+      }
+
+      if (filters.isActive === "false" && isActive) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  function setupFiltersListener() {
+    $("#btn_aplicar_filtros_roles")
+      .off("click")
+      .on("click", function () {
+        loadRoles();
+      });
+
+    $("#filtro_estado_rol")
+      .off("change")
+      .on("change", function () {
+        loadRoles();
+      });
+
+    $("#filtro_nombre_rol, #filtro_descripcion_rol")
+      .off("keypress")
+      .on("keypress", function (e) {
+        if (e.which === 13) {
+          e.preventDefault();
+          loadRoles();
+        }
+      });
+
+    $("#btn_limpiar_filtros_roles")
+      .off("click")
+      .on("click", function () {
+        $("#filtro_nombre_rol").val("");
+        $("#filtro_descripcion_rol").val("");
+        $("#filtro_estado_rol").val("");
+        loadRoles();
+      });
   }
 
   // ───────────────────────────────────────────
@@ -378,8 +467,6 @@ const RoleListController = (() => {
     3: "is_active",
   };
 
-  let dataTableInstance = null;
-
   function initDataTable() {
     if (dataTableInstance) {
       dataTableInstance.destroy();
@@ -415,6 +502,7 @@ const RoleListController = (() => {
           const page = Math.floor(data.start / data.length) + 1;
           const pageSize = data.length;
           const search = data.search?.value || "";
+          const filters = getCurrentFilters();
 
           let ordering = "";
           if (data.order && data.order.length > 0) {
@@ -426,16 +514,29 @@ const RoleListController = (() => {
             }
           }
 
-          const response = await RoleService.listarRolesPaginados({
+          const params = {
             page,
             page_size: pageSize,
             search,
             ordering,
-          });
+          };
+
+          if (filters.roleName) params.role_name = filters.roleName;
+          if (filters.roleDescription)
+            params.role_description = filters.roleDescription;
+          if (filters.isActive) params.is_active = filters.isActive;
+
+          const response = await RoleService.listarRolesPaginados(params);
 
           if (response?.success && response.data) {
-            const roles = response.data.results || [];
-            const totalRecords = response.data.count || 0;
+            const rawRoles = response.data.results || [];
+            const roles = applyClientFilters(rawRoles, filters);
+            const hasClientFilters = Boolean(
+              filters.roleName || filters.roleDescription || filters.isActive,
+            );
+            const totalRecords = hasClientFilters
+              ? roles.length
+              : response.data.count || 0;
 
             const rows = roles.map((role, index) => {
               const statusBadge = role.is_active
@@ -544,7 +645,8 @@ const RoleListController = (() => {
       console.error("[ROLES] Error al cargar catálogo de permisos:", error);
     }
 
-    // 2. Iniciar tabla
+    // 2. Iniciar tabla y listeners
+    setupFiltersListener();
     initDataTable();
     setupViewDetailsListener();
     setupEditRoleListener();

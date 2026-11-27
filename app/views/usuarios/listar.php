@@ -8,6 +8,14 @@ require_once __DIR__ . '/../layouts/head.php';
 <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2/css/select2.min.css">
 <link rel="stylesheet" href="<?php echo $URL; ?>/public/assets/vendor/AdminLTE-3.2.0/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
 
+<style>
+    /* Ocultar botón Exportar y buscador nativo de DataTables */
+    .dt-buttons,
+    .dataTables_filter {
+        display: none !important;
+    }
+</style>
+
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
 
@@ -56,6 +64,48 @@ require_once __DIR__ . '/../layouts/head.php';
                                     </div>
                                 </div>
 
+                                <!-- Barra de Filtros para Listado de Usuarios -->
+                                <div class="px-3 pt-3 pb-2 bg-light border-bottom">
+                                    <div class="form-row align-items-end">
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_nombre_completo" class="small font-weight-bold text-muted mb-1 text-nowrap">Nombre Completo</label>
+                                            <input type="text" id="filtro_nombre_completo" class="form-control form-control-sm" placeholder="Buscar nombre...">
+                                        </div>
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_usuario" class="small font-weight-bold text-muted mb-1 text-nowrap">Nombre de Usuario</label>
+                                            <input type="text" id="filtro_usuario" class="form-control form-control-sm" placeholder="Buscar usuario...">
+                                        </div>
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_correo" class="small font-weight-bold text-muted mb-1 text-nowrap">Correo Electrónico</label>
+                                            <input type="text" id="filtro_correo" class="form-control form-control-sm" placeholder="correo@ejemplo.com">
+                                        </div>
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_rol" class="small font-weight-bold text-muted mb-1 text-nowrap">Rol / Permiso</label>
+                                            <select id="filtro_rol" class="form-control form-control-sm">
+                                                <option value="">Todos los roles</option>
+                                                <option value="Administrador">Administrador</option>
+                                                <option value="Vendedor">Vendedor</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2">
+                                            <label for="filtro_estado" class="small font-weight-bold text-muted mb-1 text-nowrap">Estado</label>
+                                            <select id="filtro_estado" class="form-control form-control-sm">
+                                                <option value="">Todos</option>
+                                                <option value="Activo">Activo</option>
+                                                <option value="Inactivo">Inactivo</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-xl-2 col-md-4 col-sm-6 mb-2 d-flex align-items-end">
+                                            <button type="button" id="btn_aplicar_filtros_usuarios" class="btn btn-primary btn-sm font-weight-bold flex-fill mr-1 text-nowrap">
+                                                <i class="fas fa-filter mr-1"></i> Filtrar
+                                            </button>
+                                            <button type="button" id="btn_limpiar_filtros_usuarios" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="card-body">
                                     <table id="tbl_usuarios" class="table table-bordered table-striped table-hover responsive nowrap" width="100%">
                                         <thead class="bg-dark text-white">
@@ -98,7 +148,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         <i class="fas fa-id-card mr-2"></i>Información Detallada del Usuario
                     </h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
 
@@ -172,7 +222,7 @@ require_once __DIR__ . '/../layouts/head.php';
                         <i class="fas fa-user-edit mr-2"></i>Editar Usuario
                     </h5>
                     <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
 
